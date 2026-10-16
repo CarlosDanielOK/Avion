@@ -43,9 +43,13 @@ La lista de espera estará asociada a una salida específica. Los clientes podr�
 
 ### S08 – Asignación de lugares liberados
 
-Cuando se produzca una cancelación, el vendedor podrá consultar las solicitudes de la lista de espera y ofrecer los lugares disponibles respetando su orden de inscripción.
+Cuando se produzca una cancelación, el vendedor podrá consultar las solicitudes de la lista de espera y ofrecer los lugares disponibles respetando el orden de inscripción y la cantidad de pasajeros solicitada, conforme a lo establecido en RN34.
 
-Se propone que una solicitud conserve su prioridad hasta que sea atendida o retirada.
+Cada solicitud conservará su prioridad mientras permanezca vigente y no haya sido atendida, rechazada, retirada o marcada como vencida.
+
+Cuando se realice una oferta de cupos, el cliente dispondrá de un plazo máximo de 24 horas para aceptarla o rechazarla, según lo establecido en S13. Si el cliente no responde dentro de ese plazo, la oferta vencerá y la solicitud se marcará como vencida, dejando de participar en la asignación de lugares.
+
+Si una solicitud requiere más cupos que los disponibles, conservará su prioridad y podrán evaluarse las siguientes solicitudes compatibles, sin alterar el orden original de inscripción.
 
 ### S09 – Recomendación de tours
 
