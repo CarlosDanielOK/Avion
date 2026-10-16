@@ -24,31 +24,42 @@ Entre las principales necesidades se encuentran:
 - Coordinar la asignación de guías y vehículos.
 - Generar reportes para la administración.
 
+  
+### Funcionalidades adicionales propuestas
+
+**RF25 – Lista de espera**
+
+El sistema permitirá registrar interesados en salidas que hayan alcanzado su capacidad máxima, manteniendo el orden de inscripción para gestionar la disponibilidad de lugares.
+
+**RF26 – Recomendación de tours**
+
+El sistema permitirá recomendar tours según las preferencias, el presupuesto y las fechas disponibles del cliente, mediante criterios predefinidos, sin utilizar inteligencia artificial.
+
+
 ## 3. Objetivo general
 
 Desarrollar un sistema de gestión que permita administrar las operaciones de Rumbo Sur, centralizando la información y automatizando los procesos principales de la agencia.
 
+
 ## 4. Actores del sistema
 
-### Cliente
-
-Persona que solicita una reserva para una salida turística y realiza los pagos correspondientes.
-
-### Vendedor
-
-Empleado encargado de gestionar las ventas y registrar las reservas de los clientes.
-
-### Coordinador de operaciones
-
-Responsable de organizar las salidas, coordinar los recursos y emitir las listas de pasajeros.
+Se identifican los actores que interactúan directamente con el sistema y los participantes externos involucrados en los procesos de la agencia.
 
 ### Administrador
+Gestiona la información general del sistema, administra los parámetros de operación y consulta los reportes.
 
-Responsable de administrar la información general y consultar los reportes del sistema.
+### Vendedor
+Registra clientes, gestiona reservas, consulta disponibilidad y administra los pagos correspondientes.
+
+### Coordinador de operaciones
+Organiza las salidas programadas, asigna guías y vehículos, y consulta las listas de pasajeros.
 
 ### Guía turístico
+Dispone de acceso de consulta a la información necesaria para las salidas asignadas, según el supuesto S01.
 
-Personal encargado de acompañar las salidas programadas, según sus habilitaciones.
+### Participantes externos
+El cliente y el proveedor intervienen en los procesos comerciales de la agencia, pero no se consideran actores directos del software.
+
 
 ## 5. Entidades principales
 
