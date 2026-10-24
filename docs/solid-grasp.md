@@ -47,6 +47,12 @@ Los casos de uso de creación y cancelación de reservas requieren varias valida
 
 Si la interfaz de usuario ejecutara directamente esas reglas, se dificultaría su reutilización y la realización de pruebas independientes.
 
+### P06 – Comportamientos sin un lugar natural en las clases del negocio
+
+El cálculo del total de una reserva necesita datos de la salida (tarifa), de los pasajeros (tipo y edad) y de las promociones, y la política de devolución depende de los días hasta la salida y de los pagos realizados. Ninguna clase del dominio (`Reserva`, `Salida`, `Pasajero`) representa por sí sola ese conocimiento.
+
+Si se asignaran a `Reserva`, esta tendría que conocer tarifas, promociones y reglas de devolución, perdiendo cohesión y aumentando su acoplamiento.
+
 ---
 
 ## 5.2. Tres principios SOLID
@@ -169,6 +175,8 @@ De esta forma, los componentes de coordinación dependen de una interfaz y no de
 
 `ControladorReservas`, `RepositorioReservas` y `RepositorioReservasArchivo`.
 
+El mismo esquema se aplicará a las demás entidades que se guardan en archivos (clientes, tours y salidas), conforme a S11.
+
 #### Ventaja obtenida
 
 Esta decisión permite modificar el mecanismo de persistencia sin alterar la coordinación de reservas.
@@ -181,7 +189,7 @@ También facilita reemplazar el repositorio por una implementación de prueba y 
 
 ## 5.3. Cuatro patrones GRASP
 
-Se seleccionaron cuatro patrones GRASP para orientar la asignación de responsabilidades entre las clases del sistema: Experto en Información, Creador, Controlador y Bajo Acoplamiento.
+Se seleccionaron cuatro patrones GRASP para orientar la asignación de responsabilidades entre las clases del sistema: Experto en Información, Creador, Controlador y Fabricación Pura.
 
 ### 5.3.1. Experto en Información (Information Expert)
 
@@ -224,7 +232,7 @@ Cada clase administra las operaciones relacionadas con la información que conoc
 
 ### 5.3.2. Creador (Creator)
 
-**Problema identificado:** Falta de un criterio claro para asignar la creación de objetos relacionados.
+**Problema identificado:** si el menú o el controlador crearan los pasajeros con `new Pasajero(...)` y los agregaran por su cuenta a la reserva, podrían quedar reservas con pasajeros que no cumplen los requisitos del tour o con relaciones inconsistentes.
 
 #### Fundamentación
 
@@ -300,42 +308,31 @@ La separación permite mantener la interfaz independiente de la lógica de negoc
 
 ---
 
-### 5.3.4. Bajo Acoplamiento (Low Coupling)
+### 5.3.4. Fabricación Pura (Pure Fabrication)
 
-**Problema identificado:** P03 – Dependencia entre los componentes de gestión y almacenamiento.
+**Problema identificado:** P06 – Comportamientos sin un lugar natural en las clases del negocio.
 
 #### Fundamentación
 
-La gestión de reservas requiere consultar y guardar información, pero no necesita conocer cómo se representan físicamente los datos en archivos.
+El cálculo del precio y la política de devolución no son datos que tenga una reserva, un tour o un pasajero por sí mismos: son procesos que combinan información de varias clases. Ubicarlos en `Reserva` la obligaría a conocer tarifas, promociones y reglas de cancelación, y reduciría su cohesión.
 
-Una dependencia directa entre el controlador y la implementación concreta de almacenamiento dificultaría modificar o probar ambos componentes de manera independiente.
-
-El patrón Bajo Acoplamiento propone reducir las dependencias innecesarias entre las clases para limitar el impacto de los cambios.
+El patrón Fabricación Pura propone crear una clase que no representa un concepto del negocio, sino que se inventa para agrupar un comportamiento con alta cohesión y bajo acoplamiento.
 
 #### Decisión de diseño
 
-Se propone que `ControladorReservas` se comunique con el almacenamiento exclusivamente mediante la interfaz `RepositorioReservas`.
+Se crean las clases artificiales `CalculadoraPrecioReserva`, que calcula el total a partir de la tarifa de la salida, el factor de cada pasajero y las promociones; `GestorPagos`, que aplica el recargo por cuotas con tarjeta; y `GestorCancelaciones`, que aplica la política de devolución. `Reserva` conserva sus datos y las operaciones sobre su propio estado, como `totalAbonado()` y `anular()`.
 
-La clase `RepositorioReservasArchivo` se encargará de los detalles de lectura y escritura, mientras que el controlador dependerá únicamente de las operaciones definidas en la interfaz.
-
-Esta decisión complementa el principio DIP de SOLID:
-
-- **DIP:** establece que los componentes de alto nivel deben depender de abstracciones.
-- **Bajo Acoplamiento:** busca reducir las dependencias concretas y limitar el impacto de los cambios entre componentes.
-
-Aunque ambos criterios se relacionan, se utilizan para justificar aspectos diferentes del diseño.
+Esta decisión se diferencia de SRP: SRP justifica separar las responsabilidades de `Reserva` según sus motivos de cambio, mientras que Fabricación Pura justifica que las clases resultantes sean inventadas porque ese comportamiento no pertenece a ninguna clase del dominio.
 
 #### Clases involucradas
 
-`ControladorReservas`, `RepositorioReservas` y `RepositorioReservasArchivo`.
+`CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` y `Reserva`.
 
 #### Ventaja obtenida
 
-Se reducen las dependencias directas entre la lógica de negocio y los detalles técnicos de persistencia.
+`Reserva` mantiene una alta cohesión, los cálculos pueden probarse sin armar una reserva completa y las reglas de precio y devolución pueden cambiar sin modificar el resto del modelo.
 
-Esto mejora la mantenibilidad, la capacidad de prueba y la posibilidad de reemplazar componentes.
-
-**Trazabilidad:** RF08 y RF12–RF17; S11.
+**Trazabilidad:** RF09, RF10, RF12 y RF15; RN15, RN16 y RN23–RN28; S15 y S16.
 
 ---
 
@@ -347,9 +344,10 @@ La siguiente tabla resume cómo las decisiones de diseño propuestas permiten ab
 |---|---|---|---|
 | P01 | Concentración de responsabilidades en reservas | SOLID: SRP | Separar las responsabilidades de reserva, cálculo de precios, pagos y cancelaciones |
 | P02 | Dificultad para incorporar promociones | SOLID: OCP | Definir una interfaz `Promocion` y distintas implementaciones |
-| P03 | Acoplamiento entre negocio y persistencia | SOLID: DIP / GRASP: Bajo Acoplamiento | Utilizar `RepositorioReservas` como abstracción de almacenamiento |
+| P03 | Acoplamiento entre negocio y persistencia | SOLID: DIP | Utilizar `RepositorioReservas` como abstracción de almacenamiento |
 | P04 | Distribución inadecuada de cálculos | GRASP: Experto en Información | Asignar el cálculo de cupos a `Salida` y el de saldos a `Reserva` |
 | P05 | Interfaz acoplada a procesos de negocio | GRASP: Controlador | Incorporar `ControladorReservas` para coordinar los casos de uso |
+| P06 | Cálculos y políticas sin lugar natural en el dominio | GRASP: Fabricación Pura | Crear `CalculadoraPrecioReserva`, `GestorPagos` y `GestorCancelaciones` |
 
 El patrón GRASP Creador complementa estas decisiones al establecer que `Reserva` administra la incorporación de sus pasajeros, manteniendo consistente la relación entre ambos objetos.
 
@@ -359,7 +357,7 @@ La aplicación de los principios SOLID y los patrones GRASP permite establecer c
 
 Los principios SRP, OCP y DIP contribuyen a separar funcionalidades, facilitar la incorporación de promociones y evitar dependencias directas con los mecanismos de persistencia.
 
-Por su parte, los patrones Experto en Información, Creador, Controlador y Bajo Acoplamiento permiten asignar responsabilidades a las clases adecuadas, coordinar los procesos del sistema y reducir las dependencias innecesarias.
+Por su parte, los patrones Experto en Información, Creador, Controlador y Fabricación Pura permiten asignar responsabilidades a las clases adecuadas, coordinar los procesos del sistema y ubicar los cálculos en clases cohesivas.
 
 Estas decisiones se relacionan directamente con los requerimientos, reglas de negocio y casos de uso definidos para la agencia.
 
