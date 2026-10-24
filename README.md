@@ -6,7 +6,7 @@
 |---|---|
 | **Propuesta elegida** | B – Agencia de Turismo |
 | **Lenguaje** | Java 17 o superior |
-| **Modelado** | UML (PlantUML) |
+| **Modelado** | UML |
 | **Estado actual** | Etapa 1 finalizada – Etapa 2 en preparación |
 | **Entrega Etapa 1** | 25/10/2026 (tag `etapa-1`) |
 | **Entrega Etapa 2** | 04/11/2026 (tag `etapa-2`) |
