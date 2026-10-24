@@ -1,0 +1,28 @@
+@startuml casos-uso-administracion
+title Gestión administrativa
+skinparam shadowing false
+skinparam backgroundColor White
+skinparam usecase {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam actor {
+  BackgroundColor White
+  BorderColor #333333
+}
+left to right direction
+actor "Administrador" as ADM
+rectangle "Sistema de Gestión Rumbo Sur" {
+  usecase "CU01 - Administrar tours" as CU01
+  usecase "CU02 - Gestionar itinerarios" as CU02
+  usecase "CU03 - Gestionar tarifas" as CU03
+  usecase "CU23 - Administrar proveedores" as CU23
+  usecase "CU24 - Generar reportes" as CU24
+}
+ADM --> CU01
+ADM --> CU02
+ADM --> CU03
+ADM --> CU23
+ADM --> CU24
+@enduml

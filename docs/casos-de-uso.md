@@ -43,40 +43,47 @@ Se utilizaron asociaciones mediante líneas continuas para indicar qué funciona
 
 Las relaciones «include» se utilizan cuando un caso de uso requiere obligatoriamente otro comportamiento modelado como caso de uso independiente.
 
-Las condiciones de negocio y los escenarios alternativos se documentan en las descripciones textuales. No se incorporan relaciones «extend» artificiales entre funcionalidades independientes.
+Las relaciones «extend» se utilizan para comportamientos condicionales: el caso que extiende solo se ejecuta si se da una condición (por ejemplo, la lista de espera solo cuando no hay cupos). La flecha va desde el caso que extiende hacia el caso base.
+
+Relaciones modeladas:
+
+- «include»: CU08 incluye a CU07 y a CU09; CU09 incluye a CU10; CU12 incluye a CU13.
+- «extend»: CU11 y CU25 extienden a CU08; CU14 extiende a CU12 y a CU13; CU19 extiende a CU04.
+
+Las condiciones de negocio y los escenarios alternativos se documentan además en las descripciones textuales.
 
 
-### 2.2.2. Gestión administrativa
+### 2.2.1. Gestión administrativa
 
 El Administrador gestiona tours, itinerarios, tarifas y proveedores, y consulta reportes administrativos.
 
-**Figura 2. Diagrama de casos de uso de gestión administrativa.**
+**Figura 1. Diagrama de casos de uso de gestión administrativa.**
 
 ![Diagrama UML de gestión administrativa](uml/casos-uso-administracion.png)
 
-### 2.2.3. Gestión comercial y reservas
+### 2.2.2. Gestión comercial y reservas
 
 El Vendedor registra clientes y pasajeros, crea y modifica reservas, calcula precios, evalúa promociones, gestiona servicios adicionales y utiliza las funcionalidades de lista de espera y recomendaciones.
 
-**Figura 3. Diagrama de casos de uso de gestión comercial y reservas.**
+**Figura 2. Diagrama de casos de uso de gestión comercial y reservas.**
 
 ![Diagrama UML de gestión comercial y reservas](uml/casos-uso-reservas.png)
 
-### 2.2.4. Pagos y cancelaciones
+### 2.2.3. Pagos y cancelaciones
 
 El Vendedor registra pagos, controla saldos, confirma o anula reservas, gestiona cancelaciones y registra ajustes económicos.
 
-**Figura 4. Diagrama de casos de uso de pagos y cancelaciones.**
+**Figura 3. Diagrama de casos de uso de pagos y cancelaciones.**
 
 ![Diagrama UML de pagos y cancelaciones](uml/casos-uso-pagos.png)
 
-### 2.2.5. Gestión operativa
+### 2.2.4. Gestión operativa
 
 El Coordinador de operaciones programa salidas, administra y asigna recursos, emite listas de pasajeros, inicia y finaliza salidas y liquida honorarios.
 
 Se incorpora la consulta de salidas asignadas por parte del Guía de turismo como funcionalidad propuesta mediante S01.
 
-**Figura 5. Diagrama de casos de uso de gestión operativa.**
+**Figura 4. Diagrama de casos de uso de gestión operativa.**
 
 ![Diagrama UML de gestión operativa](uml/casos-uso-operaciones.png)
 
@@ -828,7 +835,7 @@ Las relaciones «include» se utilizan para comportamientos obligatorios modelad
 
 Los flujos alternativos y las excepciones se describen en las fichas textuales.
 
-No se agregan relaciones «extend» cuando no existe una extensión funcional justificada.
+Las relaciones «extend» se utilizan solo para los comportamientos condicionales que figuran en las fichas textuales (por ejemplo, la lista de espera cuando no hay cupos).
 
 La organización de los diagramas por módulos responde a criterios de claridad visual y no representa sistemas independientes.
 

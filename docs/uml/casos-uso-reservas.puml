@@ -1,0 +1,38 @@
+@startuml casos-uso-reservas
+title Gestión comercial y reservas
+skinparam shadowing false
+skinparam backgroundColor White
+skinparam usecase {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam actor {
+  BackgroundColor White
+  BorderColor #333333
+}
+left to right direction
+actor "Vendedor" as VEN
+rectangle "Sistema de Gestión Rumbo Sur" {
+  usecase "CU06 - Registrar clientes" as CU06
+  usecase "CU08 - Crear reserva" as CU08
+  usecase "CU07 - Registrar pasajeros" as CU07
+  usecase "CU09 - Calcular precio de reserva" as CU09
+  usecase "CU10 - Evaluar promociones" as CU10
+  usecase "CU11 - Gestionar servicios adicionales" as CU11
+  usecase "CU16 - Modificar reserva" as CU16
+  usecase "CU25 - Gestionar lista de espera" as CU25
+  usecase "CU26 - Recomendar tours" as CU26
+}
+VEN --> CU06
+VEN --> CU08
+VEN --> CU11
+VEN --> CU16
+VEN --> CU25
+VEN --> CU26
+CU08 .> CU07 : <<include>>
+CU08 .> CU09 : <<include>>
+CU09 .> CU10 : <<include>>
+CU11 .> CU08 : <<extend>>\n[se contratan adicionales]
+CU25 .> CU08 : <<extend>>\n[cupos insuficientes]
+@enduml

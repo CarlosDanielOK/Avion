@@ -95,6 +95,8 @@ Los días de anticipación para cancelaciones se calcularán como días calendar
 
 Este criterio será utilizado de manera uniforme para RN23 a RN28 y deberá validarse con el grupo.
 
+Los tramos se interpretan de la siguiente manera: con 30 días o más de anticipación se devuelve el 90 %; de 29 a 15 días, el 50 %; de 14 a 7 días, el 20 %; con menos de 7 días no hay devolución. Si la cancelación la provoca la agencia, la devolución es del 100 % sin importar los días.
+
 ### S16 – Reglas de precio y recargo
 
 El descuento de jubilados se considera una tarifa especial por tipo de pasajero; las promociones comerciales RN15 y RN16 no se acumulan entre sí.
@@ -110,3 +112,17 @@ Este orden de cálculo es una interpretación propuesta, pendiente de validació
 Las recomendaciones (RF26) usarán filtros determinísticos sobre tours y salidas existentes; no garantizarán disponibilidad futura ni reservarán lugares.
 
 Antes de confirmar una reserva se validarán nuevamente los cupos, la edad mínima y las condiciones del tour.
+
+### S18 – Estados de la reserva
+
+Los estados de la reserva son los del enunciado. Pendiente: creada, sin la seña. Confirmada: al registrarse la seña del 30 %. Anulada: por falta de pago en plazo (S14), por cancelación solicitada por el cliente o por la agencia, o por cancelación de la salida. Finalizada: cuando finaliza la salida.
+
+No existe un estado «cancelada» para la reserva: toda cancelación deja la reserva en estado anulada y registra una cancelación con fecha, motivo, porcentaje e importe devuelto.
+
+### S19 – Medio de devolución
+
+La devolución se acredita por el mismo medio de pago utilizado en la reserva. Si se abonó con más de un medio, se utiliza el del último pago registrado.
+
+### S20 – Comisión del vendedor
+
+Cada vendedor tiene una comisión, registrada como dato de su ficha. El sistema no liquida comisiones: el reporte de ventas por vendedor informa los importes vendidos.
