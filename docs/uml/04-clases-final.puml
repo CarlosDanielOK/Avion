@@ -1,0 +1,369 @@
+@startuml 04-clases-final
+title Rumbo Sur - Diagrama de clases final (con SOLID y GRASP aplicados)
+
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam backgroundColor White
+skinparam class {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
+}
+hide empty members
+
+' ===================== ENUMERACIONES =====================
+enum CategoriaTour {
+  AVENTURA
+  CULTURAL
+  NATURALEZA
+}
+enum Temporada {
+  BAJA
+  MEDIA
+  ALTA
+}
+enum NivelDificultad {
+  BAJO
+  MEDIO
+  ALTO
+}
+enum EstadoSalida {
+  PROGRAMADA
+  CONFIRMADA
+  COMPLETA
+  EN_CURSO
+  FINALIZADA
+  CANCELADA
+}
+enum EstadoReserva {
+  PENDIENTE
+  CONFIRMADA
+  ANULADA
+  FINALIZADA
+}
+enum TipoPasajero {
+  ADULTO
+  MENOR
+  JUBILADO
+}
+enum MedioPago {
+  EFECTIVO
+  TRANSFERENCIA
+  TARJETA
+}
+enum TipoVehiculo {
+  MICRO
+  COMBI
+  CAMIONETA
+}
+enum TipoServicio {
+  EXCURSION
+  TRASLADO
+  SEGURO
+}
+enum TipoProveedor {
+  HOTEL
+  RESTAURANTE
+  TRANSPORTISTA
+}
+
+' ===================== PERSONAS (herencia) =====================
+abstract class Persona {
+  # nombre: String
+  # apellido: String
+  # documento: String
+  # telefono: String
+  + obtenerNombreCompleto(): String
+}
+
+abstract class Empleado {
+  # legajo: int
+  + {abstract} getRol(): String
+}
+
+class Vendedor #FFF3CC {
+  - comision: double
+  + getRol(): String
+}
+
+class Guia {
+  - idiomas: List<String>
+  - categoriasHabilitadas: List<CategoriaTour>
+  - honorarioPorDia: double
+  + getRol(): String
+  + estaHabilitadoPara(cat: CategoriaTour): boolean
+  + estaDisponible(inicio: LocalDate, fin: LocalDate): boolean
+  + calcularHonorarios(salida: Salida): double
+}
+
+class Coordinador {
+  + getRol(): String
+  + asignarRecursos(salida: Salida, guia: Guia, vehiculo: Vehiculo): void
+  + emitirListaPasajeros(salida: Salida): void
+  + iniciarSalida(salida: Salida): void
+  + finalizarSalida(salida: Salida): void
+}
+
+class Administrador {
+  + getRol(): String
+  + reporteOcupacionPorSalida(): String
+  + reporteVentasPorVendedor(): String
+  + reporteIngresosPorTour(): String
+  + reporteCancelaciones(): String
+}
+
+class Cliente {
+  - correo: String
+  - paisResidencia: String
+}
+
+class Pasajero #FFF3CC {
+  - fechaNacimiento: LocalDate
+  - tipo: TipoPasajero
+  - contactoEmergencia: String
+  - restricciones: String
+  + calcularEdad(fecha: LocalDate): int
+  + obtenerFactorTarifa(fecha: LocalDate): double
+}
+
+Persona <|-- Empleado
+Persona <|-- Cliente
+Persona <|-- Pasajero
+Empleado <|-- Vendedor
+Empleado <|-- Guia
+Empleado <|-- Coordinador
+Empleado <|-- Administrador
+
+' ===================== CATALOGO (herencia) =====================
+abstract class Tour {
+  - codigo: String
+  - nombre: String
+  - descripcion: String
+  - duracionDias: int
+  - cupoMinimo: int
+  - cupoMaximo: int
+  + {abstract} getCategoria(): CategoriaTour
+  + requiereSeguro(): boolean
+  + puedeParticipar(p: Pasajero, fecha: LocalDate): boolean
+  + obtenerTarifa(fecha: LocalDate): Tarifa
+}
+
+class TourAventura {
+  - nivelDificultad: NivelDificultad
+  - edadMinima: int
+  + getCategoria(): CategoriaTour
+  + requiereSeguro(): boolean
+  + puedeParticipar(p: Pasajero, fecha: LocalDate): boolean
+}
+
+class TourCultural {
+  + getCategoria(): CategoriaTour
+}
+
+class TourNaturaleza {
+  + getCategoria(): CategoriaTour
+}
+
+class Actividad {
+  - dia: int
+  - orden: int
+  - horario: LocalTime
+  - descripcion: String
+  - lugar: String
+}
+
+class Proveedor {
+  - nombre: String
+  - cuit: String
+  - contacto: String
+  - tipoServicio: TipoProveedor
+}
+
+class Tarifa {
+  - temporada: Temporada
+  - vigenciaDesde: LocalDate
+  - vigenciaHasta: LocalDate
+  - precioBase: double
+  + estaVigente(fecha: LocalDate): boolean
+}
+
+class ServicioAdicional {
+  - nombre: String
+  - precio: double
+  - tipo: TipoServicio
+}
+
+Tour <|-- TourAventura
+Tour <|-- TourCultural
+Tour <|-- TourNaturaleza
+
+Tour "1" *-- "1..*" Actividad : tiene itinerario >
+Tour "1" *-- "0..*" Tarifa : tiene >
+Actividad "0..*" --> "0..1" Proveedor : incluye servicio de >
+Tour "0..*" -- "0..*" ServicioAdicional : ofrece >
+
+' ===================== OPERACION =====================
+class Vehiculo {
+  - patente: String
+  - capacidad: int
+  - tipo: TipoVehiculo
+}
+
+class Salida #FFF3CC {
+  - fechaInicio: LocalDate
+  - fechaFin: LocalDate
+  - cupoMaximo: int
+  - estado: EstadoSalida
+  - listaEmitida: boolean
+  + cuposOcupados(): int
+  + cuposDisponibles(): int
+  + puedeParticipar(datos: DatosPasajero): boolean
+  + obtenerTarifa(): Tarifa
+  + actualizarEstado(hoy: LocalDate): void
+}
+
+class Liquidacion {
+  - fecha: LocalDate
+  - dias: int
+  - monto: double
+}
+
+Salida "0..*" --> "1" Tour : corresponde a >
+Salida "0..*" --> "0..1" Guia : guiada por >
+Salida "0..*" --> "0..1" Vehiculo : usa >
+Salida "1" -- "0..1" Liquidacion : genera >
+Liquidacion "0..*" --> "1" Guia : paga a >
+
+' ===================== VENTAS =====================
+class Reserva #FFF3CC {
+  - numero: long
+  - fecha: LocalDate
+  - estado: EstadoReserva
+  - total: double
+  + agregarPasajero(datos: DatosPasajero): void
+  + definirTotal(total: double): void
+  + registrarPago(pago: Pago): void
+  + calcularSaldo(): double
+  + totalAbonado(): double
+  + medioDePagoUsado(): MedioPago
+  + puedeCancelarse(): boolean
+  + diasHastaSalida(hoy: LocalDate): int
+  + confirmar(): void
+  + anular(cancelacion: Cancelacion): void
+}
+
+class Pago #FFF3CC {
+  - fecha: LocalDate
+  - importe: double
+  - recargo: double
+  - medio: MedioPago
+  - cuotas: int
+}
+
+class Cancelacion {
+  - fecha: LocalDate
+  - motivo: String
+  - porcentajeDevolucion: int
+  - importeDevuelto: double
+  - medioDevolucion: MedioPago
+}
+
+class NotaAjuste {
+  - fecha: LocalDate
+  - motivo: String
+  - importe: double
+}
+
+Reserva "0..*" --> "1" Cliente : titular >
+Reserva "0..*" --> "1" Vendedor : atendida por >
+Reserva "0..*" --> "1" Salida : para >
+Reserva "1" *-- "1..*" Pasajero : incluye >
+Reserva "1" *-- "0..*" Pago : se abona con >
+Reserva "1" *-- "0..*" NotaAjuste : corrige con >
+Reserva "1" -- "0..1" Cancelacion : puede tener >
+Pasajero "0..*" -- "0..*" ServicioAdicional : contrata >
+
+
+' ===================== CAMBIOS: PATRONES (clases nuevas en azul) =====================
+class DatosPasajero <<record>> #DDEEFF {
+  nombre: String
+  apellido: String
+  documento: String
+  fechaNacimiento: LocalDate
+  tipo: TipoPasajero
+  contactoEmergencia: String
+  restricciones: String
+}
+
+class MenuConsola #DDEEFF {
+  + mostrarMenu(): void
+}
+
+class ControladorReservas #DDEEFF {
+  + crearReserva(cliente: Cliente, salida: Salida, vendedor: Vendedor, datos: List<DatosPasajero>): Reserva
+  + cancelarReserva(numero: long, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
+}
+
+class CalculadoraPrecioReserva #DDEEFF {
+  + calcularTotal(reserva: Reserva): double
+}
+
+interface Promocion #DDEEFF {
+  + calcularDescuento(reserva: Reserva, subtotalTour: double): double
+}
+class PromocionAnticipada #DDEEFF {
+  + calcularDescuento(reserva: Reserva, subtotalTour: double): double
+}
+class PromocionGrupo #DDEEFF {
+  + calcularDescuento(reserva: Reserva, subtotalTour: double): double
+}
+
+class GestorPagos #DDEEFF {
+  + registrarPago(reserva: Reserva, importe: double, medio: MedioPago, cuotas: int): Pago
+}
+
+class GestorCancelaciones #DDEEFF {
+  + cancelar(reserva: Reserva, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
+}
+
+interface RepositorioReservas #DDEEFF {
+  + guardar(reserva: Reserva): void
+  + buscarPorId(numero: long): Reserva
+}
+class RepositorioReservasArchivo #DDEEFF {
+  - rutaArchivo: String
+  + guardar(reserva: Reserva): void
+  + buscarPorId(numero: long): Reserva
+}
+
+class ReglaNegocioException <<Exception>> #DDEEFF
+class CuposInsuficientesException <<Exception>> #DDEEFF
+class RequisitosNoCumplidosException <<Exception>> #DDEEFF
+class ReservaNoCancelableException <<Exception>> #DDEEFF
+
+Promocion <|.. PromocionAnticipada
+Promocion <|.. PromocionGrupo
+RepositorioReservas <|.. RepositorioReservasArchivo
+ReglaNegocioException <|-- CuposInsuficientesException
+ReglaNegocioException <|-- RequisitosNoCumplidosException
+ReglaNegocioException <|-- ReservaNoCancelableException
+
+MenuConsola --> ControladorReservas : delega >
+ControladorReservas --> RepositorioReservas : persiste mediante >
+ControladorReservas --> CalculadoraPrecioReserva : usa >
+ControladorReservas --> GestorCancelaciones : usa >
+ControladorReservas --> GestorPagos : usa >
+ControladorReservas ..> Reserva : crea >
+ControladorReservas ..> ReglaNegocioException : lanza >
+CalculadoraPrecioReserva "1" --> "1..*" Promocion : evalua >
+GestorCancelaciones ..> Cancelacion : crea >
+GestorPagos ..> Pago : crea >
+Reserva ..> DatosPasajero : recibe >
+
+legend right
+  Azul: clase nueva por SOLID/GRASP
+  Amarillo: clase modificada respecto del diagrama inicial
+  Sin color: sin cambios
+end legend
+
+@enduml
