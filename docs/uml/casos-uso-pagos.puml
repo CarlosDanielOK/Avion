@@ -1,0 +1,31 @@
+@startuml casos-uso-pagos
+title Pagos y cancelaciones
+skinparam shadowing false
+skinparam backgroundColor White
+skinparam usecase {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam actor {
+  BackgroundColor White
+  BorderColor #333333
+}
+left to right direction
+actor "Vendedor" as VEN
+rectangle "Sistema de Gestión Rumbo Sur" {
+  usecase "CU12 - Registrar pagos" as CU12
+  usecase "CU13 - Controlar saldos" as CU13
+  usecase "CU14 - Confirmar o anular reservas" as CU14
+  usecase "CU15 - Cancelar reserva" as CU15
+  usecase "CU17 - Registrar ajustes económicos" as CU17
+}
+VEN --> CU12
+VEN --> CU13
+VEN --> CU14
+VEN --> CU15
+VEN --> CU17
+CU12 .> CU13 : <<include>>
+CU14 .> CU12 : <<extend>>\n[se alcanzó la seña]
+CU14 .> CU13 : <<extend>>\n[saldo vencido]
+@enduml
