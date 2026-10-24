@@ -38,7 +38,7 @@ Este proyecto propone un sistema de software que centraliza la venta, la operaci
 
 ## 2. Alcance funcional
 
-El sistema cubre, como mínimo, los siguientes procesos definidos en la propuesta:
+El alcance funcional previsto incluye los siguientes procesos:
 
 - Administración del catálogo de tours (itinerario, duración y tarifas) y programación de salidas con fecha y cupo.
 - Registro de clientes y creación de reservas con uno o más pasajeros.
@@ -48,6 +48,7 @@ El sistema cubre, como mínimo, los siguientes procesos definidos en la propuest
 - Asignación de guía y vehículo a cada salida y emisión de la lista de pasajeros.
 - Liquidación de honorarios de guías.
 - Reportes: ocupación por salida, ventas por vendedor, ingresos por tour y cancelaciones.
+- Funcionalidades adicionales propuestas: lista de espera y recomendación de tours (RF25 y RF26).
 
 El detalle completo se encuentra en los documentos de análisis (ver [sección 5](#5-documentación)): 26 requerimientos funcionales (RF01–RF26), 35 reglas de negocio (RN01–RN35), 17 supuestos (S01–S17) y 27 casos de uso (CU01–CU27).
 
@@ -66,12 +67,12 @@ El cliente y los proveedores participan de los procesos del negocio, pero no int
 
 ### 4.1. Modelado UML
 
-- **Casos de uso:** cuatro diagramas por módulo (administración, reservas, pagos y operaciones), con relaciones *include* y *extend*, y una ficha textual por cada caso de uso.
+- **Casos de uso:** cuatro diagramas por módulo (administración, reservas, pagos y operaciones), con relaciones «include» justificadas y escenarios alternativos descriptos en las fichas. No se agregan relaciones «extend» artificiales.
 - **Diagrama de clases inicial:** incluye las jerarquías `Persona` (`Empleado`, `Cliente`, `Pasajero`) y `Tour` (`TourAventura`, `TourCultural`, `TourNaturaleza`), con sobreescritura de métodos.
 - **Diagramas de secuencia:** CU08 *Crear reserva* (con flujos alternativos por cupos insuficientes y requisitos no cumplidos) y CU15 *Cancelar reserva* (con política de devolución y reserva no cancelable).
 - **Diagrama de clases final:** incorpora los cambios derivados de la aplicación de patrones, con su nota de cambios.
 
-### 4.2. Principios y patrones aplicados
+### 4.2. Principios y patrones propuestos en el diseño
 
 | Tipo | Aplicación | Clases principales |
 |---|---|---|
@@ -80,24 +81,28 @@ El cliente y los proveedores participan de los procesos del negocio, pero no int
 | SOLID – DIP | La lógica depende de una abstracción de almacenamiento y no de archivos concretos. | `RepositorioReservas`, `RepositorioReservasArchivo` |
 | GRASP – Experto en Información | Cada clase resuelve lo que conoce (cupos en `Salida`, saldo en `Reserva`). | `Salida`, `Reserva` |
 | GRASP – Creador | `Reserva` incorpora y administra a sus pasajeros. | `Reserva`, `Pasajero` |
-| GRASP – Controlador | Se separa la interfaz de la lógica de los casos de uso. | `MenuConsola`, `ControladorReservas` |
-| GRASP – Fabricación Pura | Clases creadas para ubicar cálculos y políticas que no pertenecen al dominio. | `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` |
+| GRASP – Controlador | Coordina las operaciones de los casos de uso y delega responsabilidades. | `ControladorReservas` |
+| GRASP – Bajo Acoplamiento | La lógica utiliza una abstracción de repositorio y no depende de la implementación concreta del almacenamiento. | `ControladorReservas`, `RepositorioReservas`, `RepositorioReservasArchivo` |
 
 La justificación completa de cada decisión (problema detectado, decisión adoptada y ventaja) se encuentra en [`docs/solid-grasp.md`](docs/solid-grasp.md).
 
 ## 5. Documentación
 
+### Análisis y requerimientos
+
 | Documento | Contenido |
 |---|---|
-| [`docs/Documento_Diseno_Etapa1_RumboSur.pdf`](docs/Documento_Diseno_Etapa1_RumboSur.pdf) | Documento de diseño de la Etapa 1 (entregable). |
-| [`docs/enunciado-propuesta-b.md`](docs/enunciado-propuesta-b.md) | Enunciado de la propuesta elegida (Propuesta B). |
 | [`docs/analisis-enunciado.md`](docs/analisis-enunciado.md) | Análisis del enunciado, actores y alcance. |
 | [`docs/requerimientos-funcionales.md`](docs/requerimientos-funcionales.md) | Requerimientos funcionales RF01–RF26. |
 | [`docs/reglas-negocio.md`](docs/reglas-negocio.md) | Reglas de negocio RN01–RN35. |
 | [`docs/supuestos-adoptados.md`](docs/supuestos-adoptados.md) | Supuestos S01–S17. |
 | [`docs/casos-de-uso.md`](docs/casos-de-uso.md) | Diagramas y fichas de casos de uso, y matriz de trazabilidad. |
+
+### Diseño y diagramas
+
+| Documento | Contenido |
+|---|---|
 | [`docs/solid-grasp.md`](docs/solid-grasp.md) | Aplicación y fundamentación de SOLID y GRASP. |
-| [`docs/nota-de-cambios.md`](docs/nota-de-cambios.md) | Justificación de los cambios entre el diagrama de clases inicial y el final. |
 | [`docs/uml/`](docs/uml) | Diagramas UML (imagen exportada y fuente PlantUML) y nota de cambios. |
 
 ## 6. Estructura del repositorio
@@ -133,7 +138,7 @@ El proyecto se desarrolla de forma colaborativa en GitHub:
 - La rama `main` contiene únicamente versiones revisadas.
 - Los cambios se desarrollan en ramas de trabajo y se integran mediante *pull requests* revisados por al menos otro integrante.
 - Los *commits* tienen mensajes descriptivos.
-- Cada etapa se entrega marcada con un *tag* (`etapa-1`, `etapa-2`).
+- Para identificar cada entrega, se prevé crear un *tag* (`etapa-1`, `etapa-2`).
 
 ## 10. Plan de entregas y estado
 
