@@ -52,7 +52,7 @@ El Administrador gestiona tours, itinerarios, tarifas y proveedores, y consulta 
 
 **Figura 2. Diagrama de casos de uso de gestión administrativa.**
 
-![Diagrama UML de gestión administrativa](diagramas/casos-uso-administracion.png)
+![Diagrama UML de gestión administrativa](uml/casos-uso-administracion.png)
 
 ### 2.2.3. Gestión comercial y reservas
 
@@ -60,7 +60,7 @@ El Vendedor registra clientes y pasajeros, crea y modifica reservas, calcula pre
 
 **Figura 3. Diagrama de casos de uso de gestión comercial y reservas.**
 
-![Diagrama UML de gestión comercial y reservas](diagramas/casos-uso-reservas.png)
+![Diagrama UML de gestión comercial y reservas](uml/casos-uso-reservas.png)
 
 ### 2.2.4. Pagos y cancelaciones
 
@@ -68,7 +68,7 @@ El Vendedor registra pagos, controla saldos, confirma o anula reservas, gestiona
 
 **Figura 4. Diagrama de casos de uso de pagos y cancelaciones.**
 
-![Diagrama UML de pagos y cancelaciones](diagramas/casos-uso-pagos.png)
+![Diagrama UML de pagos y cancelaciones](uml/casos-uso-pagos.png)
 
 ### 2.2.5. Gestión operativa
 
@@ -78,7 +78,7 @@ Se incorpora la consulta de salidas asignadas por parte del Guía de turismo com
 
 **Figura 5. Diagrama de casos de uso de gestión operativa.**
 
-![Diagrama UML de gestión operativa](diagramas/casos-uso-operaciones.png)
+![Diagrama UML de gestión operativa](uml/casos-uso-operaciones.png)
 
 ## 2.3. Descripciones textuales de casos de uso
 

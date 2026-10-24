@@ -16,7 +16,7 @@ Cada tour deberá contar con un itinerario compuesto por actividades ordenadas p
 Los tours se clasificarán en aventura, cultural y naturaleza. Los tours de aventura deberán establecer una edad mínima y un nivel de dificultad.
 
 ### RN03 – Programación de salidas
-Cada salida corresponderá a un tour y tendrá fechas programadas, cupo máximo, guía y vehículo asignados.
+Cada salida corresponderá a un tour y tendrá fechas programadas y cupo máximo. El guía y el vehículo deberán estar asignados antes de iniciar la salida, de acuerdo con RN30.
 
 ### RN04 – Estados de las salidas
 Los estados posibles serán: programada, confirmada, completa, en curso, finalizada y cancelada.

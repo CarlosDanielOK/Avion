@@ -1,0 +1,287 @@
+@startuml 01-clases-inicial
+title Rumbo Sur - Diagrama de clases inicial (antes de aplicar SOLID/GRASP)
+
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam backgroundColor White
+skinparam class {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
+}
+hide empty members
+
+' ===================== ENUMERACIONES =====================
+enum CategoriaTour {
+  AVENTURA
+  CULTURAL
+  NATURALEZA
+}
+enum Temporada {
+  BAJA
+  MEDIA
+  ALTA
+}
+enum NivelDificultad {
+  BAJO
+  MEDIO
+  ALTO
+}
+enum EstadoSalida {
+  PROGRAMADA
+  CONFIRMADA
+  COMPLETA
+  EN_CURSO
+  FINALIZADA
+  CANCELADA
+}
+enum EstadoReserva {
+  PENDIENTE
+  CONFIRMADA
+  ANULADA
+  FINALIZADA
+}
+enum TipoPasajero {
+  ADULTO
+  MENOR
+  JUBILADO
+}
+enum MedioPago {
+  EFECTIVO
+  TRANSFERENCIA
+  TARJETA
+}
+enum TipoVehiculo {
+  MICRO
+  COMBI
+  CAMIONETA
+}
+enum TipoServicio {
+  EXCURSION
+  TRASLADO
+  SEGURO
+}
+enum TipoProveedor {
+  HOTEL
+  RESTAURANTE
+  TRANSPORTISTA
+}
+
+' ===================== PERSONAS (herencia) =====================
+abstract class Persona {
+  # nombre: String
+  # apellido: String
+  # documento: String
+  # telefono: String
+  + obtenerNombreCompleto(): String
+}
+
+abstract class Empleado {
+  # legajo: int
+  + {abstract} getRol(): String
+}
+
+class Vendedor {
+  - comision: double
+  + getRol(): String
+  + crearReserva(cliente: Cliente, salida: Salida): Reserva
+}
+
+class Guia {
+  - idiomas: List<String>
+  - categoriasHabilitadas: List<CategoriaTour>
+  - honorarioPorDia: double
+  + getRol(): String
+  + estaHabilitadoPara(cat: CategoriaTour): boolean
+  + estaDisponible(inicio: LocalDate, fin: LocalDate): boolean
+  + calcularHonorarios(salida: Salida): double
+}
+
+class Coordinador {
+  + getRol(): String
+  + asignarRecursos(salida: Salida, guia: Guia, vehiculo: Vehiculo): void
+  + emitirListaPasajeros(salida: Salida): void
+  + iniciarSalida(salida: Salida): void
+  + finalizarSalida(salida: Salida): void
+}
+
+class Administrador {
+  + getRol(): String
+  + reporteOcupacionPorSalida(): String
+  + reporteVentasPorVendedor(): String
+  + reporteIngresosPorTour(): String
+  + reporteCancelaciones(): String
+}
+
+class Cliente {
+  - correo: String
+  - paisResidencia: String
+}
+
+class Pasajero {
+  - fechaNacimiento: LocalDate
+  - tipo: TipoPasajero
+  - contactoEmergencia: String
+  - restricciones: String
+  + calcularEdad(fecha: LocalDate): int
+}
+
+Persona <|-- Empleado
+Persona <|-- Cliente
+Persona <|-- Pasajero
+Empleado <|-- Vendedor
+Empleado <|-- Guia
+Empleado <|-- Coordinador
+Empleado <|-- Administrador
+
+' ===================== CATALOGO (herencia) =====================
+abstract class Tour {
+  - codigo: String
+  - nombre: String
+  - descripcion: String
+  - duracionDias: int
+  - cupoMinimo: int
+  - cupoMaximo: int
+  + {abstract} getCategoria(): CategoriaTour
+  + requiereSeguro(): boolean
+  + puedeParticipar(p: Pasajero, fecha: LocalDate): boolean
+  + obtenerTarifa(fecha: LocalDate): Tarifa
+}
+
+class TourAventura {
+  - nivelDificultad: NivelDificultad
+  - edadMinima: int
+  + getCategoria(): CategoriaTour
+  + requiereSeguro(): boolean
+  + puedeParticipar(p: Pasajero, fecha: LocalDate): boolean
+}
+
+class TourCultural {
+  + getCategoria(): CategoriaTour
+}
+
+class TourNaturaleza {
+  + getCategoria(): CategoriaTour
+}
+
+class Actividad {
+  - dia: int
+  - orden: int
+  - horario: LocalTime
+  - descripcion: String
+  - lugar: String
+}
+
+class Proveedor {
+  - nombre: String
+  - cuit: String
+  - contacto: String
+  - tipoServicio: TipoProveedor
+}
+
+class Tarifa {
+  - temporada: Temporada
+  - vigenciaDesde: LocalDate
+  - vigenciaHasta: LocalDate
+  - precioBase: double
+  + estaVigente(fecha: LocalDate): boolean
+}
+
+class ServicioAdicional {
+  - nombre: String
+  - precio: double
+  - tipo: TipoServicio
+}
+
+Tour <|-- TourAventura
+Tour <|-- TourCultural
+Tour <|-- TourNaturaleza
+
+Tour "1" *-- "1..*" Actividad : tiene itinerario >
+Tour "1" *-- "0..*" Tarifa : tiene >
+Actividad "0..*" --> "0..1" Proveedor : incluye servicio de >
+Tour "0..*" -- "0..*" ServicioAdicional : ofrece >
+
+' ===================== OPERACION =====================
+class Vehiculo {
+  - patente: String
+  - capacidad: int
+  - tipo: TipoVehiculo
+}
+
+class Salida {
+  - fechaInicio: LocalDate
+  - fechaFin: LocalDate
+  - cupoMaximo: int
+  - estado: EstadoSalida
+  - listaEmitida: boolean
+  + cuposOcupados(): int
+  + cuposDisponibles(): int
+  + actualizarEstado(hoy: LocalDate): void
+}
+
+class Liquidacion {
+  - fecha: LocalDate
+  - dias: int
+  - monto: double
+}
+
+Salida "0..*" --> "1" Tour : corresponde a >
+Salida "0..*" --> "0..1" Guia : guiada por >
+Salida "0..*" --> "0..1" Vehiculo : usa >
+Salida "1" -- "0..1" Liquidacion : genera >
+Liquidacion "0..*" --> "1" Guia : paga a >
+
+' ===================== VENTAS (todo dentro de Reserva: diseno inicial) =====================
+class Reserva {
+  - numero: long
+  - fecha: LocalDate
+  - estado: EstadoReserva
+  - total: double
+  + agregarPasajero(p: Pasajero): void
+  + calcularTotal(): double
+  + registrarPago(pago: Pago): void
+  + calcularSaldo(): double
+  + confirmar(): void
+  + anular(): void
+  + cancelar(motivo: String, fecha: LocalDate): Cancelacion
+}
+
+class Pago {
+  - fecha: LocalDate
+  - importe: double
+  - medio: MedioPago
+  - cuotas: int
+  + calcularRecargo(): double
+}
+
+class Cancelacion {
+  - fecha: LocalDate
+  - motivo: String
+  - porcentajeDevolucion: int
+  - importeDevuelto: double
+  - medioDevolucion: MedioPago
+}
+
+class NotaAjuste {
+  - fecha: LocalDate
+  - motivo: String
+  - importe: double
+}
+
+Reserva "0..*" --> "1" Cliente : titular >
+Reserva "0..*" --> "1" Vendedor : atendida por >
+Reserva "0..*" --> "1" Salida : para >
+Reserva "1" *-- "1..*" Pasajero : incluye >
+Reserva "1" *-- "0..*" Pago : se abona con >
+Reserva "1" *-- "0..*" NotaAjuste : corrige con >
+Reserva "1" -- "0..1" Cancelacion : puede tener >
+Pasajero "0..*" -- "0..*" ServicioAdicional : contrata >
+
+note bottom of Reserva
+  Diseno inicial: Reserva concentra calculo de precio,
+  promociones, pagos y cancelacion (se rediseña
+  con SOLID/GRASP en el diagrama final).
+end note
+
+@enduml

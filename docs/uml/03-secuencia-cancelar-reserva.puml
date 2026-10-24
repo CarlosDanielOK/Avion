@@ -1,0 +1,60 @@
+@startuml 03-secuencia-cancelar-reserva
+title CU15 - Cancelar reserva (politica de devolucion y error por reserva no cancelable)
+skinparam shadowing false
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+autonumber
+
+actor Vendedor
+participant ":MenuConsola" as UI
+participant ":ControladorReservas" as CTRL
+participant ":RepositorioReservas" as REPO
+participant ":Reserva" as RES
+participant ":GestorCancelaciones" as GC
+participant ":Cancelacion" as CAN
+participant ":Salida" as SAL
+
+Vendedor -> UI : cancelarReserva(numero, motivo, porAgencia)
+UI -> CTRL : cancelarReserva(numero, motivo, porAgencia, hoy)
+activate CTRL
+CTRL -> REPO : buscarPorId(numero)
+REPO --> CTRL : reserva
+CTRL -> RES : puedeCancelarse()
+RES --> CTRL : puede
+
+alt reserva ya anulada o finalizada  [no puede cancelarse]
+  CTRL --> UI : throw ReservaNoCancelableException
+  UI --> Vendedor : informa que la reserva no se puede cancelar
+else reserva cancelable
+  CTRL -> GC : cancelar(reserva, motivo, porAgencia, hoy)
+  activate GC
+  GC -> RES : diasHastaSalida(hoy)
+  RES --> GC : dias
+  alt cancela la agencia
+    GC -> GC : porcentaje = 100
+  else dias >= 30
+    GC -> GC : porcentaje = 90
+  else dias >= 15
+    GC -> GC : porcentaje = 50
+  else dias >= 7
+    GC -> GC : porcentaje = 20
+  else menos de 7 dias
+    GC -> GC : porcentaje = 0
+  end
+  GC -> RES : totalAbonado()
+  RES --> GC : abonado
+  GC -> GC : importe = abonado * porcentaje / 100
+  GC -> RES : medioDePagoUsado()
+  RES --> GC : medio
+  create CAN
+  GC -> CAN : <<create>> new Cancelacion(hoy, motivo, porcentaje, importe, medio)
+  GC -> RES : anular(cancelacion)
+  GC --> CTRL : cancelacion
+  deactivate GC
+  CTRL -> SAL : actualizarEstado(hoy)
+  CTRL -> REPO : guardar(reserva)
+  CTRL --> UI : cancelacion
+  UI --> Vendedor : muestra porcentaje e importe devuelto
+end
+deactivate CTRL
+@enduml
