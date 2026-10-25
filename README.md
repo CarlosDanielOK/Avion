@@ -82,7 +82,7 @@ El cliente y los proveedores participan de los procesos del negocio, pero no int
 | GRASP – Experto en Información | Cada clase resuelve lo que conoce (cupos en `Salida`, saldo en `Reserva`). | `Salida`, `Reserva` |
 | GRASP – Creador | `Reserva` incorpora y administra a sus pasajeros. | `Reserva`, `Pasajero` |
 | GRASP – Controlador | Coordina las operaciones de los casos de uso y delega responsabilidades. | `ControladorReservas` |
-| GRASP – Bajo Acoplamiento | La lógica utiliza una abstracción de repositorio y no depende de la implementación concreta del almacenamiento. | `ControladorReservas`, `RepositorioReservas`, `RepositorioReservasArchivo` |
+| GRASP – Fabricación Pura | Los cálculos y políticas que no pertenecen a una clase del negocio se ubican en clases propias. | `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` |
 
 La justificación completa de cada decisión (problema detectado, decisión adoptada y ventaja) se encuentra en [`docs/solid-grasp.md`](docs/solid-grasp.md).
 
@@ -95,7 +95,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 | [`docs/analisis-enunciado.md`](docs/analisis-enunciado.md) | Análisis del enunciado, actores y alcance. |
 | [`docs/requerimientos-funcionales.md`](docs/requerimientos-funcionales.md) | Requerimientos funcionales RF01–RF26. |
 | [`docs/reglas-negocio.md`](docs/reglas-negocio.md) | Reglas de negocio RN01–RN35. |
-| [`docs/supuestos-adoptados.md`](docs/supuestos-adoptados.md) | Supuestos S01–S17. |
+| [`docs/supuestos-adoptados.md`](docs/supuestos-adoptados.md) | Supuestos S01–S20. |
 | [`docs/casos-de-uso.md`](docs/casos-de-uso.md) | Diagramas y fichas de casos de uso, y matriz de trazabilidad. |
 
 ### Diseño y diagramas

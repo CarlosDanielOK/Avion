@@ -158,7 +158,7 @@ abstract class Tour {
   - cupoMaximo: int
   + {abstract} getCategoria(): CategoriaTour
   + requiereSeguro(): boolean
-  + puedeParticipar(p: Pasajero, fecha: LocalDate): boolean
+  + puedeParticipar(datos: DatosPasajero, fecha: LocalDate): boolean
   + obtenerTarifa(fecha: LocalDate): Tarifa
 }
 
@@ -167,7 +167,7 @@ class TourAventura {
   - edadMinima: int
   + getCategoria(): CategoriaTour
   + requiereSeguro(): boolean
-  + puedeParticipar(p: Pasajero, fecha: LocalDate): boolean
+  + puedeParticipar(datos: DatosPasajero, fecha: LocalDate): boolean
 }
 
 class TourCultural {
@@ -233,7 +233,7 @@ class Salida #FFF3CC {
   - listaEmitida: boolean
   + cuposOcupados(): int
   + cuposDisponibles(): int
-  + puedeParticipar(p: Pasajero): boolean
+  + puedeParticipar(datos: DatosPasajero): boolean
   + obtenerTarifa(): Tarifa
   + actualizarEstado(hoy: LocalDate): void
   + validarCondicionesInicio(): boolean
