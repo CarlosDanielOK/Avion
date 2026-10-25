@@ -255,16 +255,27 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Precondición:** Cliente y salida existentes; salida habilitada para reservas.
 
-**Flujo principal:**
-1. El vendedor selecciona un cliente.
-2. Selecciona una salida programada.
-3. Registra los pasajeros mediante CU07.
-4. El sistema verifica los cupos y requisitos de participación.
-5. Calcula el precio mediante CU09.
-6. El vendedor incorpora los servicios adicionales correspondientes mediante CU11.
-7. El sistema muestra el importe y las condiciones de pago.
-8. El vendedor confirma el registro.
-9. El sistema genera la reserva pendiente y retiene temporalmente los cupos según S04.
+Flujo principal:
+
+1.El vendedor selecciona un cliente registrado.
+
+Selecciona una salida habilitada para reservas.
+
+3.Registra los pasajeros mediante CU07.
+
+4.El sistema verifica la disponibilidad de cupos y los requisitos de participación de cada pasajero.
+
+5.El vendedor incorpora los servicios adicionales correspondientes mediante CU11, incluido el seguro obligatorio cuando se trate de un tour de aventura.
+
+6.El sistema calcula el precio total mediante CU09, considerando las tarifas, las promociones aplicables y los servicios adicionales.
+
+7.El sistema muestra el importe desglosado y las condiciones de pago.
+
+8.El vendedor confirma el registro.
+
+9.El sistema genera una reserva pendiente y retiene temporalmente los cupos según S04, siempre que se cumplan las condiciones de vigencia y pago.
+
+10.Cuando la reserva se realiza dentro de los diez días anteriores a la salida, se exige el pago total durante la operación y solamente se confirma cuando se registra dicho pago.
 
 **Flujos alternativos:**
 - **Cupos insuficientes:** se informa la falta de disponibilidad y puede gestionarse una solicitud de lista de espera mediante CU25.
@@ -272,9 +283,9 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 - **Reserva dentro de los diez días anteriores a la salida:** se exige el pago total durante la operación. La reserva queda confirmada únicamente cuando se registra el pago requerido.
 - **Datos incompletos:** se solicita completar la información antes de guardar.
 
-**Postcondición:** Reserva pendiente con cupos retenidos temporalmente, o confirmada cuando corresponda el pago total.
+**Postcondición:** Reserva pendiente con cupos retenidos temporalmente o confirmada cuando corresponda el pago total.
 
-**Trazabilidad:** RF08 · RN10–RN21 · S03–S06, S14, S16.
+**Trazabilidad:** RF08 · RN10–RN22 · S03–S06, S14 y S16.
 
 ### CU09 – Calcular precio de reserva
 
@@ -545,18 +556,27 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 **Precondición:** Salida con reservas vigentes.
 
 **Flujo principal:**
+
 1. El coordinador selecciona la salida.
-2. El sistema obtiene los pasajeros correspondientes.
-3. Reúne documentos, contactos de emergencia y restricciones relevantes.
-4. Genera la lista.
-5. Registra que la lista fue emitida.
+2. Solicita iniciar la operación.
+3. El sistema verifica que exista una lista de pasajeros emitida.
+4. Comprueba que la salida tenga un guía asignado, disponible y habilitado para la categoría del tour.
+5. Verifica que exista un vehículo asignado con capacidad suficiente, de acuerdo con RN09.
+6. Si se cumplen las condiciones, cambia el estado de la salida a *en curso*.
+7. Al concluir la actividad, el coordinador registra la finalización.
+8. El sistema cambia el estado a *finalizada*.
 
 **Flujos alternativos:**
-- Si faltan datos obligatorios, se solicita completarlos antes de emitirla.
 
-**Postcondición:** Lista de pasajeros disponible para la operación.
+- Si falta la lista de pasajeros, se impide iniciar la salida.
+- Si no existe un guía asignado o habilitado, se rechaza el inicio.
+- Si no existe un vehículo asignado o su capacidad es insuficiente, se impide iniciar la salida.
+- Si el estado de la salida es incompatible con la operación solicitada, se rechaza la transición.
 
-**Trazabilidad:** RF20 · RN29–RN30 · S01.
+**Postcondición:** Salida en curso o finalizada según la operación registrada.
+
+**Trazabilidad:** RF21 · RN04, RN08–RN09, RN29–RN31 · S01.
+
 
 ### CU21 – Iniciar y finalizar salidas
 
