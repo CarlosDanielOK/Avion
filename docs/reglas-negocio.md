@@ -110,11 +110,10 @@ Se permitirá reemplazar un pasajero por otro hasta tres días antes de la salid
 Antes de cada salida, el coordinador deberá emitir una lista con los documentos y contactos de emergencia de los pasajeros.
 
 ### RN30 – Condiciones para iniciar una salida
-No se podrá iniciar una salida sin una lista de pasajeros emitida ni sin un guía asignado.
-
-
-### RN30 – Condiciones para iniciar una salida
 No se podrá iniciar una salida sin una lista de pasajeros emitida, un guía asignado y habilitado para la categoría del tour, y un vehículo asignado cuya capacidad cumpla con lo establecido en RN09.
+
+### RN31 – Liquidación de honorarios
+Los honorarios de los guías se liquidarán únicamente por salidas finalizadas.
 
 ### RN32 – Cálculo de honorarios
 Los honorarios se calcularán mediante un monto fijo por día trabajado, más un 5 % de las ventas de servicios adicionales de la salida.

@@ -21,6 +21,8 @@ Esta carpeta contiene los archivos fuente PlantUML (`.puml`), sus imágenes expo
 - `Salida` y `Reserva` conservan las responsabilidades sobre la información que conocen: disponibilidad, estado y saldo.
 - `CalculadoraPrecioReserva`, `GestorPagos` y `GestorCancelaciones` son clases artificiales que ubican los cálculos y políticas fuera de `Reserva`, aplicando Fabricación Pura.
 - `DatosPasajero` desacopla los datos de entrada del proceso de creación y permite que `Reserva` administre la incorporación de sus pasajeros, aplicando Creador.
+- `Reserva` incorpora los servicios adicionales, el seguro obligatorio en tours de aventura y el vencimiento de la reserva pendiente (`agregarServicioAdicional()`, `incluirSeguroObligatorio()`, `establecerVencimiento()`, `estaVencida()`), y `ControladorReservas` coordina estos pasos junto con el pago total inmediato.
+- `Salida` incorpora `validarCondicionesInicio()`, `iniciar()` y `finalizar()` para aplicar las reglas de operación (RN29 y RN30).
 - Se agregan excepciones de dominio para representar incumplimientos de reglas en los flujos de creación y cancelación.
 
 Estos cambios se reflejan en el diagrama final y se justifican en `docs/solid-grasp.md`.
