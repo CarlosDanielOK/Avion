@@ -265,30 +265,33 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Actor principal:** Vendedor.
 
-**Objetivo:** Registrar una reserva asociada a un cliente, una salida y sus pasajeros.
+**Objetivo:** Registrar una reserva asociada a un cliente, una salida y sus pasajeros, verificando la disponibilidad, las restricciones de participación y las condiciones de pago.
 
 **Precondición:** Cliente y salida existentes; salida habilitada para reservas.
 
 **Flujo principal:**
-1. El vendedor selecciona un cliente.
-2. Selecciona una salida programada.
+
+1. El vendedor selecciona un cliente registrado.
+2. Selecciona una salida habilitada para reservas.
 3. Registra los pasajeros mediante CU07.
-4. El sistema verifica los cupos y requisitos de participación.
-5. Calcula el precio mediante CU09.
-6. El vendedor incorpora los servicios adicionales correspondientes mediante CU11.
-7. El sistema muestra el importe y las condiciones de pago.
+4. El sistema verifica la disponibilidad de cupos y los requisitos de participación de cada pasajero.
+5. El vendedor incorpora los servicios adicionales correspondientes mediante CU11, incluido el seguro obligatorio cuando se trate de un tour de aventura.
+6. El sistema calcula el precio total mediante CU09, considerando las tarifas, las promociones aplicables y los servicios adicionales.
+7. El sistema muestra el importe desglosado y las condiciones de pago.
 8. El vendedor confirma el registro.
-9. El sistema genera la reserva pendiente y retiene temporalmente los cupos según S04.
+9. Si faltan más de diez días para la salida, el sistema genera una reserva pendiente y retiene temporalmente los cupos según S04, siempre que se cumplan las condiciones de vigencia y pago.
+10. Cuando faltan diez días o menos para la salida, se exige el pago total durante la operación y la reserva solamente se confirma cuando se registra dicho pago.
 
 **Flujos alternativos:**
-- **Cupos insuficientes:** se informa la falta de disponibilidad y puede gestionarse una solicitud de lista de espera mediante CU25.
-- **Restricciones de participación:** se impide registrar la reserva con pasajeros que no cumplen las condiciones.
-- **Reserva dentro de los diez días anteriores a la salida:** se exige el pago total durante la operación. La reserva queda confirmada únicamente cuando se registra el pago requerido.
-- **Datos incompletos:** se solicita completar la información antes de guardar.
 
-**Postcondición:** Reserva pendiente con cupos retenidos temporalmente, o confirmada cuando corresponda el pago total.
+- **Cupos insuficientes:** Se informa la falta de disponibilidad y puede gestionarse una solicitud de lista de espera mediante CU25.
+- **Restricciones de participación:** Se impide registrar la reserva con pasajeros que no cumplen las condiciones.
+- **Pago total no registrado cuando es obligatorio:** No se registra la reserva y se informa al vendedor que debe completarse el pago.
+- **Datos incompletos:** Se solicita completar la información antes de guardar.
 
-**Trazabilidad:** RF08 · RN10–RN21 · S03–S06, S14, S16.
+**Postcondición:** Reserva pendiente con cupos retenidos temporalmente o reserva confirmada cuando corresponda el pago total.
+
+**Trazabilidad:** RF08 · RN10–RN22 · S03–S06, S14, S16.
 
 ### CU09 – Calcular precio de reserva
 
