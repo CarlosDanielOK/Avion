@@ -13,9 +13,9 @@ participant ":ControladorReservas" as CTRL
 participant ":Salida" as SAL
 participant ":Tour" as TOUR
 participant ":Reserva" as RES
-participant ":Pasajero" as PAS
 participant ":CalculadoraPrecioReserva" as CALC
 participant "p:Promocion" as PROMO
+participant ":GestorPagos" as GP
 participant ":RepositorioReservas" as REPO
 
 Vendedor -> UI : crearReserva(idCliente, idSalida, datosPasajeros)
@@ -28,18 +28,20 @@ SAL --> CTRL : disponibles
 alt cupos insuficientes
   CTRL --> UI : CuposInsuficientesException
   UI --> Vendedor : informa falta de cupos y ofrece CU25
+
 else cupos suficientes
 
   loop por cada pasajero
     CTRL -> SAL : puedeParticipar(datosPasajero)
-    SAL -> TOUR : puedeParticipar(datosPasajero, fechaInicio)
-    TOUR --> SAL : cumple
-    SAL --> CTRL : cumple
+    SAL -> TOUR : verificar restricciones del tour
+    TOUR --> SAL : cumple / no cumple
+    SAL --> CTRL : cumple / no cumple
   end
 
   alt algun pasajero no cumple requisitos
     CTRL --> UI : RequisitosNoCumplidosException
     UI --> Vendedor : informa restricciones del tour
+
   else todos cumplen requisitos
 
     create RES
@@ -47,20 +49,24 @@ else cupos suficientes
 
     loop por cada pasajero
       CTRL -> RES : agregarPasajero(datosPasajero)
-      create PAS
-      RES -> PAS : <<create>> new Pasajero(datosPasajero)
+      note right of RES
+        Reserva crea e incorpora
+        cada Pasajero, aplicando
+        el patron GRASP Creador.
+      end note
     end
 
-    UI -> Vendedor : solicita servicios adicionales
+    CTRL --> UI : solicitar seleccion de servicios
+    UI --> Vendedor : muestra servicios disponibles
     Vendedor -> UI : seleccionaServiciosAdicionales()
-    UI -> CTRL : registrarServiciosSeleccionados()
+    UI -> CTRL : registrarServiciosSeleccionados(reserva, servicios)
 
-    alt tour de aventura
+    opt tour de aventura
       CTRL -> RES : incluirSeguroObligatorio()
-    else otro tipo de tour
-      opt se contrataron servicios opcionales
-        CTRL -> RES : agregarServiciosAdicionales()
-      end
+    end
+
+    loop por cada servicio opcional seleccionado
+      CTRL -> RES : agregarServicioAdicional(servicio)
     end
 
     CTRL -> CALC : calcularTotal(reserva)
@@ -70,16 +76,16 @@ else cupos suficientes
     SAL --> CALC : tarifa
 
     loop por cada pasajero
-      CALC -> PAS : obtenerFactorTarifa(fechaInicio)
-      PAS --> CALC : factor
+      CALC -> CALC : aplicar factor de tarifa del pasajero
     end
 
-    loop por cada promocion aplicable
+    loop por cada promocion disponible
       CALC -> PROMO : calcularDescuento(reserva, subtotalTour)
       PROMO --> CALC : descuento
     end
 
-    CALC -> CALC : aplicar mejor promocion y sumar adicionales
+    CALC -> CALC : seleccionar mejor promocion
+    CALC -> CALC : sumar servicios adicionales
     CALC --> CTRL : total
     deactivate CALC
 
@@ -90,22 +96,41 @@ else cupos suficientes
       UI --> Vendedor : solicita pago total
 
       alt pago total registrado
-        CTRL -> RES : registrarPagoTotal()
+        CTRL -> GP : registrarPago(reserva, total, medio, cuotas)
+        activate GP
+        GP -> RES : registrarPago(pago)
+        GP --> CTRL : pago registrado
+        deactivate GP
+
         CTRL -> RES : confirmar()
         CTRL -> REPO : guardar(reserva)
+        REPO --> CTRL : guardado
+
         CTRL --> UI : reserva CONFIRMADA
         UI --> Vendedor : muestra confirmacion
+
       else pago no registrado
         CTRL --> UI : reserva no registrada
         UI --> Vendedor : informa pago requerido
       end
 
     else faltan mas de 10 dias
-      CTRL -> RES : establecerVencimiento(maximo 48 horas)
+      CTRL -> RES : establecerVencimiento(fechaHoraCreacion.plusHours(48))
       CTRL -> RES : establecerEstado(PENDIENTE)
+
+      note right of RES
+        La reserva retiene cupos
+        mientras este pendiente
+        y su plazo siga vigente.
+        El vencimiento debe respetar
+        los limites de pago aplicables.
+      end note
+
       CTRL -> REPO : guardar(reserva)
+      REPO --> CTRL : guardado
+
       CTRL --> UI : reserva PENDIENTE
-      UI --> Vendedor : muestra importe y plazo de pago
+      UI --> Vendedor : muestra importe y vencimiento
     end
 
   end
@@ -113,4 +138,3 @@ end
 
 deactivate CTRL
 @enduml
-
