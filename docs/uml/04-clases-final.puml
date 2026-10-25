@@ -224,6 +224,7 @@ class Vehiculo {
   - tipo: TipoVehiculo
 }
 
+
 class Salida #FFF3CC {
   - fechaInicio: LocalDate
   - fechaFin: LocalDate
@@ -232,10 +233,14 @@ class Salida #FFF3CC {
   - listaEmitida: boolean
   + cuposOcupados(): int
   + cuposDisponibles(): int
-  + puedeParticipar(datos: DatosPasajero): boolean
+  + puedeParticipar(p: Pasajero): boolean
   + obtenerTarifa(): Tarifa
   + actualizarEstado(hoy: LocalDate): void
+  + validarCondicionesInicio(): boolean
+  + iniciar(): void
+  + finalizar(): void
 }
+
 
 class Liquidacion {
   - fecha: LocalDate
