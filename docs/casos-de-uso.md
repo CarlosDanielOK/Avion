@@ -579,25 +579,32 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Actor principal:** Coordinador de operaciones.
 
-**Objetivo:** Registrar el inicio y la finalización de salidas.
+**Objetivo:** Registrar el inicio y la finalización de las salidas, verificando las condiciones operativas necesarias.
 
 **Precondición:** Salida existente en un estado compatible con la operación.
 
 **Flujo principal:**
-1. El coordinador selecciona la salida.
+
+1. El coordinador selecciona una salida.
 2. Solicita iniciar la operación.
-3. El sistema verifica que exista un guía asignado y una lista de pasajeros emitida.
-4. Cambia el estado a en curso.
-5. Al concluir, el coordinador registra la finalización.
-6. El sistema cambia el estado a finalizada.
+3. El sistema verifica que se haya emitido la lista de pasajeros correspondiente.
+4. Verifica que exista un guía asignado y habilitado para la categoría del tour.
+5. Verifica que exista un vehículo asignado cuya capacidad cumpla con RN09.
+6. El sistema comprueba que el estado de la salida permita iniciar la operación.
+7. Si todas las condiciones se cumplen, cambia el estado de la salida a **en curso**.
+8. Al concluir la operación, el coordinador registra la finalización.
+9. El sistema verifica que la salida se encuentre **en curso** y cambia su estado a **finalizada**.
 
 **Flujos alternativos:**
-- Si falta el guía o la lista, no se permite iniciar.
-- Si el estado de la salida es incompatible, se impide la transición.
 
-**Postcondición:** Salida en curso o finalizada según la operación registrada.
+- **Lista de pasajeros no emitida:** El sistema impide iniciar la salida e informa la condición pendiente.
+- **Guía no asignado o no habilitado:** El sistema impide iniciar la salida hasta que se asigne un guía habilitado para la categoría del tour.
+- **Vehículo no asignado o con capacidad insuficiente:** El sistema impide iniciar la salida hasta que se asigne un vehículo que cumpla RN09.
+- **Estado incompatible:** El sistema rechaza la transición e informa que la operación no está permitida.
 
-**Trazabilidad:** RF21 · RN04, RN29–RN31 · S01.
+**Postcondición:** Salida en curso o finalizada, según la operación registrada.
+
+**Trazabilidad:** RF21 · RN04, RN08–RN09, RN29–RN31 · S01.
 
 ### CU22 – Liquidar honorarios
 
