@@ -27,8 +27,10 @@ Una salida se confirmará cuando alcance el cupo mínimo establecido.
 ### RN06 – Cancelación por cupo insuficiente
 Si siete días antes de la fecha de inicio no se alcanza el cupo mínimo, la salida se cancelará y se devolverá el 100 % de los importes abonados.
 
-### RN07 – Control de cupos
-Cuando se alcance el cupo máximo, la salida pasará al estado completa y no admitirá nuevas reservas.
+**RN07 – Control de cupos**
+Cuando la totalidad de los cupos de una salida se encuentre ocupada por reservas confirmadas o retenida temporalmente por reservas pendientes vigentes, la salida pasará al estado completa y no admitirá nuevas reservas que excedan su capacidad máxima.
+Las reservas pendientes retendrán cupos únicamente durante el plazo establecido en S04 y S14. Cuando una reserva sea anulada o venza su plazo de retención, los cupos correspondientes volverán a estar disponibles.
+La inscripción en una lista de espera no ocupará ni retendrá cupos, conforme a RN34.
 
 ### RN08 – Disponibilidad de guías
 Un guía no podrá tener asignadas dos salidas superpuestas y solo podrá dirigir tours de categorías para las cuales se encuentre habilitado.
@@ -102,8 +104,8 @@ Se permitirá reemplazar un pasajero por otro hasta tres días antes de la salid
 ### RN29 – Emisión de listas de pasajeros
 Antes de cada salida, el coordinador deberá emitir una lista con los documentos y contactos de emergencia de los pasajeros.
 
-### RN30 – Condiciones para iniciar una salida
-No se podrá iniciar una salida sin una lista de pasajeros emitida ni sin un guía asignado.
+**RN30 – Condiciones para iniciar una salida**
+No se podrá iniciar una salida sin una lista de pasajeros emitida, un guía asignado y habilitado para la categoría del tour, y un vehículo asignado cuya capacidad cumpla con lo establecido en RN09.
 
 ### RN31 – Liquidación de honorarios
 Los honorarios de los guías se liquidarán únicamente por salidas finalizadas.
