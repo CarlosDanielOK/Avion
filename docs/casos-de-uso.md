@@ -43,40 +43,54 @@ Se utilizaron asociaciones mediante líneas continuas para indicar qué funciona
 
 Las relaciones «include» se utilizan cuando un caso de uso requiere obligatoriamente otro comportamiento modelado como caso de uso independiente.
 
-Las condiciones de negocio y los escenarios alternativos se documentan en las descripciones textuales. No se incorporan relaciones «extend» artificiales entre funcionalidades independientes.
+Las relaciones «extend» se utilizan para comportamientos condicionales: el caso que extiende solo se ejecuta si se da una condición (por ejemplo, la lista de espera solo cuando no hay cupos). La flecha va desde el caso que extiende hacia el caso base.
+
+**Relaciones modeladas:**
+
+- **«include»:** CU08 (Crear reserva) incluye CU07 (Registrar pasajeros) y CU09 (Calcular precio de reserva). CU09 incluye CU10 (Evaluar promociones). CU12 (Registrar pagos) incluye CU13 (Controlar saldos), considerando la actualización del saldo como parte del registro de cada pago.
+
+- **«extend»:** CU11 (Gestionar servicios adicionales) extiende CU08 cuando se contratan servicios opcionales. En los tours de aventura, el seguro obligatorio se incorpora según las reglas de negocio correspondientes, por lo que no se considera opcional.
+
+- **CU25 (Gestionar lista de espera):** se mantiene como caso de uso independiente. Cuando CU08 detecta que no existen cupos disponibles, el vendedor puede ofrecer al cliente incorporarse a la lista de espera. Esta situación se documenta como flujo alternativo de CU08.
+
+- **CU14 (Confirmar o anular reservas):** se mantiene como caso de uso independiente. La confirmación se realiza cuando se cumplen las condiciones de pago y demás requisitos establecidos. La anulación se produce cuando corresponde según las reglas de negocio, por ejemplo, ante el vencimiento del plazo de pago. Estas situaciones se documentan en sus flujos principales y alternativos.
+
+- **CU19 (Asignar recursos):** se mantiene como caso de uso independiente del CU04 (Programar salidas), ya que la asignación de guías y vehículos puede gestionarse después de programar una salida.
+
+Las relaciones «include» representan comportamientos obligatorios y las relaciones «extend» representan comportamientos condicionales. Los flujos alternativos y las excepciones se detallan en las fichas textuales correspondientes.
 
 
-### 2.2.2. Gestión administrativa
+### 2.2.1. Gestión administrativa
 
 El Administrador gestiona tours, itinerarios, tarifas y proveedores, y consulta reportes administrativos.
 
-**Figura 2. Diagrama de casos de uso de gestión administrativa.**
+**Figura 1. Diagrama de casos de uso de gestión administrativa.**
 
 ![Diagrama UML de gestión administrativa](uml/casos-uso-administracion.png)
 
-### 2.2.3. Gestión comercial y reservas
+### 2.2.2. Gestión comercial y reservas
 
 El Vendedor registra clientes y pasajeros, crea y modifica reservas, calcula precios, evalúa promociones, gestiona servicios adicionales y utiliza las funcionalidades de lista de espera y recomendaciones.
 
-**Figura 3. Diagrama de casos de uso de gestión comercial y reservas.**
+**Figura 2. Diagrama de casos de uso de gestión comercial y reservas.**
 
 ![Diagrama UML de gestión comercial y reservas](uml/casos-uso-reservas.png)
 
-### 2.2.4. Pagos y cancelaciones
+### 2.2.3. Pagos y cancelaciones
 
 El Vendedor registra pagos, controla saldos, confirma o anula reservas, gestiona cancelaciones y registra ajustes económicos.
 
-**Figura 4. Diagrama de casos de uso de pagos y cancelaciones.**
+**Figura 3. Diagrama de casos de uso de pagos y cancelaciones.**
 
 ![Diagrama UML de pagos y cancelaciones](uml/casos-uso-pagos.png)
 
-### 2.2.5. Gestión operativa
+### 2.2.4. Gestión operativa
 
 El Coordinador de operaciones programa salidas, administra y asigna recursos, emite listas de pasajeros, inicia y finaliza salidas y liquida honorarios.
 
 Se incorpora la consulta de salidas asignadas por parte del Guía de turismo como funcionalidad propuesta mediante S01.
 
-**Figura 5. Diagrama de casos de uso de gestión operativa.**
+**Figura 4. Diagrama de casos de uso de gestión operativa.**
 
 ![Diagrama UML de gestión operativa](uml/casos-uso-operaciones.png)
 
@@ -251,30 +265,33 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Actor principal:** Vendedor.
 
-**Objetivo:** Registrar una reserva asociada a un cliente, una salida y sus pasajeros.
+**Objetivo:** Registrar una reserva asociada a un cliente, una salida y sus pasajeros, verificando la disponibilidad, las restricciones de participación y las condiciones de pago.
 
 **Precondición:** Cliente y salida existentes; salida habilitada para reservas.
 
 **Flujo principal:**
-1. El vendedor selecciona un cliente.
-2. Selecciona una salida programada.
+
+1. El vendedor selecciona un cliente registrado.
+2. Selecciona una salida habilitada para reservas.
 3. Registra los pasajeros mediante CU07.
-4. El sistema verifica los cupos y requisitos de participación.
-5. Calcula el precio mediante CU09.
-6. El vendedor incorpora los servicios adicionales correspondientes mediante CU11.
-7. El sistema muestra el importe y las condiciones de pago.
+4. El sistema verifica la disponibilidad de cupos y los requisitos de participación de cada pasajero.
+5. El vendedor incorpora los servicios adicionales correspondientes mediante CU11, incluido el seguro obligatorio cuando se trate de un tour de aventura.
+6. El sistema calcula el precio total mediante CU09, considerando las tarifas, las promociones aplicables y los servicios adicionales.
+7. El sistema muestra el importe desglosado y las condiciones de pago.
 8. El vendedor confirma el registro.
-9. El sistema genera la reserva pendiente y retiene temporalmente los cupos según S04.
+9. Si faltan más de diez días para la salida, el sistema genera una reserva pendiente y retiene temporalmente los cupos según S04, siempre que se cumplan las condiciones de vigencia y pago.
+10. Cuando faltan diez días o menos para la salida, se exige el pago total durante la operación y la reserva solamente se confirma cuando se registra dicho pago.
 
 **Flujos alternativos:**
-- **Cupos insuficientes:** se informa la falta de disponibilidad y puede gestionarse una solicitud de lista de espera mediante CU25.
-- **Restricciones de participación:** se impide registrar la reserva con pasajeros que no cumplen las condiciones.
-- **Reserva dentro de los diez días anteriores a la salida:** se exige el pago total durante la operación. La reserva queda confirmada únicamente cuando se registra el pago requerido.
-- **Datos incompletos:** se solicita completar la información antes de guardar.
 
-**Postcondición:** Reserva pendiente con cupos retenidos temporalmente, o confirmada cuando corresponda el pago total.
+- **Cupos insuficientes:** Se informa la falta de disponibilidad y puede gestionarse una solicitud de lista de espera mediante CU25.
+- **Restricciones de participación:** Se impide registrar la reserva con pasajeros que no cumplen las condiciones.
+- **Pago total no registrado cuando es obligatorio:** No se registra la reserva y se informa al vendedor que debe completarse el pago.
+- **Datos incompletos:** Se solicita completar la información antes de guardar.
 
-**Trazabilidad:** RF08 · RN10–RN21 · S03–S06, S14, S16.
+**Postcondición:** Reserva pendiente con cupos retenidos temporalmente o reserva confirmada cuando corresponda el pago total.
+
+**Trazabilidad:** RF08 · RN10–RN22 · S03–S06, S14, S16.
 
 ### CU09 – Calcular precio de reserva
 
@@ -562,25 +579,32 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Actor principal:** Coordinador de operaciones.
 
-**Objetivo:** Registrar el inicio y la finalización de salidas.
+**Objetivo:** Registrar el inicio y la finalización de las salidas, verificando las condiciones operativas necesarias.
 
 **Precondición:** Salida existente en un estado compatible con la operación.
 
 **Flujo principal:**
-1. El coordinador selecciona la salida.
+
+1. El coordinador selecciona una salida.
 2. Solicita iniciar la operación.
-3. El sistema verifica que exista un guía asignado y una lista de pasajeros emitida.
-4. Cambia el estado a en curso.
-5. Al concluir, el coordinador registra la finalización.
-6. El sistema cambia el estado a finalizada.
+3. El sistema verifica que se haya emitido la lista de pasajeros correspondiente.
+4. Verifica que exista un guía asignado y habilitado para la categoría del tour.
+5. Verifica que exista un vehículo asignado cuya capacidad cumpla con RN09.
+6. El sistema comprueba que el estado de la salida permita iniciar la operación.
+7. Si todas las condiciones se cumplen, cambia el estado de la salida a **en curso**.
+8. Al concluir la operación, el coordinador registra la finalización.
+9. El sistema verifica que la salida se encuentre **en curso** y cambia su estado a **finalizada**.
 
 **Flujos alternativos:**
-- Si falta el guía o la lista, no se permite iniciar.
-- Si el estado de la salida es incompatible, se impide la transición.
 
-**Postcondición:** Salida en curso o finalizada según la operación registrada.
+- **Lista de pasajeros no emitida:** El sistema impide iniciar la salida e informa la condición pendiente.
+- **Guía no asignado o no habilitado:** El sistema impide iniciar la salida hasta que se asigne un guía habilitado para la categoría del tour.
+- **Vehículo no asignado o con capacidad insuficiente:** El sistema impide iniciar la salida hasta que se asigne un vehículo que cumpla RN09.
+- **Estado incompatible:** El sistema rechaza la transición e informa que la operación no está permitida.
 
-**Trazabilidad:** RF21 · RN04, RN29–RN31 · S01.
+**Postcondición:** Salida en curso o finalizada, según la operación registrada.
+
+**Trazabilidad:** RF21 · RN04, RN08–RN09, RN29–RN31 · S01.
 
 ### CU22 – Liquidar honorarios
 
@@ -828,7 +852,7 @@ Las relaciones «include» se utilizan para comportamientos obligatorios modelad
 
 Los flujos alternativos y las excepciones se describen en las fichas textuales.
 
-No se agregan relaciones «extend» cuando no existe una extensión funcional justificada.
+Las relaciones «extend» se utilizan solo para los comportamientos condicionales que figuran en las fichas textuales (por ejemplo, la lista de espera cuando no hay cupos).
 
 La organización de los diagramas por módulos responde a criterios de claridad visual y no representa sistemas independientes.
 

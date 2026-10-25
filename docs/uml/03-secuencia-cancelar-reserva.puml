@@ -1,5 +1,7 @@
+
 @startuml 03-secuencia-cancelar-reserva
-title CU15 - Cancelar reserva (politica de devolucion y error por reserva no cancelable)
+title CU15 - Cancelar reserva (devoluciones y flujos alternativos)
+
 skinparam shadowing false
 skinparam backgroundColor White
 skinparam sequenceMessageAlign center
@@ -17,44 +19,79 @@ participant ":Salida" as SAL
 Vendedor -> UI : cancelarReserva(numero, motivo, porAgencia)
 UI -> CTRL : cancelarReserva(numero, motivo, porAgencia, hoy)
 activate CTRL
-CTRL -> REPO : buscarPorId(numero)
-REPO --> CTRL : reserva
-CTRL -> RES : puedeCancelarse()
-RES --> CTRL : puede
 
-alt reserva ya anulada o finalizada  [no puede cancelarse]
-  CTRL --> UI : throw ReservaNoCancelableException
-  UI --> Vendedor : informa que la reserva no se puede cancelar
-else reserva cancelable
-  CTRL -> GC : cancelar(reserva, motivo, porAgencia, hoy)
-  activate GC
-  GC -> RES : diasHastaSalida(hoy)
-  RES --> GC : dias
-  alt cancela la agencia
-    GC -> GC : porcentaje = 100
-  else dias >= 30
-    GC -> GC : porcentaje = 90
-  else dias >= 15
-    GC -> GC : porcentaje = 50
-  else dias >= 7
-    GC -> GC : porcentaje = 20
-  else menos de 7 dias
-    GC -> GC : porcentaje = 0
+CTRL -> REPO : buscarPorId(numero)
+REPO --> CTRL : reserva o null
+
+alt reserva inexistente
+  CTRL --> UI : informa reserva no encontrada
+  UI --> Vendedor : muestra error de busqueda
+
+else reserva encontrada
+  CTRL -> RES : puedeCancelarse()
+  RES --> CTRL : puede
+
+  alt reserva no cancelable
+    CTRL --> UI : ReservaNoCancelableException
+    UI --> Vendedor : informa que no puede cancelarse
+
+  else reserva cancelable
+    CTRL -> GC : cancelar(reserva, motivo, porAgencia, hoy)
+    activate GC
+
+    GC -> RES : diasHastaSalida(hoy)
+    RES --> GC : dias
+
+    alt cancelacion por la agencia
+      GC -> GC : porcentaje = 100
+    else faltan 30 dias o mas
+      GC -> GC : porcentaje = 90
+    else faltan entre 15 y 29 dias
+      GC -> GC : porcentaje = 50
+    else faltan entre 7 y 14 dias
+      GC -> GC : porcentaje = 20
+    else faltan menos de 7 dias
+      GC -> GC : porcentaje = 0
+    end
+
+    GC -> RES : totalAbonado()
+    RES --> GC : abonado
+
+    GC -> GC : importe = abonado * porcentaje / 100
+
+    GC -> RES : medioDePagoUsado()
+    RES --> GC : medio
+
+    create CAN
+    GC -> CAN : <<create>> new Cancelacion(hoy, motivo, porcentaje, importe, medio)
+
+    GC -> RES : anular(cancelacion)
+    GC --> CTRL : cancelacion
+    deactivate GC
+
+    note over RES,SAL
+      Al anular la reserva, sus pasajeros
+      dejan de ocupar cupos en la salida.
+      La disponibilidad se recalcula
+      considerando las reservas vigentes.
+    end note
+
+    CTRL -> SAL : actualizarEstado(hoy)
+    CTRL -> REPO : guardar(reserva)
+    REPO --> CTRL : guardado
+
+    CTRL --> UI : cancelacion
+    UI --> Vendedor : muestra devolucion calculada
+
+    note over UI
+      El importe calculado no implica
+      que el reintegro ya fue ejecutado.
+      La devolucion efectiva se registra
+      segun el procedimiento de pagos.
+    end note
+
   end
-  GC -> RES : totalAbonado()
-  RES --> GC : abonado
-  GC -> GC : importe = abonado * porcentaje / 100
-  GC -> RES : medioDePagoUsado()
-  RES --> GC : medio
-  create CAN
-  GC -> CAN : <<create>> new Cancelacion(hoy, motivo, porcentaje, importe, medio)
-  GC -> RES : anular(cancelacion)
-  GC --> CTRL : cancelacion
-  deactivate GC
-  CTRL -> SAL : actualizarEstado(hoy)
-  CTRL -> REPO : guardar(reserva)
-  CTRL --> UI : cancelacion
-  UI --> Vendedor : muestra porcentaje e importe devuelto
 end
+
 deactivate CTRL
 @enduml

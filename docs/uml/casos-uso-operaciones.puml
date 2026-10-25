@@ -1,0 +1,59 @@
+
+@startuml casos-uso-operaciones
+title Gestión operativa
+
+skinparam shadowing false
+skinparam backgroundColor White
+
+skinparam usecase {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
+}
+
+skinparam actor {
+  BackgroundColor White
+  BorderColor #333333
+}
+
+left to right direction
+
+actor "Coordinador de operaciones" as COO
+actor "Guía de turismo" as GUI
+
+rectangle "Sistema de Gestión Rumbo Sur" {
+  usecase "CU04 - Programar salidas" as CU04
+  usecase "CU05 - Gestionar estados de salidas" as CU05
+  usecase "CU18 - Administrar guías y vehículos" as CU18
+  usecase "CU19 - Asignar recursos" as CU19
+  usecase "CU20 - Emitir listas de pasajeros" as CU20
+  usecase "CU21 - Iniciar y finalizar salidas" as CU21
+  usecase "CU22 - Liquidar honorarios" as CU22
+  usecase "CU27 - Consultar salidas asignadas" as CU27
+}
+
+COO --> CU04
+COO --> CU05
+COO --> CU18
+COO --> CU19
+COO --> CU20
+COO --> CU21
+COO --> CU22
+
+GUI --> CU27
+
+note right of CU19
+  La asignación de guías y vehículos
+  puede realizarse después de
+  programar una salida.
+end note
+
+note right of CU21
+  Antes de iniciar una salida,
+  se verifica que tenga
+  pasajeros registrados,
+  guía habilitado y
+  vehículo adecuado.
+end note
+
+@enduml
