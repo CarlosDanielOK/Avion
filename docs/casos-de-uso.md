@@ -45,12 +45,19 @@ Las relaciones «include» se utilizan cuando un caso de uso requiere obligatori
 
 Las relaciones «extend» se utilizan para comportamientos condicionales: el caso que extiende solo se ejecuta si se da una condición (por ejemplo, la lista de espera solo cuando no hay cupos). La flecha va desde el caso que extiende hacia el caso base.
 
-Relaciones modeladas:
+**Relaciones modeladas:**
 
-- «include»: CU08 incluye a CU07 y a CU09; CU09 incluye a CU10; CU12 incluye a CU13.
-- «extend»: CU11 y CU25 extienden a CU08; CU14 extiende a CU12 y a CU13; CU19 extiende a CU04.
+- **«include»:** CU08 (Crear reserva) incluye CU07 (Registrar pasajeros) y CU09 (Calcular precio de reserva). CU09 incluye CU10 (Evaluar promociones). CU12 (Registrar pagos) incluye CU13 (Controlar saldos), considerando la actualización del saldo como parte del registro de cada pago.
 
-Las condiciones de negocio y los escenarios alternativos se documentan además en las descripciones textuales.
+- **«extend»:** CU11 (Gestionar servicios adicionales) extiende CU08 cuando se contratan servicios opcionales. En los tours de aventura, el seguro obligatorio se incorpora según las reglas de negocio correspondientes, por lo que no se considera opcional.
+
+- **CU25 (Gestionar lista de espera):** se mantiene como caso de uso independiente. Cuando CU08 detecta que no existen cupos disponibles, el vendedor puede ofrecer al cliente incorporarse a la lista de espera. Esta situación se documenta como flujo alternativo de CU08.
+
+- **CU14 (Confirmar o anular reservas):** se mantiene como caso de uso independiente. La confirmación se realiza cuando se cumplen las condiciones de pago y demás requisitos establecidos. La anulación se produce cuando corresponde según las reglas de negocio, por ejemplo, ante el vencimiento del plazo de pago. Estas situaciones se documentan en sus flujos principales y alternativos.
+
+- **CU19 (Asignar recursos):** se mantiene como caso de uso independiente del CU04 (Programar salidas), ya que la asignación de guías y vehículos puede gestionarse después de programar una salida.
+
+Las relaciones «include» representan comportamientos obligatorios y las relaciones «extend» representan comportamientos condicionales. Los flujos alternativos y las excepciones se detallan en las fichas textuales correspondientes.
 
 
 ### 2.2.1. Gestión administrativa
