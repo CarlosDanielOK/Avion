@@ -86,11 +86,3 @@ El sistema deberá permitir registrar y consultar proveedores, incluyendo nombre
 
 ### RF24 – Generar reportes
 El sistema deberá permitir emitir reportes de ocupación por salida, ventas por vendedor, ingresos por tour y cancelaciones.
-
-## 6. Funcionalidades complementarias propuestas
-
-### RF25 – Gestionar lista de espera para salidas completas
-El sistema deberá permitir registrar clientes interesados en salidas que hayan alcanzado su cupo máximo, incorporándolos a una lista de espera ordenada por fecha de solicitud. Cuando se liberen lugares debido a una cancelación, el sistema deberá identificar a los clientes en espera y permitir al vendedor ofrecer los cupos disponibles, respetando el orden de inscripción y la cantidad de pasajeros solicitada.
-
-### RF26 – Recomendar tours según las preferencias del cliente
-El sistema deberá permitir registrar las preferencias turísticas de los clientes, considerando categorías de interés, presupuesto disponible y fechas deseadas. A partir de esta información, deberá generar recomendaciones de tours que coincidan con dichas preferencias, mostrando las salidas disponibles y sus tarifas correspondientes.

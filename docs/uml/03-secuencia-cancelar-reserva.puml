@@ -1,4 +1,3 @@
-
 @startuml 03-secuencia-cancelar-reserva
 title CU15 - Cancelar reserva (devoluciones y flujos alternativos)
 
@@ -10,37 +9,41 @@ autonumber
 actor Vendedor
 participant ":MenuConsola" as UI
 participant ":ControladorReservas" as CTRL
-participant ":RepositorioReservas" as REPO
+participant ":Agencia" as AGE
 participant ":Reserva" as RES
 participant ":GestorCancelaciones" as GC
-participant ":Cancelacion" as CAN
 participant ":Salida" as SAL
+participant ":Cancelacion" as CAN
+participant ":RepositorioAgencia" as REPO
 
 Vendedor -> UI : cancelarReserva(numero, motivo, porAgencia)
-UI -> CTRL : cancelarReserva(numero, motivo, porAgencia, hoy)
+UI -> CTRL : cancelarReserva(numero, motivo, porAgencia, ahora)
 activate CTRL
 
-CTRL -> REPO : buscarPorId(numero)
-REPO --> CTRL : reserva o null
+CTRL -> AGE : buscarReserva(numero)
 
 alt reserva inexistente
-  CTRL --> UI : informa reserva no encontrada
+  AGE --> CTRL : EntidadNoEncontradaException
+  CTRL --> UI : EntidadNoEncontradaException
   UI --> Vendedor : muestra error de busqueda
 
 else reserva encontrada
+  AGE --> CTRL : reserva
   CTRL -> RES : puedeCancelarse()
-  RES --> CTRL : puede
+  RES --> CTRL : puede / no puede
 
-  alt reserva no cancelable
+  alt reserva no cancelable (estado ANULADA o FINALIZADA, o salida en curso o finalizada)
     CTRL --> UI : ReservaNoCancelableException
     UI --> Vendedor : informa que no puede cancelarse
 
   else reserva cancelable
-    CTRL -> GC : cancelar(reserva, motivo, porAgencia, hoy)
+    CTRL -> GC : cancelar(reserva, motivo, porAgencia, ahora)
     activate GC
 
-    GC -> RES : diasHastaSalida(hoy)
-    RES --> GC : dias
+    GC -> RES : getSalida()
+    RES --> GC : salida
+    GC -> SAL : diasHastaInicio(hoy)
+    SAL --> GC : dias
 
     alt cancelacion por la agencia
       GC -> GC : porcentaje = 100
@@ -63,33 +66,30 @@ else reserva encontrada
     RES --> GC : medio
 
     create CAN
-    GC -> CAN : <<create>> new Cancelacion(hoy, motivo, porcentaje, importe, medio)
+    GC -> CAN : <<create>> new Cancelacion(fecha, motivo, porcentaje, importe, medio)
 
     GC -> RES : anular(cancelacion)
     GC --> CTRL : cancelacion
     deactivate GC
 
     note over RES,SAL
-      Al anular la reserva, sus pasajeros
-      dejan de ocupar cupos en la salida.
-      La disponibilidad se recalcula
-      considerando las reservas vigentes.
+      Al anular la reserva sus pasajeros
+      dejan de ocupar cupos: Salida cuenta
+      solo las reservas que ocupan cupos.
     end note
 
-    CTRL -> SAL : actualizarEstado(hoy)
-    CTRL -> REPO : guardar(reserva)
+    CTRL -> SAL : actualizarEstado(ahora)
+    CTRL -> REPO : guardar(agencia)
     REPO --> CTRL : guardado
 
     CTRL --> UI : cancelacion
-    UI --> Vendedor : muestra devolucion calculada
+    UI --> Vendedor : muestra el importe a devolver
 
     note over UI
-      El importe calculado no implica
-      que el reintegro ya fue ejecutado.
-      La devolucion efectiva se registra
-      segun el procedimiento de pagos.
+      El importe calculado no implica que el
+      reintegro ya fue ejecutado: se acredita
+      por el medio de pago original (S13).
     end note
-
   end
 end
 

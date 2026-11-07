@@ -4,7 +4,7 @@
 
 La aplicación de los principios SOLID y los patrones GRASP tiene como objetivo establecer una distribución adecuada de responsabilidades entre las clases del Sistema de Gestión Rumbo Sur, favoreciendo la cohesión, el bajo acoplamiento, la extensibilidad y el mantenimiento del software.
 
-Las decisiones propuestas se fundamentan en los requerimientos funcionales RF01–RF26, las reglas de negocio RN01–RN35, los supuestos S01–S17 y los casos de uso previamente identificados.
+Las decisiones propuestas se fundamentan en los requerimientos funcionales RF01–RF24, las reglas de negocio RN01–RN33, los supuestos S01–S21 y los casos de uso previamente identificados.
 
 Dado que el proyecto se encuentra en la etapa de diseño, los problemas descriptos representan riesgos potenciales de implementación y no defectos comprobados en código existente.
 
@@ -34,7 +34,7 @@ Implementar todas las variantes mediante condiciones dentro de un único método
 
 ### P03 – Acoplamiento entre la lógica de negocio y la persistencia
 
-El sistema deberá conservar información mediante archivos, según el supuesto S11.
+El sistema deberá conservar información mediante archivos, según el supuesto S07.
 
 Si las clases encargadas de gestionar reservas también realizaran directamente la lectura y escritura de archivos, cualquier modificación del almacenamiento afectaría la lógica de negocio.
 
@@ -158,7 +158,7 @@ El diseño permite incorporar nuevas promociones mediante implementaciones adici
 
 También facilita probar cada promoción de manera independiente.
 
-**Trazabilidad:** RF09–RF11; RN12–RN19 y RN22; S03, S05, S06 y S16.
+**Trazabilidad:** RF09–RF11; RN12–RN19 y RN22; S03, S05, S06 y S11.
 
 ---
 
@@ -168,7 +168,7 @@ También facilita probar cada promoción de manera independiente.
 
 #### Fundamentación
 
-El supuesto S11 establece que la información del sistema se conservará mediante archivos.
+El supuesto S07 establece que la información del sistema se conservará mediante archivos.
 
 Sin embargo, si las operaciones de reserva dependieran directamente de una clase encargada de escribir archivos, la lógica de negocio quedaría vinculada a un mecanismo particular de almacenamiento.
 
@@ -180,9 +180,10 @@ El principio de Inversión de Dependencias establece que los componentes de alto
 
 Se propone establecer una abstracción para el acceso a los datos:
 
-- **`RepositorioReservas`:** interfaz que define operaciones como `guardar(reserva)` y `buscarPorId(numero)`.
-- **`RepositorioReservasArchivo`:** clase que implementa la interfaz y realiza las operaciones de lectura y escritura de archivos.
-- **`ControladorReservas`:** clase que utiliza la abstracción `RepositorioReservas`, sin depender directamente de los detalles del almacenamiento.
+- **`RepositorioAgencia`:** interfaz que define las operaciones `guardar(agencia)` y `cargar()`.
+- **`RepositorioAgenciaArchivo`:** clase que implementa la interfaz y realiza la lectura y escritura del archivo de datos (serialización de objetos Java, S07).
+- **`ControladorReservas` y `ControladorOperaciones`:** clases que usan la abstracción `RepositorioAgencia`, sin depender directamente de los detalles del almacenamiento.
+- **`Agencia`:** objeto raíz que mantiene en memoria las colecciones del sistema (tours, salidas, clientes, reservas, empleados, vehículos y proveedores) y ofrece las búsquedas. El repositorio guarda y recupera la agencia completa, por lo que una sola interfaz cubre todas las entidades.
 
 La implementación concreta del repositorio se proporcionará al construir o configurar el controlador.
 
@@ -190,9 +191,9 @@ De esta forma, los componentes de coordinación dependen de una interfaz y no de
 
 #### Clases involucradas
 
-`ControladorReservas`, `RepositorioReservas` y `RepositorioReservasArchivo`.
+`ControladorReservas`, `ControladorOperaciones`, `RepositorioAgencia`, `RepositorioAgenciaArchivo` y `Agencia`.
 
-El mismo criterio podrá extenderse a las demás entidades que se guardan en archivos, como clientes, tours y salidas, conforme al supuesto S11.
+Al guardar la agencia completa, el mismo criterio vale para todas las entidades del sistema (S07).
 
 #### Ventaja obtenida
 
@@ -200,7 +201,7 @@ Esta decisión permite modificar el mecanismo de persistencia sin alterar la coo
 
 También facilita reemplazar el repositorio por una implementación de prueba y verificar las operaciones sin utilizar archivos reales.
 
-**Trazabilidad:** RF08, RF12–RF17; S02 y S11.
+**Trazabilidad:** RF08, RF12–RF17; S02 y S07.
 
 ---
 
@@ -229,16 +230,18 @@ El patrón Experto en Información establece que una responsabilidad debe asigna
 
 Se propone distribuir las responsabilidades de la siguiente manera:
 
-- **`Salida`:** conoce su capacidad y la ocupación correspondiente, por lo que puede determinar los cupos disponibles.
+- **`Salida`:** conoce su capacidad y la lista de sus reservas (asociación `Salida`–`Reserva` en el diagrama), por lo que puede determinar los cupos disponibles. También conoce su fecha de inicio, por lo que responde cuántos días faltan (`diasHastaInicio`) y si corresponde exigir el pago total (`exigePagoTotal`, faltan 10 días o menos).
+- **`Pasajero`:** conoce su fecha de nacimiento y su tipo, por lo que calcula su factor de tarifa (`obtenerFactorTarifa`).
+- **`Guia`:** conoce sus salidas asignadas y por eso responde si está disponible en un rango de fechas.
 - **`Reserva`:** conoce el importe total y los pagos asociados, por lo que puede calcular el saldo pendiente.
 - **`CalculadoraPrecioReserva`:** reúne las reglas necesarias para determinar el precio a partir de tarifas, promociones y servicios adicionales.
 - **`ControladorReservas`:** coordina las operaciones, pero delega los cálculos en las clases responsables.
 
 Por ejemplo, cuando el vendedor intenta crear una reserva, `ControladorReservas` solicita a `Salida` que verifique la disponibilidad, en lugar de calcular directamente los cupos.
 
-Para determinar los cupos disponibles, `Salida` debe considerar tanto las reservas confirmadas como las reservas pendientes que mantienen una retención vigente, según RN07, S04 y S14.
+Para determinar los cupos disponibles, `Salida` debe considerar tanto las reservas confirmadas como las reservas pendientes que mantienen una retención vigente, según RN07, S04 y S09.
 
-Del mismo modo, para consultar el saldo de una reserva, se utiliza el comportamiento correspondiente de `Reserva`.
+Del mismo modo, para consultar el saldo de una reserva, se utiliza el comportamiento correspondiente de `Reserva`, y para saber si hace falta pago total inmediato, el controlador pregunta a `Salida` en lugar de calcular los días por su cuenta.
 
 #### Clases involucradas
 
@@ -250,7 +253,7 @@ Esta distribución favorece la cohesión, evita la concentración de lógica en 
 
 Cada clase administra las operaciones relacionadas con la información que conoce.
 
-**Trazabilidad:** RF04, RF05, RF08, RF09 y RF13; RN07; S04 y S14.
+**Trazabilidad:** RF04, RF05, RF08, RF09 y RF13; RN07; S04 y S09.
 
 ---
 
@@ -278,7 +281,9 @@ El `ControladorReservas` coordinará la creación de la reserva y verificará pr
 
 Una vez superadas esas validaciones, `Reserva` administrará la creación y asociación de sus pasajeros.
 
-Esta decisión se fundamenta en que `Reserva` agrupa y administra a los pasajeros vinculados con una operación comercial.
+Esta decisión se fundamenta en que `Reserva` agrupa y administra a los pasajeros vinculados con una operación comercial. Por el mismo criterio, `Reserva` crea sus `NotaAjuste` (`registrarAjuste`).
+
+La propia `Reserva` es creada por `ControladorReservas`, porque es la clase que recibe los datos iniciales (cliente, salida, vendedor y número de reserva): el patrón Creador también admite como creador a quien dispone de los datos de inicialización.
 
 En el diagrama de clases final, esta relación se representa mediante composición:
 
@@ -314,7 +319,7 @@ El patrón Controlador establece que los eventos del sistema deben recibirse y c
 
 #### Decisión de diseño
 
-Se propone utilizar `ControladorReservas` como responsable de recibir las solicitudes relacionadas con la creación y cancelación de reservas.
+Se proponen dos controladores de casos de uso. `ControladorReservas` recibe las solicitudes del módulo comercial (clientes, reservas, pagos, cancelaciones, reemplazos y ajustes: CU06 a CU17). `ControladorOperaciones` recibe las del módulo operativo y de catálogo (tours, tarifas, proveedores, guías, vehículos, salidas, asignación de recursos, lista de pasajeros, inicio y fin de salida y liquidación: CU01 a CU05, CU18 a CU23). Los reportes (CU24) los resuelve `GeneradorReportes`. `MenuConsola` solo muestra opciones y delega en ellos.
 
 Este controlador delegará las operaciones en las clases especializadas:
 
@@ -323,25 +328,25 @@ Este controlador delegará las operaciones en las clases especializadas:
 - **`CalculadoraPrecioReserva`:** determinación de importes.
 - **`GestorPagos`:** registro de pagos y aplicación de condiciones de cobro.
 - **`GestorCancelaciones`:** aplicación de la política de devolución.
-- **`RepositorioReservas`:** recuperación y almacenamiento de registros.
+- **`Agencia` y `RepositorioAgencia`:** búsqueda de entidades y almacenamiento de los datos.
 
 El controlador coordinará el flujo de trabajo sin concentrar los cálculos específicos de cada regla de negocio.
 
-Por ejemplo, ante una solicitud de creación de reserva, verificará la disponibilidad, coordinará las validaciones, solicitará el cálculo del precio y determinará si corresponde una reserva pendiente o el pago total inmediato.
+Por ejemplo, ante una solicitud de creación de reserva, `iniciarReserva` verifica la disponibilidad con `Salida`, valida a los pasajeros y crea la reserva; luego `finalizarReserva` solicita el cálculo del precio a `CalculadoraPrecioReserva`, consulta a `Salida` si corresponde el pago total inmediato y delega en `GestorPagos` o en `Reserva` según el caso. Ninguna de estas reglas está escrita dentro del controlador.
 
-Para las reservas pendientes, también coordinará la verificación del vencimiento, según S04 y S14.
+Para las reservas pendientes, también coordinará la verificación del vencimiento, según S04 y S09.
 
 Ante una solicitud de cancelación, recuperará la reserva, verificará si puede cancelarse, solicitará el cálculo de devolución a `GestorCancelaciones` y coordinará la actualización de su estado.
 
 #### Clases involucradas
 
-`ControladorReservas`, `Reserva`, `Salida`, `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` y `RepositorioReservas`.
+`ControladorReservas`, `Reserva`, `Salida`, `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones`, `Agencia` y `RepositorioAgencia`.
 
 #### Ventaja obtenida
 
 La separación permite mantener la interfaz independiente de la lógica de negocio, reutilizar las operaciones desde diferentes puntos del sistema y facilitar la construcción de los diagramas de secuencia.
 
-**Trazabilidad:** CU08 y CU15; RF08–RF17; RN07, RN10–RN28; S04, S06 y S14.
+**Trazabilidad:** CU08 y CU15; RF08–RF17; RN07, RN10–RN28; S04, S06 y S09.
 
 ---
 
@@ -384,7 +389,7 @@ Esta decisión se diferencia del principio SRP:
 
 La clase `Reserva` mantiene una mayor cohesión, las políticas de cálculo pueden probarse de forma aislada y las reglas de precio, cobro y devolución pueden cambiar sin modificar innecesariamente otras partes del modelo.
 
-**Trazabilidad:** RF09, RF10, RF12 y RF15; RN15, RN16 y RN23–RN28; S15 y S16.
+**Trazabilidad:** RF09, RF10, RF12 y RF15; RN15, RN16 y RN23–RN28; S10 y S11.
 
 ---
 
@@ -396,7 +401,7 @@ La siguiente tabla resume cómo las decisiones de diseño propuestas permiten ab
 |---|---|---|---|
 | P01 | Concentración de responsabilidades en reservas | SOLID: SRP | Separar las responsabilidades de reserva, cálculo de precios, pagos y cancelaciones. |
 | P02 | Dificultad para incorporar promociones | SOLID: OCP | Definir una interfaz `Promocion` y distintas implementaciones. |
-| P03 | Acoplamiento entre negocio y persistencia | SOLID: DIP | Utilizar `RepositorioReservas` como abstracción de almacenamiento. |
+| P03 | Acoplamiento entre negocio y persistencia | SOLID: DIP | Utilizar `RepositorioAgencia` como abstracción de almacenamiento. |
 | P04 | Distribución inadecuada de cálculos | GRASP: Experto en Información | Asignar el cálculo de cupos a `Salida` y el de saldos a `Reserva`. |
 | P05 | Interfaz acoplada a procesos de negocio | GRASP: Controlador | Incorporar `ControladorReservas` para coordinar los casos de uso. |
 | P06 | Cálculos y políticas sin lugar natural en el dominio | GRASP: Fabricación Pura | Crear `CalculadoraPrecioReserva`, `GestorPagos` y `GestorCancelaciones`. |

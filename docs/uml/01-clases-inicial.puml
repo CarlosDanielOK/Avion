@@ -191,6 +191,7 @@ class ServicioAdicional {
   - nombre: String
   - precio: double
   - tipo: TipoServicio
+  - obligatorio: boolean
 }
 
 Tour <|-- TourAventura
@@ -200,7 +201,7 @@ Tour <|-- TourNaturaleza
 Tour "1" *-- "1..*" Actividad : tiene itinerario >
 Tour "1" *-- "0..*" Tarifa : tiene >
 Actividad "0..*" --> "0..1" Proveedor : incluye servicio de >
-Tour "0..*" -- "0..*" ServicioAdicional : ofrece >
+Tour "1" *-- "0..*" ServicioAdicional : ofrece >
 
 ' ===================== OPERACION =====================
 class Vehiculo {
@@ -210,6 +211,7 @@ class Vehiculo {
 }
 
 class Salida {
+  - id: long
   - fechaInicio: LocalDate
   - fechaFin: LocalDate
   - cupoMaximo: int
@@ -227,7 +229,7 @@ class Liquidacion {
 }
 
 Salida "0..*" --> "1" Tour : corresponde a >
-Salida "0..*" --> "0..1" Guia : guiada por >
+Guia "0..1" -- "0..*" Salida : guia de >
 Salida "0..*" --> "0..1" Vehiculo : usa >
 Salida "1" -- "0..1" Liquidacion : genera >
 Liquidacion "0..*" --> "1" Guia : paga a >
@@ -271,7 +273,7 @@ class NotaAjuste {
 
 Reserva "0..*" --> "1" Cliente : titular >
 Reserva "0..*" --> "1" Vendedor : atendida por >
-Reserva "0..*" --> "1" Salida : para >
+Salida "1" -- "0..*" Reserva : recibe >
 Reserva "1" *-- "1..*" Pasajero : incluye >
 Reserva "1" *-- "0..*" Pago : se abona con >
 Reserva "1" *-- "0..*" NotaAjuste : corrige con >

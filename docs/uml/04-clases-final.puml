@@ -1,4 +1,3 @@
-
 @startuml 04-clases-final
 title Rumbo Sur - Diagrama de clases final (SOLID y GRASP)
 
@@ -98,7 +97,7 @@ class Vendedor #FFF3CC {
   + getRol(): String
 }
 
-class Guia {
+class Guia #FFF3CC {
   - idiomas: List<String>
   - categoriasHabilitadas: List<CategoriaTour>
   - honorarioPorDia: double
@@ -108,20 +107,12 @@ class Guia {
   + calcularHonorarios(salida: Salida): double
 }
 
-class Coordinador {
+class Coordinador #FFF3CC {
   + getRol(): String
-  + asignarRecursos(salida: Salida, guia: Guia, vehiculo: Vehiculo): void
-  + emitirListaPasajeros(salida: Salida): void
-  + iniciarSalida(salida: Salida): void
-  + finalizarSalida(salida: Salida): void
 }
 
-class Administrador {
+class Administrador #FFF3CC {
   + getRol(): String
-  + reporteOcupacionPorSalida(): String
-  + reporteVentasPorVendedor(): String
-  + reporteIngresosPorTour(): String
-  + reporteCancelaciones(): String
 }
 
 class Cliente {
@@ -149,7 +140,7 @@ Empleado <|-- Administrador
 
 ' ===================== CATALOGO =====================
 
-abstract class Tour {
+abstract class Tour #FFF3CC {
   - codigo: String
   - nombre: String
   - descripcion: String
@@ -160,9 +151,10 @@ abstract class Tour {
   + requiereSeguro(): boolean
   + puedeParticipar(datos: DatosPasajero, fecha: LocalDate): boolean
   + obtenerTarifa(fecha: LocalDate): Tarifa
+  + obtenerServiciosObligatorios(): List<ServicioAdicional>
 }
 
-class TourAventura {
+class TourAventura #FFF3CC {
   - nivelDificultad: NivelDificultad
   - edadMinima: int
   + getCategoria(): CategoriaTour
@@ -201,10 +193,11 @@ class Tarifa {
   + estaVigente(fecha: LocalDate): boolean
 }
 
-class ServicioAdicional {
+class ServicioAdicional #FFF3CC {
   - nombre: String
   - precio: double
   - tipo: TipoServicio
+  - obligatorio: boolean
 }
 
 Tour <|-- TourAventura
@@ -213,8 +206,8 @@ Tour <|-- TourNaturaleza
 
 Tour "1" *-- "1..*" Actividad : tiene itinerario >
 Tour "1" *-- "0..*" Tarifa : tiene >
+Tour "1" *-- "0..*" ServicioAdicional : ofrece >
 Actividad "0..*" --> "0..1" Proveedor : incluye servicio de >
-Tour "0..*" -- "0..*" ServicioAdicional : ofrece >
 
 ' ===================== OPERACION =====================
 
@@ -224,23 +217,30 @@ class Vehiculo {
   - tipo: TipoVehiculo
 }
 
-
 class Salida #FFF3CC {
+  - id: long
   - fechaInicio: LocalDate
   - fechaFin: LocalDate
   - cupoMaximo: int
   - estado: EstadoSalida
   - listaEmitida: boolean
-  + cuposOcupados(): int
-  + cuposDisponibles(): int
+  + cuposOcupados(ahora: LocalDateTime): int
+  + cuposDisponibles(ahora: LocalDateTime): int
   + puedeParticipar(datos: DatosPasajero): boolean
   + obtenerTarifa(): Tarifa
-  + actualizarEstado(hoy: LocalDate): void
-  + validarCondicionesInicio(): boolean
+  + diasHastaInicio(hoy: LocalDate): int
+  + exigePagoTotal(hoy: LocalDate): boolean
+  + totalServiciosAdicionales(): double
+  + agregarReserva(reserva: Reserva): void
+  + asignarGuia(guia: Guia): void
+  + asignarVehiculo(vehiculo: Vehiculo): void
+  + emitirLista(): List<Pasajero>
+  + actualizarEstado(ahora: LocalDateTime): void
+  + validarCondicionesInicio(): void
   + iniciar(): void
   + finalizar(): void
+  + compareTo(otra: Salida): int
 }
-
 
 class Liquidacion {
   - fecha: LocalDate
@@ -249,7 +249,7 @@ class Liquidacion {
 }
 
 Salida "0..*" --> "1" Tour : corresponde a >
-Salida "0..*" --> "0..1" Guia : guiada por >
+Guia "0..1" -- "0..*" Salida : guia de >
 Salida "0..*" --> "0..1" Vehiculo : usa >
 Salida "1" -- "0..1" Liquidacion : genera >
 Liquidacion "0..*" --> "1" Guia : paga a >
@@ -262,21 +262,26 @@ class Reserva #FFF3CC {
   - estado: EstadoReserva
   - total: double
   - vencimientoPago: LocalDateTime
-  + agregarPasajero(datos: DatosPasajero): void
-  + agregarServicioAdicional(servicio: ServicioAdicional): void
-  + incluirSeguroObligatorio(): void
-  + definirTotal(total: double): void
-  + establecerVencimiento(vencimiento: LocalDateTime): void
-  + establecerEstado(estado: EstadoReserva): void
+  + agregarPasajero(datos: DatosPasajero): Pasajero
+  + incluirServiciosObligatorios(): void
+  + agregarServicioAdicional(p: Pasajero, s: ServicioAdicional): void
+  + totalServiciosAdicionales(): double
+  + registrarTotal(total: double): void
+  + iniciarRetencion(ahora: LocalDateTime): void
   + estaVencida(ahora: LocalDateTime): boolean
+  + ocupaCupos(ahora: LocalDateTime): boolean
+  + cantidadPasajeros(): int
   + registrarPago(pago: Pago): void
-  + calcularSaldo(): double
   + totalAbonado(): double
+  + calcularSaldo(): double
+  + seniaCubierta(): boolean
   + medioDePagoUsado(): MedioPago
   + puedeCancelarse(): boolean
-  + diasHastaSalida(hoy: LocalDate): int
   + confirmar(): void
   + anular(cancelacion: Cancelacion): void
+  + anularPorVencimiento(): void
+  + reemplazarPasajero(documento: String, datos: DatosPasajero, hoy: LocalDate): void
+  + registrarAjuste(motivo: String, importe: double, fecha: LocalDate): NotaAjuste
 }
 
 class Pago #FFF3CC {
@@ -303,14 +308,54 @@ class NotaAjuste {
 
 Reserva "0..*" --> "1" Cliente : titular >
 Reserva "0..*" --> "1" Vendedor : atendida por >
-Reserva "0..*" --> "1" Salida : para >
+Salida "1" -- "0..*" Reserva : recibe >
 Reserva "1" *-- "1..*" Pasajero : incluye >
 Reserva "1" *-- "0..*" Pago : se abona con >
 Reserva "1" *-- "0..*" NotaAjuste : corrige con >
 Reserva "1" -- "0..1" Cancelacion : puede tener >
-Reserva "0..*" -- "0..*" ServicioAdicional : incorpora >
-
 Pasajero "0..*" -- "0..*" ServicioAdicional : contrata >
+
+' ===================== RAIZ DEL SISTEMA Y PERSISTENCIA =====================
+
+class Agencia #DDEEFF {
+  - tours: List<Tour>
+  - salidas: List<Salida>
+  - clientes: List<Cliente>
+  - reservas: List<Reserva>
+  - empleados: List<Empleado>
+  - vehiculos: List<Vehiculo>
+  - proveedores: List<Proveedor>
+  + buscarTour(codigo: String): Tour
+  + buscarSalida(id: long): Salida
+  + buscarCliente(documento: String): Cliente
+  + buscarReserva(numero: long): Reserva
+  + buscarEmpleado(legajo: int): Empleado
+  + buscarVehiculo(patente: String): Vehiculo
+  + siguienteNumeroReserva(): long
+  + agregarReserva(reserva: Reserva): void
+}
+
+interface RepositorioAgencia #DDEEFF {
+  + guardar(agencia: Agencia): void
+  + cargar(): Agencia
+}
+
+class RepositorioAgenciaArchivo #DDEEFF {
+  - rutaArchivo: String
+  + guardar(agencia: Agencia): void
+  + cargar(): Agencia
+}
+
+Agencia o-- "0..*" Tour
+Agencia o-- "0..*" Salida
+Agencia o-- "0..*" Reserva
+Agencia o-- "0..*" Cliente
+Agencia o-- "0..*" Empleado
+Agencia o-- "0..*" Vehiculo
+Agencia o-- "0..*" Proveedor
+
+RepositorioAgencia <|.. RepositorioAgenciaArchivo
+RepositorioAgencia ..> Agencia : persiste >
 
 ' ===================== CONTROL E INTERFAZ =====================
 
@@ -329,12 +374,34 @@ class MenuConsola #DDEEFF {
 }
 
 class ControladorReservas #DDEEFF {
-  + crearReserva(cliente: Cliente, salida: Salida, vendedor: Vendedor, datos: List<DatosPasajero>): Reserva
-  + registrarServiciosSeleccionados(reserva: Reserva, servicios: List<ServicioAdicional>): void
-  + requierePagoTotalInmediato(salida: Salida, hoy: LocalDate): boolean
-  + registrarPagoTotal(reserva: Reserva, medio: MedioPago): Pago
+  + registrarCliente(datos del cliente): Cliente
+  + iniciarReserva(documentoCliente: String, idSalida: long, legajoVendedor: int, datos: List<DatosPasajero>, ahora: LocalDateTime): Reserva
+  + agregarServicioAdicional(reserva: Reserva, p: Pasajero, s: ServicioAdicional): void
+  + finalizarReserva(reserva: Reserva, medio: MedioPago, cuotas: int, ahora: LocalDateTime): Reserva
+  + registrarPago(numero: long, importe: double, medio: MedioPago, cuotas: int, ahora: LocalDateTime): Pago
   + verificarVencimiento(reserva: Reserva, ahora: LocalDateTime): void
-  + cancelarReserva(numero: long, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
+  + cancelarReserva(numero: long, motivo: String, porAgencia: boolean, ahora: LocalDateTime): Cancelacion
+  + reemplazarPasajero(numero: long, documento: String, datos: DatosPasajero, ahora: LocalDateTime): void
+  + registrarAjuste(numero: long, motivo: String, importe: double, ahora: LocalDateTime): NotaAjuste
+}
+
+class ControladorOperaciones #DDEEFF {
+  + registrarTour / registrarTarifa / registrarProveedor
+  + registrarGuia / registrarVehiculo
+  + programarSalida(codigoTour: String, inicio: LocalDate, fin: LocalDate, cupo: int): Salida
+  + actualizarEstadoSalida(idSalida: long, ahora: LocalDateTime): void
+  + asignarRecursos(idSalida: long, legajoGuia: int, patente: String): void
+  + emitirListaPasajeros(idSalida: long): List<Pasajero>
+  + iniciarSalida(idSalida: long): void
+  + finalizarSalida(idSalida: long): void
+  + liquidarHonorarios(idSalida: long, hoy: LocalDate): Liquidacion
+}
+
+class GeneradorReportes #DDEEFF {
+  + reporteOcupacionPorSalida(): String
+  + reporteVentasPorVendedor(): String
+  + reporteIngresosPorTour(): String
+  + reporteCancelaciones(): String
 }
 
 ' ===================== CALCULO DE PRECIOS =====================
@@ -358,24 +425,11 @@ class PromocionGrupo #DDEEFF {
 ' ===================== PAGOS Y CANCELACIONES =====================
 
 class GestorPagos #DDEEFF {
-  + registrarPago(reserva: Reserva, importe: double, medio: MedioPago, cuotas: int): Pago
+  + registrarPago(reserva: Reserva, importe: double, medio: MedioPago, cuotas: int, fecha: LocalDate): Pago
 }
 
 class GestorCancelaciones #DDEEFF {
-  + cancelar(reserva: Reserva, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
-}
-
-' ===================== PERSISTENCIA =====================
-
-interface RepositorioReservas #DDEEFF {
-  + guardar(reserva: Reserva): void
-  + buscarPorId(numero: long): Reserva
-}
-
-class RepositorioReservasArchivo #DDEEFF {
-  - rutaArchivo: String
-  + guardar(reserva: Reserva): void
-  + buscarPorId(numero: long): Reserva
+  + cancelar(reserva: Reserva, motivo: String, porAgencia: boolean, ahora: LocalDateTime): Cancelacion
 }
 
 ' ===================== EXCEPCIONES =====================
@@ -383,27 +437,41 @@ class RepositorioReservasArchivo #DDEEFF {
 class ReglaNegocioException <<Exception>> #DDEEFF
 class CuposInsuficientesException <<Exception>> #DDEEFF
 class RequisitosNoCumplidosException <<Exception>> #DDEEFF
+class PagoRequeridoException <<Exception>> #DDEEFF
 class ReservaNoCancelableException <<Exception>> #DDEEFF
+class OperacionNoPermitidaException <<Exception>> #DDEEFF
+class EntidadNoEncontradaException <<Exception>> #DDEEFF
 
 ' ===================== RELACIONES SOLID Y GRASP =====================
 
 Promocion <|.. PromocionAnticipada
 Promocion <|.. PromocionGrupo
-
-RepositorioReservas <|.. RepositorioReservasArchivo
+Comparable <|.. Salida
 
 ReglaNegocioException <|-- CuposInsuficientesException
 ReglaNegocioException <|-- RequisitosNoCumplidosException
+ReglaNegocioException <|-- PagoRequeridoException
 ReglaNegocioException <|-- ReservaNoCancelableException
+ReglaNegocioException <|-- OperacionNoPermitidaException
+ReglaNegocioException <|-- EntidadNoEncontradaException
 
 MenuConsola --> ControladorReservas : delega >
+MenuConsola --> ControladorOperaciones : delega >
+MenuConsola --> GeneradorReportes : delega >
 
-ControladorReservas --> RepositorioReservas : persiste mediante >
+ControladorReservas --> Agencia : consulta >
+ControladorReservas --> RepositorioAgencia : persiste mediante >
 ControladorReservas --> CalculadoraPrecioReserva : usa >
-ControladorReservas --> GestorCancelaciones : usa >
 ControladorReservas --> GestorPagos : usa >
+ControladorReservas --> GestorCancelaciones : usa >
 ControladorReservas ..> Reserva : crea >
 ControladorReservas ..> ReglaNegocioException : lanza >
+
+ControladorOperaciones --> Agencia : consulta >
+ControladorOperaciones --> RepositorioAgencia : persiste mediante >
+ControladorOperaciones --> GestorCancelaciones : usa >
+
+GeneradorReportes --> Agencia : consulta >
 
 CalculadoraPrecioReserva "1" --> "1..*" Promocion : evalua >
 
@@ -411,6 +479,8 @@ GestorCancelaciones ..> Cancelacion : crea >
 GestorPagos ..> Pago : crea >
 
 Reserva ..> DatosPasajero : recibe >
+Reserva ..> Pasajero : crea >
+Reserva ..> NotaAjuste : crea >
 
 legend right
   Azul: clase nueva por SOLID/GRASP

@@ -1,4 +1,3 @@
-
 @startuml 02-secuencia-crear-reserva
 title CU08 - Crear reserva (flujo principal y alternativas)
 
@@ -10,30 +9,40 @@ autonumber
 actor Vendedor
 participant ":MenuConsola" as UI
 participant ":ControladorReservas" as CTRL
+participant ":Agencia" as AGE
 participant ":Salida" as SAL
 participant ":Tour" as TOUR
 participant ":Reserva" as RES
+participant ":Pasajero" as PAS
 participant ":CalculadoraPrecioReserva" as CALC
 participant "p:Promocion" as PROMO
 participant ":GestorPagos" as GP
-participant ":RepositorioReservas" as REPO
+participant ":RepositorioAgencia" as REPO
 
-Vendedor -> UI : crearReserva(idCliente, idSalida, datosPasajeros)
-UI -> CTRL : crearReserva(cliente, salida, vendedor, datosPasajeros)
+== Fase 1: iniciar la reserva (cupos, requisitos y pasajeros) ==
+
+Vendedor -> UI : cargar cliente, salida y pasajeros
+UI -> CTRL : iniciarReserva(documentoCliente, idSalida, legajoVendedor, datos, ahora)
 activate CTRL
 
-CTRL -> SAL : cuposDisponibles()
+CTRL -> AGE : buscarCliente(documentoCliente)
+AGE --> CTRL : cliente
+CTRL -> AGE : buscarSalida(idSalida)
+AGE --> CTRL : salida
+CTRL -> AGE : buscarEmpleado(legajoVendedor)
+AGE --> CTRL : vendedor
+
+CTRL -> SAL : cuposDisponibles(ahora)
 SAL --> CTRL : disponibles
 
-alt cupos insuficientes
+alt disponibles < cantidad de pasajeros
   CTRL --> UI : CuposInsuficientesException
-  UI --> Vendedor : informa falta de cupos y ofrece CU25
-
+  UI --> Vendedor : informa falta de cupos
 else cupos suficientes
 
-  loop por cada pasajero
+  loop por cada DatosPasajero
     CTRL -> SAL : puedeParticipar(datosPasajero)
-    SAL -> TOUR : verificar restricciones del tour
+    SAL -> TOUR : puedeParticipar(datosPasajero, fechaInicio)
     TOUR --> SAL : cumple / no cumple
     SAL --> CTRL : cumple / no cumple
   end
@@ -41,98 +50,106 @@ else cupos suficientes
   alt algun pasajero no cumple requisitos
     CTRL --> UI : RequisitosNoCumplidosException
     UI --> Vendedor : informa restricciones del tour
-
   else todos cumplen requisitos
 
-    create RES
-    CTRL -> RES : <<create>> new Reserva(cliente, salida, vendedor)
+    CTRL -> AGE : siguienteNumeroReserva()
+    AGE --> CTRL : numero
 
-    loop por cada pasajero
-      CTRL -> RES : agregarPasajero(datosPasajero)
-      note right of RES
-        Reserva crea e incorpora
-        cada Pasajero, aplicando
-        el patron GRASP Creador.
+    create RES
+    CTRL -> RES : <<create>> new Reserva(numero, cliente, salida, vendedor, ahora)
+    note right of RES
+      La reserva nace en estado
+      PENDIENTE y todavia no
+      figura en la salida.
+    end note
+
+    loop por cada DatosPasajero
+      RES -> RES : agregarPasajero(datosPasajero)
+      create PAS
+      RES -> PAS : <<create>> new Pasajero(datosPasajero)
+      note right of PAS
+        GRASP Creador: Reserva
+        contiene a los pasajeros
+        y los crea.
       end note
     end
 
-    CTRL --> UI : solicitar seleccion de servicios
-    UI --> Vendedor : muestra servicios disponibles
-    Vendedor -> UI : seleccionaServiciosAdicionales()
-    UI -> CTRL : registrarServiciosSeleccionados(reserva, servicios)
+    CTRL -> RES : incluirServiciosObligatorios()
+    CTRL --> UI : reserva en preparacion
 
-    opt tour de aventura
-      CTRL -> RES : incluirSeguroObligatorio()
+    opt el vendedor elige servicios opcionales (CU11)
+      loop por cada servicio elegido
+        UI -> CTRL : agregarServicioAdicional(reserva, pasajero, servicio)
+        CTRL -> RES : agregarServicioAdicional(pasajero, servicio)
+      end
     end
 
-    loop por cada servicio opcional seleccionado
-      CTRL -> RES : agregarServicioAdicional(servicio)
-    end
+    == Fase 2: calcular el precio y registrar la reserva ==
+
+    UI -> CTRL : finalizarReserva(reserva, medio, cuotas, ahora)
 
     CTRL -> CALC : calcularTotal(reserva)
     activate CALC
-
     CALC -> SAL : obtenerTarifa()
     SAL --> CALC : tarifa
-
     loop por cada pasajero
-      CALC -> CALC : aplicar factor de tarifa del pasajero
+      CALC -> PAS : obtenerFactorTarifa(fechaInicio)
+      PAS --> CALC : factor
     end
-
     loop por cada promocion disponible
       CALC -> PROMO : calcularDescuento(reserva, subtotalTour)
       PROMO --> CALC : descuento
     end
-
-    CALC -> CALC : seleccionar mejor promocion
-    CALC -> CALC : sumar servicios adicionales
+    note over CALC
+      Se aplica solo la promocion
+      de mayor descuento (RN17).
+    end note
+    CALC -> RES : totalServiciosAdicionales()
+    RES --> CALC : adicionales
     CALC --> CTRL : total
     deactivate CALC
 
-    CTRL -> RES : definirTotal(total)
+    CTRL -> RES : registrarTotal(total)
 
-    alt faltan 10 dias o menos para la salida
-      CTRL --> UI : requiere pago total inmediato
-      UI --> Vendedor : solicita pago total
+    CTRL -> SAL : exigePagoTotal(hoy)
+    SAL --> CTRL : exige / no exige
 
-      alt pago total registrado
-        CTRL -> GP : registrarPago(reserva, total, medio, cuotas)
+    alt exige pago total y medio == null
+      CTRL --> UI : PagoRequeridoException
+      UI --> Vendedor : informa que debe abonar el total
+      note right of CTRL
+        La reserva no se agrega a la
+        salida ni se guarda: se descarta.
+      end note
+    else se puede registrar la reserva
+
+      alt exige pago total (faltan 10 dias o menos)
+        CTRL -> GP : registrarPago(reserva, total, medio, cuotas, fecha)
         activate GP
         GP -> RES : registrarPago(pago)
-        GP --> CTRL : pago registrado
+        GP -> RES : seniaCubierta()
+        RES --> GP : true
+        GP -> RES : confirmar()
+        GP --> CTRL : pago
         deactivate GP
-
-        CTRL -> RES : confirmar()
-        CTRL -> REPO : guardar(reserva)
-        REPO --> CTRL : guardado
-
-        CTRL --> UI : reserva CONFIRMADA
-        UI --> Vendedor : muestra confirmacion
-
-      else pago no registrado
-        CTRL --> UI : reserva no registrada
-        UI --> Vendedor : informa pago requerido
+      else faltan mas de 10 dias
+        CTRL -> RES : iniciarRetencion(ahora)
+        note right of RES
+          vencimientoPago = el menor entre
+          ahora + 48 hs y 10 dias antes
+          de la salida (S04).
+          Estado PENDIENTE: retiene cupos
+          mientras no venza.
+        end note
       end
 
-    else faltan mas de 10 dias
-      CTRL -> RES : establecerVencimiento(fechaHoraCreacion.plusHours(48))
-      CTRL -> RES : establecerEstado(PENDIENTE)
-
-      note right of RES
-        La reserva retiene cupos
-        mientras este pendiente
-        y su plazo siga vigente.
-        El vencimiento debe respetar
-        los limites de pago aplicables.
-      end note
-
-      CTRL -> REPO : guardar(reserva)
+      CTRL -> SAL : agregarReserva(reserva)
+      CTRL -> AGE : agregarReserva(reserva)
+      CTRL -> REPO : guardar(agencia)
       REPO --> CTRL : guardado
-
-      CTRL --> UI : reserva PENDIENTE
-      UI --> Vendedor : muestra importe y vencimiento
+      CTRL --> UI : reserva CONFIRMADA o PENDIENTE
+      UI --> Vendedor : muestra importe desglosado y estado
     end
-
   end
 end
 

@@ -32,9 +32,8 @@ Si siete días antes de la fecha de inicio no se alcanza el cupo mínimo, la sal
 
 Cuando la totalidad de los cupos de una salida se encuentre ocupada por reservas confirmadas o retenida temporalmente por reservas pendientes vigentes, la salida pasará al estado completa y no admitirá nuevas reservas que excedan su capacidad máxima.
 
-Las reservas pendientes retendrán cupos únicamente durante el plazo establecido en S04 y S14. Cuando una reserva sea anulada o venza su plazo de retención, los cupos correspondientes volverán a estar disponibles.
+Las reservas pendientes retendrán cupos únicamente durante el plazo establecido en S04 y S09. Cuando una reserva sea anulada o venza su plazo de retención, los cupos correspondientes volverán a estar disponibles.
 
-La inscripción en una lista de espera no ocupará ni retendrá cupos, conforme a RN34.
 
 
 ### RN08 – Disponibilidad de guías
@@ -120,29 +119,3 @@ Los honorarios se calcularán mediante un monto fijo por día trabajado, más un
 
 ### RN33 – Conservación de reservas pagadas
 Una reserva pagada no podrá eliminarse. Las correcciones deberán registrarse mediante notas de ajuste.
-
-## 5. Reglas de negocio adicionales propuestas por el grupo
-
-### RN34 – Prioridad y gestión de la lista de espera
-
-Cuando una salida alcance su cupo máximo, los clientes interesados podrán incorporarse a una lista de espera, indicando la cantidad de pasajeros para los que solicitan lugares.
-
-Las solicitudes se ordenarán cronológicamente según su fecha y hora de registro.
-
-Cuando se liberen cupos, el sistema identificará la solicitud más antigua que pueda ser satisfecha en su totalidad.
-
-Si la primera solicitud requiere más lugares que los disponibles, conservará su prioridad y se podrá ofrecer el cupo a la siguiente solicitud compatible, sin eliminar ni modificar el orden de la primera.
-
-Si el cliente rechaza la oferta, su solicitud se retirará de la lista de espera.
-
-Si no responde dentro del plazo establecido, la oferta vencerá y los lugares podrán ofrecerse a otro cliente.
-
-La incorporación a la lista de espera no implica una reserva confirmada ni garantiza la disponibilidad futura de lugares.
-
-### RN35 – Criterios de recomendación de tours
-
-Las recomendaciones se generarán considerando las categorías de interés, el presupuesto y las fechas indicadas por el cliente.
-
-Solo se recomendarán salidas con cupos disponibles que cumplan las condiciones de participación del cliente.
-
-Las recomendaciones no generarán reservas automáticamente.
