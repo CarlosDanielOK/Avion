@@ -23,9 +23,9 @@ La edad de cada pasajero se determinará según la fecha de inicio de la salida,
 
 ### S04 – Reservas pendientes
 
-Las reservas pendientes de seña conservarán temporalmente los cupos solicitados hasta su fecha de vencimiento, que es la menor entre 48 horas desde su creación y 10 días antes del inicio de la salida (fecha límite de pago del saldo, RN21).
+Las reservas pendientes de seña conservarán temporalmente los cupos solicitados hasta su fecha de vencimiento, que es la menor entre 2 días calendario desde su creación y 10 días antes del inicio de la salida (fecha límite de pago del saldo, RN21). La reserva se considera vencida cuando la fecha actual supera su fecha de vencimiento.
 
-Ejemplo: una reserva creada el lunes a las 10:00 para una salida dentro de 40 días vence el miércoles a las 10:00. Si la salida es dentro de 11 días, vence a las 48 horas menos lo que falte para llegar al día 10 anterior a la salida.
+Ejemplo: una reserva creada el 2 de marzo para una salida el 10 de abril vence el 4 de marzo (el menor entre el 4 de marzo y el 31 de marzo). El 5 de marzo ya está vencida.
 
 Si la reserva se realiza dentro de los diez días anteriores a la salida, se deberá abonar el importe total al momento de registrarla, debido a que el plazo habitual para cancelar el saldo ya habrá vencido.
 
@@ -51,7 +51,7 @@ Se propone desarrollar una interfaz por consola con menú de opciones, organizad
 
 El sistema verificará el vencimiento de las reservas pendientes al iniciar operaciones relacionadas con reservas y al consultar la disponibilidad de cupos.
 
-Si transcurrieron 48 horas desde su creación sin alcanzar la seña requerida, o si se alcanzó previamente el límite de pago aplicable, la reserva será anulada automáticamente al ejecutarse dicha verificación.
+Si la fecha actual supera la fecha de vencimiento (S04) y no se alcanzó la seña requerida, la reserva será anulada automáticamente al ejecutarse dicha verificación.
 
 La anulación liberará los cupos retenidos y dejará registrado el cambio de estado, permitiendo mantener actualizada la disponibilidad de cada salida.
 

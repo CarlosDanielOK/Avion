@@ -10,6 +10,7 @@ skinparam class {
   ArrowColor #333333
 }
 hide empty members
+left to right direction
 
 ' ===================== ENUMERACIONES =====================
 
@@ -224,8 +225,8 @@ class Salida #FFF3CC {
   - cupoMaximo: int
   - estado: EstadoSalida
   - listaEmitida: boolean
-  + cuposOcupados(ahora: LocalDateTime): int
-  + cuposDisponibles(ahora: LocalDateTime): int
+  + cuposOcupados(hoy: LocalDate): int
+  + cuposDisponibles(hoy: LocalDate): int
   + puedeParticipar(datos: DatosPasajero): boolean
   + obtenerTarifa(): Tarifa
   + diasHastaInicio(hoy: LocalDate): int
@@ -235,7 +236,7 @@ class Salida #FFF3CC {
   + asignarGuia(guia: Guia): void
   + asignarVehiculo(vehiculo: Vehiculo): void
   + emitirLista(): List<Pasajero>
-  + actualizarEstado(ahora: LocalDateTime): void
+  + actualizarEstado(hoy: LocalDate): void
   + validarCondicionesInicio(): void
   + iniciar(): void
   + finalizar(): void
@@ -261,15 +262,15 @@ class Reserva #FFF3CC {
   - fecha: LocalDate
   - estado: EstadoReserva
   - total: double
-  - vencimientoPago: LocalDateTime
+  - vencimientoPago: LocalDate
   + agregarPasajero(datos: DatosPasajero): Pasajero
   + incluirServiciosObligatorios(): void
   + agregarServicioAdicional(p: Pasajero, s: ServicioAdicional): void
   + totalServiciosAdicionales(): double
   + registrarTotal(total: double): void
-  + iniciarRetencion(ahora: LocalDateTime): void
-  + estaVencida(ahora: LocalDateTime): boolean
-  + ocupaCupos(ahora: LocalDateTime): boolean
+  + iniciarRetencion(hoy: LocalDate): void
+  + estaVencida(hoy: LocalDate): boolean
+  + ocupaCupos(hoy: LocalDate): boolean
   + cantidadPasajeros(): int
   + registrarPago(pago: Pago): void
   + totalAbonado(): double
@@ -346,27 +347,26 @@ class RepositorioAgenciaArchivo #DDEEFF {
   + cargar(): Agencia
 }
 
-Agencia o-- "0..*" Tour
-Agencia o-- "0..*" Salida
-Agencia o-- "0..*" Reserva
-Agencia o-- "0..*" Cliente
-Agencia o-- "0..*" Empleado
-Agencia o-- "0..*" Vehiculo
-Agencia o-- "0..*" Proveedor
+
+note right of Agencia
+  Agencia es la raiz del sistema: agrupa
+  las colecciones de Tour, Salida, Reserva,
+  Cliente, Empleado, Vehiculo y Proveedor.
+end note
 
 RepositorioAgencia <|.. RepositorioAgenciaArchivo
 RepositorioAgencia ..> Agencia : persiste >
 
 ' ===================== CONTROL E INTERFAZ =====================
 
-class DatosPasajero <<record>> #DDEEFF {
-  nombre: String
-  apellido: String
-  documento: String
-  fechaNacimiento: LocalDate
-  tipo: TipoPasajero
-  contactoEmergencia: String
-  restricciones: String
+class DatosPasajero #DDEEFF {
+  - nombre: String
+  - apellido: String
+  - documento: String
+  - fechaNacimiento: LocalDate
+  - tipo: TipoPasajero
+  - contactoEmergencia: String
+  - restricciones: String
 }
 
 class MenuConsola #DDEEFF {
@@ -374,22 +374,25 @@ class MenuConsola #DDEEFF {
 }
 
 class ControladorReservas #DDEEFF {
-  + registrarCliente(datos del cliente): Cliente
-  + iniciarReserva(documentoCliente: String, idSalida: long, legajoVendedor: int, datos: List<DatosPasajero>, ahora: LocalDateTime): Reserva
+  + registrarCliente(nombre: String, apellido: String, documento: String, telefono: String, correo: String, pais: String): Cliente
+  + iniciarReserva(documentoCliente: String, idSalida: long, legajoVendedor: int, datos: List<DatosPasajero>, hoy: LocalDate): Reserva
   + agregarServicioAdicional(reserva: Reserva, p: Pasajero, s: ServicioAdicional): void
-  + finalizarReserva(reserva: Reserva, medio: MedioPago, cuotas: int, ahora: LocalDateTime): Reserva
-  + registrarPago(numero: long, importe: double, medio: MedioPago, cuotas: int, ahora: LocalDateTime): Pago
-  + verificarVencimiento(reserva: Reserva, ahora: LocalDateTime): void
-  + cancelarReserva(numero: long, motivo: String, porAgencia: boolean, ahora: LocalDateTime): Cancelacion
-  + reemplazarPasajero(numero: long, documento: String, datos: DatosPasajero, ahora: LocalDateTime): void
-  + registrarAjuste(numero: long, motivo: String, importe: double, ahora: LocalDateTime): NotaAjuste
+  + finalizarReserva(reserva: Reserva, medio: MedioPago, cuotas: int, hoy: LocalDate): Reserva
+  + registrarPago(numero: long, importe: double, medio: MedioPago, cuotas: int, hoy: LocalDate): Pago
+  + verificarVencimiento(reserva: Reserva, hoy: LocalDate): void
+  + cancelarReserva(numero: long, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
+  + reemplazarPasajero(numero: long, documento: String, datos: DatosPasajero, hoy: LocalDate): void
+  + registrarAjuste(numero: long, motivo: String, importe: double, hoy: LocalDate): NotaAjuste
 }
 
 class ControladorOperaciones #DDEEFF {
-  + registrarTour / registrarTarifa / registrarProveedor
-  + registrarGuia / registrarVehiculo
+  + registrarTour(tour: Tour): void
+  + registrarTarifa(codigoTour: String, tarifa: Tarifa): void
+  + registrarProveedor(proveedor: Proveedor): void
+  + registrarGuia(guia: Guia): void
+  + registrarVehiculo(vehiculo: Vehiculo): void
   + programarSalida(codigoTour: String, inicio: LocalDate, fin: LocalDate, cupo: int): Salida
-  + actualizarEstadoSalida(idSalida: long, ahora: LocalDateTime): void
+  + actualizarEstadoSalida(idSalida: long, hoy: LocalDate): void
   + asignarRecursos(idSalida: long, legajoGuia: int, patente: String): void
   + emitirListaPasajeros(idSalida: long): List<Pasajero>
   + iniciarSalida(idSalida: long): void
@@ -429,7 +432,7 @@ class GestorPagos #DDEEFF {
 }
 
 class GestorCancelaciones #DDEEFF {
-  + cancelar(reserva: Reserva, motivo: String, porAgencia: boolean, ahora: LocalDateTime): Cancelacion
+  + cancelar(reserva: Reserva, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
 }
 
 ' ===================== EXCEPCIONES =====================
@@ -465,7 +468,6 @@ ControladorReservas --> CalculadoraPrecioReserva : usa >
 ControladorReservas --> GestorPagos : usa >
 ControladorReservas --> GestorCancelaciones : usa >
 ControladorReservas ..> Reserva : crea >
-ControladorReservas ..> ReglaNegocioException : lanza >
 
 ControladorOperaciones --> Agencia : consulta >
 ControladorOperaciones --> RepositorioAgencia : persiste mediante >

@@ -22,7 +22,7 @@ participant ":RepositorioAgencia" as REPO
 == Fase 1: iniciar la reserva (cupos, requisitos y pasajeros) ==
 
 Vendedor -> UI : cargar cliente, salida y pasajeros
-UI -> CTRL : iniciarReserva(documentoCliente, idSalida, legajoVendedor, datos, ahora)
+UI -> CTRL : iniciarReserva(documentoCliente, idSalida, legajoVendedor, datos, hoy)
 activate CTRL
 
 CTRL -> AGE : buscarCliente(documentoCliente)
@@ -32,7 +32,7 @@ AGE --> CTRL : salida
 CTRL -> AGE : buscarEmpleado(legajoVendedor)
 AGE --> CTRL : vendedor
 
-CTRL -> SAL : cuposDisponibles(ahora)
+CTRL -> SAL : cuposDisponibles(hoy)
 SAL --> CTRL : disponibles
 
 alt disponibles < cantidad de pasajeros
@@ -56,7 +56,7 @@ else cupos suficientes
     AGE --> CTRL : numero
 
     create RES
-    CTRL -> RES : <<create>> new Reserva(numero, cliente, salida, vendedor, ahora)
+    CTRL -> RES : <<create>> new Reserva(numero, cliente, salida, vendedor, hoy)
     note right of RES
       La reserva nace en estado
       PENDIENTE y todavia no
@@ -86,7 +86,7 @@ else cupos suficientes
 
     == Fase 2: calcular el precio y registrar la reserva ==
 
-    UI -> CTRL : finalizarReserva(reserva, medio, cuotas, ahora)
+    UI -> CTRL : finalizarReserva(reserva, medio, cuotas, hoy)
 
     CTRL -> CALC : calcularTotal(reserva)
     activate CALC
@@ -133,10 +133,10 @@ else cupos suficientes
         GP --> CTRL : pago
         deactivate GP
       else faltan mas de 10 dias
-        CTRL -> RES : iniciarRetencion(ahora)
+        CTRL -> RES : iniciarRetencion(hoy)
         note right of RES
           vencimientoPago = el menor entre
-          ahora + 48 hs y 10 dias antes
+          hoy + 2 dias y 10 dias antes
           de la salida (S04).
           Estado PENDIENTE: retiene cupos
           mientras no venza.

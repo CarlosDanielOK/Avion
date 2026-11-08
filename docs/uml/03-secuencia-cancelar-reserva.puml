@@ -17,7 +17,7 @@ participant ":Cancelacion" as CAN
 participant ":RepositorioAgencia" as REPO
 
 Vendedor -> UI : cancelarReserva(numero, motivo, porAgencia)
-UI -> CTRL : cancelarReserva(numero, motivo, porAgencia, ahora)
+UI -> CTRL : cancelarReserva(numero, motivo, porAgencia, hoy)
 activate CTRL
 
 CTRL -> AGE : buscarReserva(numero)
@@ -37,7 +37,7 @@ else reserva encontrada
     UI --> Vendedor : informa que no puede cancelarse
 
   else reserva cancelable
-    CTRL -> GC : cancelar(reserva, motivo, porAgencia, ahora)
+    CTRL -> GC : cancelar(reserva, motivo, porAgencia, hoy)
     activate GC
 
     GC -> RES : getSalida()
@@ -78,7 +78,7 @@ else reserva encontrada
       solo las reservas que ocupan cupos.
     end note
 
-    CTRL -> SAL : actualizarEstado(ahora)
+    CTRL -> SAL : actualizarEstado(hoy)
     CTRL -> REPO : guardar(agencia)
     REPO --> CTRL : guardado
 
