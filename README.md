@@ -9,8 +9,8 @@
 | **Modelado** | UML |
 | **Estado actual** | Etapa 1 finalizada – Etapa 2 pendiente de implementación |
 | **Entrega Etapa 1** | 25/10/2026 (tag `etapa-1`) |
-| **Entrega Etapa 2** | 04/11/2026 (tag `etapa-2`) |
-| **Defensa** | 11/11/2026 |
+| **Entrega Etapa 2** | 12/11/2026 (tag `etapa-2`) |
+| **Defensa** | 19/11/2026 (jueves) |
 
 ---
 
@@ -143,8 +143,8 @@ El proyecto se desarrolla de forma colaborativa en GitHub:
 | Etapa | Contenido | Entrega | Estado |
 |---|---|---|---|
 | **Etapa 1** | Análisis, casos de uso, diagramas de clases y secuencia, SOLID y GRASP. | 25/10/2026 | Finalizada |
-| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 04/11/2026 | En preparación |
-| **Defensa** | Presentación oral y demostración del sistema. | 11/11/2026 | Pendiente |
+| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 12/11/2026 | En preparación |
+| **Defensa** | Presentación oral y demostración del sistema. | 19/11/2026 (jueves) | Pendiente |
 
 ## 11. Integrantes
 
