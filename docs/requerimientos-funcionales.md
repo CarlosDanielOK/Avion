@@ -17,7 +17,7 @@ El sistema deberá permitir registrar las actividades de cada tour, indicando d�
 El sistema deberá permitir establecer y consultar las tarifas base de los tours según temporada baja, media o alta, incluyendo sus períodos de vigencia.
 
 ### RF04 – Programar salidas
-El sistema deberá permitir crear salidas asociadas a un tour, indicando fechas de inicio y finalización, cupos, estado, guía y vehículo asignados.
+El sistema deberá permitir crear salidas asociadas a un tour, indicando fechas de inicio y finalización, cupo y estado. El guía y el vehículo podrán asignarse posteriormente, pero deberán estar asignados y validados antes de iniciar la salida.
 
 ### RF05 – Gestionar estados de salidas
 El sistema deberá controlar los estados de las salidas y actualizar su disponibilidad según la cantidad de pasajeros registrados y las condiciones establecidas.

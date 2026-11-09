@@ -4,11 +4,11 @@ Esta carpeta contiene los archivos fuente PlantUML (`.puml`), sus imágenes expo
 
 ## Inventario de diagramas
 
-- `01-clases-inicial.puml` / `01-clases-inicial.png`: modelo previo a la aplicación de patrones.
-- `02-secuencia-crear-reserva.puml` / `02-secuencia-crear-reserva.png`: CU08, con flujos alternativos por falta de cupos, requisitos no cumplidos y pago total requerido.
-- `03-secuencia-cancelar-reserva.puml` / `03-secuencia-cancelar-reserva.png`: CU15, con política de devolución, reserva inexistente y reserva no cancelable.
-- `04-clases-final.puml` / `.png` / `.svg` / `.pdf`: modelo posterior a la aplicación de SOLID y GRASP. Es un diagrama grande (4556×2948 px): para leerlo en detalle abrir el `.svg` en un navegador o el `.pdf` y ampliar.
-- `casos-uso-administracion`, `casos-uso-reservas`, `casos-uso-pagos` y `casos-uso-operaciones` (`.puml` y `.png`): diagramas de casos de uso, con relaciones «include» y «extend».
+- `01-clases-inicial.puml` / `.svg`: modelo previo a la aplicación de patrones.
+- `02-secuencia-crear-reserva.puml` / `.svg`: CU08, con flujos alternativos por falta de cupos, requisitos no cumplidos y pago total requerido.
+- `03-secuencia-cancelar-reserva.puml` / `.svg`: CU15, con política de devolución, reserva inexistente y reserva no cancelable.
+- `04-clases-final.puml` / `.svg`: modelo posterior a la aplicación de SOLID y GRASP. Es un diagrama grande: para leerlo en detalle abrir el `.svg` en un navegador y ampliar.
+- `casos-uso-administracion`, `casos-uso-reservas`, `casos-uso-pagos` y `casos-uso-operaciones` (`.puml` y `.svg`): diagramas de casos de uso, con relaciones «include» y «extend».
 
 ## Cambios del diagrama de clases inicial al final
 

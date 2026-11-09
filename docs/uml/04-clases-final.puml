@@ -278,6 +278,7 @@ class Reserva #FFF3CC {
   + calcularSaldo(): double
   + seniaCubierta(): boolean
   + medioDePagoUsado(): MedioPago
+  + obtenerSalida(): Salida
   + puedeCancelarse(): boolean
   + confirmar(): void
   + finalizar(): void
@@ -411,6 +412,8 @@ class GeneradorReportes #DDEEFF {
 ' ===================== CALCULO DE PRECIOS =====================
 
 class CalculadoraPrecioReserva #DDEEFF {
+  - promociones: List<Promocion>
+  + CalculadoraPrecioReserva(promociones: List<Promocion>)
   + calcularTotal(reserva: Reserva): double
 }
 

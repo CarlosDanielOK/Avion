@@ -16,7 +16,7 @@ participant ":Salida" as SAL
 participant ":Cancelacion" as CAN
 participant ":RepositorioAgencia" as REPO
 
-Vendedor -> UI : cancelarReserva(numero, motivo, porAgencia)
+Vendedor -> UI : selecciona cancelarReserva(numero, motivo, porAgencia)
 UI -> CTRL : cancelarReserva(numero, motivo, porAgencia, hoy)
 activate CTRL
 
@@ -40,7 +40,7 @@ else reserva encontrada
     CTRL -> GC : cancelar(reserva, motivo, porAgencia, hoy)
     activate GC
 
-    GC -> RES : getSalida()
+    GC -> RES : obtenerSalida()
     RES --> GC : salida
     GC -> SAL : diasHastaInicio(hoy)
     SAL --> GC : dias

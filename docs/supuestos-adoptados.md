@@ -47,11 +47,11 @@ Toda la información del sistema (tours, salidas, clientes, reservas, pagos, gu�
 
 Se propone desarrollar una interfaz por consola con menú de opciones, organizada según las funcionalidades y responsabilidades de los usuarios del sistema.
 
-### S09 – Vencimiento de reservas pendientes
+### S09 – Vencimiento por falta de pago
 
-El sistema verificará el vencimiento de las reservas pendientes al iniciar operaciones relacionadas con reservas y al consultar la disponibilidad de cupos.
+El sistema verificará el vencimiento de las reservas pendientes al iniciar operaciones relacionadas con reservas y al consultar la disponibilidad de cupos. También verificará las reservas confirmadas cuyo saldo todavía esté pendiente al alcanzar el límite de pago.
 
-Si la fecha actual supera la fecha de vencimiento (S04) y no se alcanzó la seña requerida, la reserva será anulada automáticamente al ejecutarse dicha verificación.
+Si una reserva pendiente no alcanzó la seña y la fecha actual supera su vencimiento de retención (S04), será anulada automáticamente. Si una reserva confirmada conserva saldo impago y la fecha actual supera el límite de diez días antes de la salida (RN21), también será anulada. En ambos casos la verificación libera los cupos retenidos.
 
 La anulación liberará los cupos retenidos y dejará registrado el cambio de estado, permitiendo mantener actualizada la disponibilidad de cada salida.
 
@@ -75,7 +75,7 @@ Este orden de cálculo es una interpretación adoptada por el grupo. La devoluci
 
 ### S12 – Estados de la reserva
 
-Los estados de la reserva son los del enunciado. Pendiente: creada, sin la seña. Confirmada: al registrarse la seña del 30 %. Anulada: por falta de pago en plazo (S09), por cancelación solicitada por el cliente o por la agencia, o por cancelación de la salida. Finalizada: cuando finaliza la salida.
+Los estados de la reserva son los del enunciado. Pendiente: creada, sin la seña y con retención temporal de cupos. Confirmada: al registrarse la seña del 30 %, aunque todavía tenga saldo pendiente. Anulada: por falta de seña o por saldo impago fuera de plazo (S09), por cancelación solicitada por el cliente o por la agencia, o por cancelación de la salida. Finalizada: cuando finaliza la salida.
 
 No existe un estado «cancelada» para la reserva: toda cancelación deja la reserva en estado anulada y registra una cancelación con fecha, motivo, porcentaje e importe devuelto.
 

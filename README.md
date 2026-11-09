@@ -7,7 +7,7 @@
 | **Propuesta elegida** | B – Agencia de Turismo |
 | **Lenguaje** | Java 17 o superior |
 | **Modelado** | UML |
-| **Estado actual** | Etapa 1 en revisión final – Etapa 2 en preparación |
+| **Estado actual** | Etapa 1 finalizada – Etapa 2 pendiente de implementación |
 | **Entrega Etapa 1** | 25/10/2026 (tag `etapa-1`) |
 | **Entrega Etapa 2** | 04/11/2026 (tag `etapa-2`) |
 | **Defensa** | 11/11/2026 |
@@ -80,7 +80,7 @@ El cliente, el guía de turismo y los proveedores participan de los procesos del
 | GRASP – Experto en Información | Cada clase resuelve lo que conoce (cupos en `Salida`, saldo en `Reserva`). | `Salida`, `Reserva` |
 | GRASP – Creador | `Reserva` incorpora y administra a sus pasajeros. | `Reserva`, `Pasajero` |
 | GRASP – Controlador | Coordina las operaciones de los casos de uso y delega responsabilidades. | `ControladorReservas`, `ControladorOperaciones` |
-| GRASP – Fabricación Pura | Los cálculos y políticas que no pertenecen a una clase del negocio se ubican en clases propias. | `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` |
+| GRASP – Fabricación Pura | Los cálculos y políticas que no pertenecen a una clase del negocio se ubican en clases propias. | `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones`, `CalculadoraHonorarios` |
 
 La justificación completa de cada decisión (problema detectado, decisión adoptada y ventaja) se encuentra en [`docs/solid-grasp.md`](docs/solid-grasp.md).
 
@@ -108,7 +108,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 ```text
 .
 ├── docs/                 Documentación del proyecto
-│   └── uml/              Diagramas UML (.puml y .png)
+│   └── uml/              Diagramas UML (.puml y .svg)
 ├── src/                  Código fuente Java (Etapa 2)
 ├── test/                 Pruebas unitarias (Etapa 2)
 └── README.md

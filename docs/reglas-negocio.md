@@ -118,4 +118,4 @@ Los honorarios de los guías se liquidarán únicamente por salidas finalizadas.
 Los honorarios se calcularán mediante un monto fijo por día trabajado, más un 5 % de las ventas de servicios adicionales de la salida. La liquidación será calculada por el componente responsable de liquidaciones a partir de la salida finalizada y su guía asignado.
 
 ### RN33 – Conservación de reservas pagadas
-Una reserva pagada no podrá eliminarse. Las correcciones deberán registrarse mediante notas de ajuste.
+Una reserva pagada no podrá eliminarse. Las correcciones deberán registrarse mediante notas de ajuste, cuyo importe puede ser positivo o negativo y se aplica al saldo o al total informado sin eliminar el movimiento original.
