@@ -7,7 +7,7 @@
 | **Propuesta elegida** | B – Agencia de Turismo |
 | **Lenguaje** | Java 17 o superior |
 | **Modelado** | UML |
-| **Estado actual** | Etapa 1 finalizada – Etapa 2 en preparación |
+| **Estado actual** | Etapa 1 finalizada – Etapa 2 pendiente de implementación |
 | **Entrega Etapa 1** | 25/10/2026 (tag `etapa-1`) |
 | **Entrega Etapa 2** | 04/11/2026 (tag `etapa-2`) |
 | **Defensa** | 11/11/2026 |
@@ -48,9 +48,8 @@ El alcance funcional previsto incluye los siguientes procesos:
 - Asignación de guía y vehículo a cada salida y emisión de la lista de pasajeros.
 - Liquidación de honorarios de guías.
 - Reportes: ocupación por salida, ventas por vendedor, ingresos por tour y cancelaciones.
-- Funcionalidades adicionales propuestas: lista de espera y recomendación de tours (RF25 y RF26).
 
-El detalle completo se encuentra en los documentos de análisis (ver [sección 5](#5-documentación)): 26 requerimientos funcionales (RF01–RF26), 35 reglas de negocio (RN01–RN35), 17 supuestos (S01–S17) y 27 casos de uso (CU01–CU27).
+El detalle completo se encuentra en los documentos de análisis (ver [sección 5](#5-documentación)): 24 requerimientos funcionales (RF01–RF24), 33 reglas de negocio (RN01–RN33), 22 supuestos (S01–S22) y 24 casos de uso (CU01–CU24).
 
 ## 3. Actores del sistema
 
@@ -59,15 +58,14 @@ El detalle completo se encuentra en los documentos de análisis (ver [sección 5
 | **Administrador** | Catálogo de tours, itinerarios, tarifas, proveedores y reportes. |
 | **Vendedor** | Clientes, reservas, precios, pagos y cancelaciones. |
 | **Coordinador de operaciones** | Salidas, asignación de recursos, listas de pasajeros y liquidación de honorarios. |
-| **Guía de turismo** | Consulta de las salidas que tiene asignadas (supuesto S01). |
 
-El cliente y los proveedores participan de los procesos del negocio, pero no interactúan directamente con el software en esta versión.
+El cliente, el guía de turismo y los proveedores participan de los procesos del negocio, pero no interactúan directamente con el software en esta versión.
 
 ## 4. Diseño de la solución
 
 ### 4.1. Modelado UML
 
-- **Casos de uso:** cuatro diagramas por módulo (administración, reservas, pagos y operaciones), con relaciones «include» justificadas y escenarios alternativos descriptos en las fichas. No se agregan relaciones «extend» artificiales.
+- **Casos de uso:** cuatro diagramas por módulo (administración, reservas, pagos y operaciones), con relaciones «include» y una relación «extend» (los servicios adicionales opcionales, CU11, extienden la creación de una reserva, CU08), y escenarios alternativos descriptos en las fichas.
 - **Diagrama de clases inicial:** incluye las jerarquías `Persona` (`Empleado`, `Cliente`, `Pasajero`) y `Tour` (`TourAventura`, `TourCultural`, `TourNaturaleza`), con sobreescritura de métodos.
 - **Diagramas de secuencia:** CU08 *Crear reserva* (con flujos alternativos por cupos insuficientes y requisitos no cumplidos) y CU15 *Cancelar reserva* (con política de devolución y reserva no cancelable).
 - **Diagrama de clases final:** incorpora los cambios derivados de la aplicación de patrones, con su nota de cambios.
@@ -78,10 +76,10 @@ El cliente y los proveedores participan de los procesos del negocio, pero no int
 |---|---|---|
 | SOLID – SRP | Se separan las responsabilidades de reserva, cálculo de precios, pagos y cancelaciones. | `Reserva`, `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` |
 | SOLID – OCP | Las promociones se incorporan sin modificar el algoritmo de cálculo. | `Promocion`, `PromocionAnticipada`, `PromocionGrupo` |
-| SOLID – DIP | La lógica depende de una abstracción de almacenamiento y no de archivos concretos. | `RepositorioReservas`, `RepositorioReservasArchivo` |
+| SOLID – DIP | La lógica depende de una abstracción de almacenamiento y no de archivos concretos. | `RepositorioAgencia`, `RepositorioAgenciaArchivo`, `Agencia` |
 | GRASP – Experto en Información | Cada clase resuelve lo que conoce (cupos en `Salida`, saldo en `Reserva`). | `Salida`, `Reserva` |
 | GRASP – Creador | `Reserva` incorpora y administra a sus pasajeros. | `Reserva`, `Pasajero` |
-| GRASP – Controlador | Coordina las operaciones de los casos de uso y delega responsabilidades. | `ControladorReservas` |
+| GRASP – Controlador | Coordina las operaciones de los casos de uso y delega responsabilidades. | `ControladorReservas`, `ControladorOperaciones` |
 | GRASP – Fabricación Pura | Los cálculos y políticas que no pertenecen a una clase del negocio se ubican en clases propias. | `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` |
 
 La justificación completa de cada decisión (problema detectado, decisión adoptada y ventaja) se encuentra en [`docs/solid-grasp.md`](docs/solid-grasp.md).
@@ -93,9 +91,9 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 | Documento | Contenido |
 |---|---|
 | [`docs/analisis-enunciado.md`](docs/analisis-enunciado.md) | Análisis del enunciado, actores y alcance. |
-| [`docs/requerimientos-funcionales.md`](docs/requerimientos-funcionales.md) | Requerimientos funcionales RF01–RF26. |
-| [`docs/reglas-negocio.md`](docs/reglas-negocio.md) | Reglas de negocio RN01–RN35. |
-| [`docs/supuestos-adoptados.md`](docs/supuestos-adoptados.md) | Supuestos S01–S20. |
+| [`docs/requerimientos-funcionales.md`](docs/requerimientos-funcionales.md) | Requerimientos funcionales RF01–RF24. |
+| [`docs/reglas-negocio.md`](docs/reglas-negocio.md) | Reglas de negocio RN01–RN33. |
+| [`docs/supuestos-adoptados.md`](docs/supuestos-adoptados.md) | Supuestos S01–S22. |
 | [`docs/casos-de-uso.md`](docs/casos-de-uso.md) | Diagramas y fichas de casos de uso, y matriz de trazabilidad. |
 
 ### Diseño y diagramas
@@ -110,7 +108,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 ```text
 .
 ├── docs/                 Documentación del proyecto
-│   └── uml/              Diagramas UML (.puml y .png)
+│   └── uml/              Diagramas UML (.puml, .png y .svg)
 ├── src/                  Código fuente Java (Etapa 2)
 ├── test/                 Pruebas unitarias (Etapa 2)
 └── README.md
@@ -123,8 +121,8 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 - **Lenguaje:** Java 17 o superior.
 - **Paradigma:** Programación Orientada a Objetos.
 - **Modelado:** UML con PlantUML.
-- **Persistencia:** lectura y escritura de archivos.
-- **Interfaz:** consola con menú (a confirmar en la Etapa 2).
+- **Persistencia:** lectura y escritura de un archivo mediante serialización de objetos Java (S07).
+- **Interfaz:** consola con menú, tal como confirmó la profesora.
 - **Control de versiones:** Git y GitHub.
 
 ## 8. Instalación y ejecución

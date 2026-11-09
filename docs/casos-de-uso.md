@@ -1,10 +1,10 @@
 # 2. Diagrama de casos de uso
 
-Los casos de uso se identificaron a partir de los 26 requerimientos funcionales (RF01–RF26), las reglas de negocio RN01–RN35 y los supuestos S01–S17.
+Los casos de uso se identificaron a partir de los 24 requerimientos funcionales (RF01–RF24), las reglas de negocio RN01–RN33 y los supuestos S01–S22.
 
-Se consideran actores directos del sistema al Administrador, al Vendedor y al Coordinador de operaciones. Adicionalmente, se propone que el Guía de turismo pueda consultar sus salidas asignadas, de acuerdo con el supuesto S01.
+Se consideran actores directos del sistema al Administrador, al Vendedor y al Coordinador de operaciones.
 
-El Cliente y el Proveedor participan de los procesos del negocio, pero no interactúan directamente con el software en esta primera versión.
+El Cliente, el Guía de turismo y el Proveedor participan de los procesos del negocio, pero no interactúan directamente con el software en esta primera versión.
 
 Los casos de uso se organizaron por módulos para facilitar la lectura de los diagramas. El Vendedor aparece en gestión comercial y en pagos, pero representa un único actor.
 
@@ -15,9 +15,8 @@ Los códigos CU identifican casos de uso y no deben confundirse con los códigos
 | Actor | Responsabilidad | Casos de uso |
 |---|---|---|
 | Administrador | Catálogo de tours, itinerarios, tarifas, proveedores y reportes | CU01, CU02, CU03, CU23, CU24 |
-| Vendedor | Clientes, reservas, precios, pagos, cancelaciones y funcionalidades complementarias | CU06–CU17, CU25, CU26 |
+| Vendedor | Clientes, reservas, precios, pagos, cancelaciones y ajustes | CU06–CU17 |
 | Coordinador de operaciones | Salidas, recursos, listas de pasajeros y honorarios | CU04, CU05, CU18–CU22 |
-| Guía de turismo | Consulta de salidas asignadas, propuesta mediante S01 | CU27 |
 
 ### Gestión administrativa
 
@@ -25,7 +24,7 @@ Comprende la administración del catálogo de tours, itinerarios, tarifas, prove
 
 ### Gestión comercial y reservas
 
-Comprende el registro de clientes y pasajeros, la creación y modificación de reservas, el cálculo de precios, la evaluación de promociones, los servicios adicionales, la lista de espera y las recomendaciones.
+Comprende el registro de clientes y pasajeros, la creación y modificación de reservas, el cálculo de precios, la evaluación de promociones, los servicios adicionales.
 
 ### Gestión de pagos y cancelaciones
 
@@ -43,15 +42,14 @@ Se utilizaron asociaciones mediante líneas continuas para indicar qué funciona
 
 Las relaciones «include» se utilizan cuando un caso de uso requiere obligatoriamente otro comportamiento modelado como caso de uso independiente.
 
-Las relaciones «extend» se utilizan para comportamientos condicionales: el caso que extiende solo se ejecuta si se da una condición (por ejemplo, la lista de espera solo cuando no hay cupos). La flecha va desde el caso que extiende hacia el caso base.
+Las relaciones «extend» se utilizan para comportamientos condicionales: el caso que extiende solo se ejecuta si se da una condición (por ejemplo, los servicios adicionales solo si el vendedor elige alguno). La flecha va desde el caso que extiende hacia el caso base.
 
 **Relaciones modeladas:**
 
 - **«include»:** CU08 (Crear reserva) incluye CU07 (Registrar pasajeros) y CU09 (Calcular precio de reserva). CU09 incluye CU10 (Evaluar promociones). CU12 (Registrar pagos) incluye CU13 (Controlar saldos), considerando la actualización del saldo como parte del registro de cada pago.
 
-- **«extend»:** CU11 (Gestionar servicios adicionales) extiende CU08 cuando se contratan servicios opcionales. En los tours de aventura, el seguro obligatorio se incorpora según las reglas de negocio correspondientes, por lo que no se considera opcional.
+- **«extend»:** CU11 (Gestionar servicios adicionales) extiende CU08 solo cuando el vendedor elige servicios opcionales. Los servicios obligatorios (por ejemplo, el seguro en los tours de aventura) no son una extensión: se incorporan automáticamente al crear la reserva como parte de CU08 (S21).
 
-- **CU25 (Gestionar lista de espera):** se mantiene como caso de uso independiente. Cuando CU08 detecta que no existen cupos disponibles, el vendedor puede ofrecer al cliente incorporarse a la lista de espera. Esta situación se documenta como flujo alternativo de CU08.
 
 - **CU14 (Confirmar o anular reservas):** se mantiene como caso de uso independiente. La confirmación se realiza cuando se cumplen las condiciones de pago y demás requisitos establecidos. La anulación se produce cuando corresponde según las reglas de negocio, por ejemplo, ante el vencimiento del plazo de pago. Estas situaciones se documentan en sus flujos principales y alternativos.
 
@@ -70,7 +68,7 @@ El Administrador gestiona tours, itinerarios, tarifas y proveedores, y consulta 
 
 ### 2.2.2. Gestión comercial y reservas
 
-El Vendedor registra clientes y pasajeros, crea y modifica reservas, calcula precios, evalúa promociones, gestiona servicios adicionales y utiliza las funcionalidades de lista de espera y recomendaciones.
+El Vendedor registra clientes y pasajeros, crea y modifica reservas, calcula precios, evalúa promociones, y gestiona servicios adicionales.
 
 **Figura 2. Diagrama de casos de uso de gestión comercial y reservas.**
 
@@ -87,8 +85,6 @@ El Vendedor registra pagos, controla saldos, confirma o anula reservas, gestiona
 ### 2.2.4. Gestión operativa
 
 El Coordinador de operaciones programa salidas, administra y asigna recursos, emite listas de pasajeros, inicia y finaliza salidas y liquida honorarios.
-
-Se incorpora la consulta de salidas asignadas por parte del Guía de turismo como funcionalidad propuesta mediante S01.
 
 **Figura 4. Diagrama de casos de uso de gestión operativa.**
 
@@ -166,7 +162,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Tarifa disponible para el cálculo de reservas.
 
-**Trazabilidad:** RF03 · RN12 · S16.
+**Trazabilidad:** RF03 · RN12 · S11, S20.
 
 ### CU04 – Programar salidas
 
@@ -213,7 +209,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Estado y disponibilidad actualizados.
 
-**Trazabilidad:** RF05 · RN04–RN07 · S04, S14.
+**Trazabilidad:** RF05 · RN04–RN07 · S04, S09, S18, S19.
 
 ### CU06 – Registrar clientes
 
@@ -275,7 +271,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 2. Selecciona una salida habilitada para reservas.
 3. Registra los pasajeros mediante CU07.
 4. El sistema verifica la disponibilidad de cupos y los requisitos de participación de cada pasajero.
-5. El vendedor incorpora los servicios adicionales correspondientes mediante CU11, incluido el seguro obligatorio cuando se trate de un tour de aventura.
+5. El sistema incorpora automáticamente los servicios obligatorios del tour (por ejemplo, el seguro en los tours de aventura) y el vendedor puede agregar servicios opcionales mediante CU11.
 6. El sistema calcula el precio total mediante CU09, considerando las tarifas, las promociones aplicables y los servicios adicionales.
 7. El sistema muestra el importe desglosado y las condiciones de pago.
 8. El vendedor confirma el registro.
@@ -284,14 +280,14 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Flujos alternativos:**
 
-- **Cupos insuficientes:** Se informa la falta de disponibilidad y puede gestionarse una solicitud de lista de espera mediante CU25.
+- **Cupos insuficientes:** Se informa la falta de disponibilidad y no se crea la reserva.
 - **Restricciones de participación:** Se impide registrar la reserva con pasajeros que no cumplen las condiciones.
 - **Pago total no registrado cuando es obligatorio:** No se registra la reserva y se informa al vendedor que debe completarse el pago.
 - **Datos incompletos:** Se solicita completar la información antes de guardar.
 
 **Postcondición:** Reserva pendiente con cupos retenidos temporalmente o reserva confirmada cuando corresponda el pago total.
 
-**Trazabilidad:** RF08 · RN10–RN22 · S03–S06, S14, S16.
+**Trazabilidad:** RF08 · RN10–RN22 · S03–S06, S09, S11, S16, S21.
 
 ### CU09 – Calcular precio de reserva
 
@@ -315,7 +311,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Importe calculado y desglosado.
 
-**Trazabilidad:** RF09 · RN12–RN19 · S03, S05, S06, S16.
+**Trazabilidad:** RF09 · RN12–RN19 · S03, S05, S06, S11.
 
 ### CU10 – Evaluar promociones
 
@@ -337,7 +333,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Promoción seleccionada o ausencia de promoción.
 
-**Trazabilidad:** RF10 · RN15–RN17 · S05, S16.
+**Trazabilidad:** RF10 · RN15–RN17 · S05, S11.
 
 ### CU11 – Gestionar servicios adicionales
 
@@ -360,7 +356,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Servicios adicionales asociados a los pasajeros.
 
-**Trazabilidad:** RF11 · RN18–RN19 · S06.
+**Trazabilidad:** RF11 · RN18–RN19 · S06, S21.
 
 ### CU12 – Registrar pagos
 
@@ -385,7 +381,9 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Pago registrado y saldo actualizado.
 
-**Trazabilidad:** RF12 · RN20–RN22 · S04, S16.
+**Criterio económico:** El importe ingresado es el capital abonado. Si el pago es con tarjeta en cuotas, el sistema calcula el recargo del 7 % sobre ese capital y registra ambos por separado (el monto cobrado es capital + recargo). La seña y el saldo se calculan siempre sobre el capital.
+
+**Trazabilidad:** RF12 · RN20–RN22 · S04, S11.
 
 ### CU13 – Controlar saldos
 
@@ -408,7 +406,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Saldo y estado de cumplimiento disponibles.
 
-**Trazabilidad:** RF13 · RN20–RN21 · S04, S14.
+**Trazabilidad:** RF13 · RN20–RN21 · S04, S09.
 
 ### CU14 – Confirmar o anular reservas
 
@@ -427,12 +425,12 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Flujos alternativos:**
 - Si el pago es insuficiente y el plazo continúa vigente, la reserva permanece pendiente.
-- Si vence el plazo de una reserva pendiente o el plazo para cancelar el saldo, el sistema anula la reserva y libera los cupos.
+- Si vence el plazo de retención de una reserva pendiente sin seña, o el plazo para cancelar el saldo de una reserva confirmada, el sistema anula la reserva y libera los cupos.
 - Si la reserva ya está anulada, se impide su confirmación.
 
 **Postcondición:** Reserva confirmada, pendiente o anulada según las condiciones verificadas.
 
-**Trazabilidad:** RF14 · RN20–RN21 · S04, S14.
+**Trazabilidad:** RF14 · RN20–RN21 · S04, S09.
 
 ### CU15 – Cancelar reserva
 
@@ -456,7 +454,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Reserva cancelada y devolución registrada según la política aplicable.
 
-**Trazabilidad:** RF15 · RN23–RN27 · S15.
+**Trazabilidad:** RF15 · RN23–RN27 · S10, S13, S15, S17, S19.
 
 ### CU16 – Modificar reserva
 
@@ -481,7 +479,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Reserva actualizada y modificación registrada.
 
-**Trazabilidad:** RF16 · RN10–RN11, RN28 · S03, S15.
+**Trazabilidad:** RF16 · RN10–RN11, RN28 · S03, S10, S16.
 
 ### CU17 – Registrar ajustes económicos
 
@@ -573,7 +571,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Postcondición:** Lista de pasajeros disponible para la operación.
 
-**Trazabilidad:** RF20 · RN29–RN30 · S01.
+**Trazabilidad:** RF20 · RN29–RN30.
 
 ### CU21 – Iniciar y finalizar salidas
 
@@ -593,7 +591,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 6. El sistema comprueba que el estado de la salida permita iniciar la operación.
 7. Si todas las condiciones se cumplen, cambia el estado de la salida a **en curso**.
 8. Al concluir la operación, el coordinador registra la finalización.
-9. El sistema verifica que la salida se encuentre **en curso** y cambia su estado a **finalizada**.
+9. El sistema verifica que la salida se encuentre **en curso**, cambia su estado a **finalizada** y finaliza las reservas vigentes asociadas a la salida.
 
 **Flujos alternativos:**
 
@@ -602,9 +600,9 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 - **Vehículo no asignado o con capacidad insuficiente:** El sistema impide iniciar la salida hasta que se asigne un vehículo que cumpla RN09.
 - **Estado incompatible:** El sistema rechaza la transición e informa que la operación no está permitida.
 
-**Postcondición:** Salida en curso o finalizada, según la operación registrada.
+**Postcondición:** Salida en curso o finalizada, según la operación registrada; al finalizar, sus reservas vigentes quedan en estado finalizada.
 
-**Trazabilidad:** RF21 · RN04, RN08–RN09, RN29–RN31 · S01.
+**Trazabilidad:** RF21 · RN04, RN08–RN09, RN29–RN31.
 
 ### CU22 – Liquidar honorarios
 
@@ -661,92 +659,16 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Flujo principal:**
 1. El administrador selecciona el tipo de reporte.
-2. Elige ocupación, ventas por vendedor, ingresos por tour o cancelaciones.
-3. Establece los filtros correspondientes.
-4. El sistema procesa la información.
-5. Muestra el reporte.
+2. Elige ocupación por salida, ventas por vendedor, ingresos por tour o cancelaciones.
+3. El sistema procesa la información de todas las operaciones registradas.
+4. Muestra el reporte por consola.
 
 **Flujos alternativos:**
 - Si no existen datos, se presenta un reporte vacío con una aclaración.
-- Si los filtros son inválidos, se solicita corregirlos.
 
 **Postcondición:** Reporte generado y disponible para consulta.
 
-**Trazabilidad:** RF24 · RN04–RN07, RN20–RN27 · S11.
-
-### CU25 – Gestionar lista de espera
-
-**Actor principal:** Vendedor.
-
-**Objetivo:** Registrar solicitudes para salidas completas y gestionar ofertas de cupos liberados.
-
-**Precondición:** Salida completa y cliente identificado.
-
-**Flujo principal:**
-1. El vendedor selecciona una salida completa.
-2. Registra la solicitud del cliente y la cantidad de pasajeros.
-3. El sistema guarda fecha y hora de inscripción.
-4. Cuando se liberan cupos, identifica la solicitud compatible más antigua.
-5. El vendedor comunica la oferta.
-6. Si el cliente acepta, se inicia CU08 con una nueva verificación de disponibilidad.
-
-**Flujos alternativos:**
-- Si no hay cupos suficientes para la primera solicitud, conserva su prioridad y evalúa las siguientes compatibles.
-- Si el cliente rechaza la oferta, se retira la solicitud.
-- Si no responde dentro de las 24 horas, la oferta y la solicitud se marcan como vencidas.
-- La inscripción en lista de espera no genera una reserva ni ocupa cupos.
-
-**Postcondición:** Solicitud vigente, atendida, retirada o vencida, según corresponda.
-
-**Trazabilidad:** RF25 · RN34 · S07, S08, S13.
-
-### CU26 – Recomendar tours
-
-**Actor principal:** Vendedor.
-
-**Objetivo:** Recomendar tours según las preferencias del cliente.
-
-**Precondición:** Catálogo de tours disponible y preferencias identificadas cuando corresponda.
-
-**Flujo principal:**
-1. El vendedor registra o consulta las preferencias del cliente.
-2. El sistema considera categoría, presupuesto y fechas.
-3. Filtra tours y salidas disponibles.
-4. Verifica las condiciones de participación.
-5. Muestra recomendaciones y tarifas correspondientes.
-
-**Flujos alternativos:**
-- Si no existen coincidencias, informa la situación y permite modificar los filtros.
-- Las recomendaciones no generan reservas ni retienen cupos automáticamente.
-
-**Postcondición:** Recomendaciones mostradas sin modificar las reservas.
-
-**Trazabilidad:** RF26 · RN35 · S09, S10, S17.
-
-### CU27 – Consultar salidas asignadas
-
-**Actor principal:** Guía de turismo.
-
-**Objetivo:** Consultar las salidas asignadas y la información operativa autorizada.
-
-**Precondición:** Acceso de consulta implementado y guía identificado.
-
-**Flujo principal:**
-1. El guía ingresa al módulo de consulta.
-2. El sistema identifica sus salidas asignadas.
-3. Muestra la información operativa correspondiente.
-4. Permite consultar los datos autorizados de los pasajeros.
-5. Finaliza la consulta sin modificar registros.
-
-**Flujos alternativos:**
-- Si no tiene salidas asignadas, se informa la situación.
-- Si intenta acceder a una salida ajena, se deniega el acceso.
-
-**Postcondición:** Información consultada sin modificaciones.
-
-**Trazabilidad:** S01 · RN29–RN30.
-
-**Aclaración:** CU27 es una funcionalidad propuesta mediante S01 y no corresponde a un requerimiento funcional original.
+**Trazabilidad:** RF24 · RN04–RN07, RN20–RN27 · S07.
 
 ## 2.4. Matriz de trazabilidad
 
@@ -778,10 +700,6 @@ La siguiente matriz vincula cada caso de uso con su requerimiento funcional prin
 | CU22 | Liquidar honorarios | RF22 | Coordinador |
 | CU23 | Administrar proveedores | RF23 | Administrador |
 | CU24 | Generar reportes | RF24 | Administrador |
-| CU25 | Gestionar lista de espera | RF25 | Vendedor |
-| CU26 | Recomendar tours | RF26 | Vendedor |
-| CU27 | Consultar salidas asignadas | S01 (propuesto) | Guía de turismo |
-
 Las reglas de negocio y los supuestos específicos se encuentran referenciados en las fichas textuales del apartado 2.3.
 
 ## 2.5. Aclaraciones del modelado
@@ -798,9 +716,8 @@ Ambas confirmaciones corresponden a procesos y estados diferentes.
 
 Todos los pasajeros ocupan un lugar, incluidos los menores de tres años que no abonan tarifa.
 
-Las reservas pendientes pueden retener cupos temporalmente, de acuerdo con S04 y S14.
+Las reservas pendientes pueden retener cupos temporalmente, de acuerdo con S04 y S09.
 
-La lista de espera no ocupa ni retiene cupos.
 
 ### Reservas próximas a la salida
 
@@ -818,31 +735,7 @@ El cálculo considera el siguiente orden:
 4. Incorporación de servicios adicionales.
 5. Recargo por financiación con tarjeta en cuotas, cuando corresponda.
 
-Este criterio responde a RN12–RN22 y a los supuestos S05, S06 y S16.
-
-### Lista de espera
-
-Las solicitudes se ordenan por fecha y hora de inscripción.
-
-Cuando se liberan lugares, se identifica la solicitud más antigua que pueda satisfacerse completamente, respetando las condiciones de RN34.
-
-Las ofertas tienen una vigencia propuesta de 24 horas.
-
-Aceptar una oferta no confirma automáticamente una reserva. El vendedor debe registrar la operación y verificar nuevamente los cupos y las condiciones de pago.
-
-### Recomendaciones
-
-Las recomendaciones se generan mediante filtros determinísticos sobre los datos registrados.
-
-No se utilizan servicios externos ni inteligencia artificial.
-
-Las recomendaciones no garantizan disponibilidad futura ni generan reservas automáticamente.
-
-### Acceso del guía
-
-El acceso del Guía de turismo constituye una funcionalidad propuesta mediante S01.
-
-Su incorporación definitiva depende de que el grupo implemente el módulo de consulta correspondiente.
+Este criterio responde a RN12–RN22 y a los supuestos S05, S06 y S11.
 
 ### Criterios UML
 
@@ -852,7 +745,7 @@ Las relaciones «include» se utilizan para comportamientos obligatorios modelad
 
 Los flujos alternativos y las excepciones se describen en las fichas textuales.
 
-Las relaciones «extend» se utilizan solo para los comportamientos condicionales que figuran en las fichas textuales (por ejemplo, la lista de espera cuando no hay cupos).
+Las relaciones «extend» se utilizan solo para los comportamientos condicionales que figuran en las fichas textuales (por ejemplo, CU11 respecto de CU08).
 
 La organización de los diagramas por módulos responde a criterios de claridad visual y no representa sistemas independientes.
 
@@ -860,6 +753,6 @@ La organización de los diagramas por módulos responde a criterios de claridad 
 
 El modelado de casos de uso permite identificar las funcionalidades del Sistema de Gestión Rumbo Sur, las responsabilidades de sus actores y las principales condiciones que deben respetarse durante su funcionamiento.
 
-Los 27 casos de uso documentados mantienen correspondencia con los 26 requerimientos funcionales y con la funcionalidad adicional de consulta del guía propuesta mediante S01.
+Los 24 casos de uso documentados mantienen correspondencia con los 24 requerimientos funcionales (RF01–RF24).
 
 Este análisis constituye una base para elaborar los diagramas de clases y de secuencia y para desarrollar posteriormente la aplicación en Java, manteniendo la coherencia entre requerimientos, diseño e implementación.

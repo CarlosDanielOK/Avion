@@ -26,16 +26,12 @@ rectangle "Sistema de Gestión Rumbo Sur" {
   usecase "CU10 - Evaluar promociones" as CU10
   usecase "CU11 - Gestionar servicios adicionales" as CU11
   usecase "CU16 - Modificar reserva" as CU16
-  usecase "CU25 - Gestionar lista de espera" as CU25
-  usecase "CU26 - Recomendar tours" as CU26
 }
 
 VEN --> CU06
 VEN --> CU08
 VEN --> CU11
 VEN --> CU16
-VEN --> CU25
-VEN --> CU26
 
 CU08 .> CU07 : <<include>>
 CU08 .> CU09 : <<include>>
@@ -43,13 +39,5 @@ CU09 .> CU10 : <<include>>
 
 CU11 .> CU08 : <<extend>>\n[servicios adicionales opcionales]
 
-note right of CU25
-  Caso de uso independiente.
-  Si no hay cupos disponibles,
-  el vendedor puede ofrecer
-  incorporar al cliente
-  a la lista de espera.
-  La oferta no reserva cupos.
-end note
 
 @enduml

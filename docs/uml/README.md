@@ -1,28 +1,37 @@
 # Diagramas UML de Rumbo Sur
 
-Esta carpeta contiene los archivos fuente PlantUML (`.puml`), sus imágenes exportadas
-(`.png`) y los diagramas de casos de uso, todos con su fuente PlantUML.
+Esta carpeta contiene los archivos fuente PlantUML (`.puml`), sus imágenes exportadas (`.png`) y los diagramas de casos de uso.
 
 ## Inventario de diagramas
 
-- `01-clases-inicial.puml` / `01-clases-inicial.png`: modelo previo a la aplicación de patrones.
-- `02-secuencia-crear-reserva.puml` / `02-secuencia-crear-reserva.png`: CU08, con flujo alternativo por falta de cupos o requisitos.
-- `03-secuencia-cancelar-reserva.puml` / `03-secuencia-cancelar-reserva.png`: CU15, con política de devolución y reserva no cancelable.
-- `04-clases-final.puml` / `04-clases-final.png`: modelo posterior a la aplicación de SOLID y GRASP.
-- `casos-uso-administracion`, `casos-uso-reservas`, `casos-uso-pagos` y `casos-uso-operaciones` (`.puml` y `.png`): diagramas de casos de uso, con relaciones «include» y «extend».
+- `01-clases-inicial.puml` / `.png` / `.svg`: modelo previo a la aplicación de patrones.
+- `02-secuencia-crear-reserva.puml` / `.png` / `.svg`: CU08, con flujos alternativos por falta de cupos, requisitos no cumplidos y pago total requerido.
+- `03-secuencia-cancelar-reserva.puml` / `.png` / `.svg`: CU15, con política de devolución, reserva inexistente y reserva no cancelable.
+- `04-clases-final.puml` / `.png` / `.svg` / `.pdf`: modelo posterior a la aplicación de SOLID y GRASP, agrupado por capas (modelo del negocio, raíz y persistencia, control e interfaz, servicios y excepciones). Es un diagrama grande: para leerlo en detalle abrir el `.svg` en un navegador o el `.pdf` y ampliar.
+- `casos-uso-administracion`, `casos-uso-reservas`, `casos-uso-pagos` y `casos-uso-operaciones` (`.puml`, `.png` y `.svg`): diagramas de casos de uso, con relaciones «include» y «extend».
 
 ## Cambios del diagrama de clases inicial al final
 
-- `Reserva` deja de concentrar la creación del objeto, el cálculo del precio y la cancelación.
-- Se incorporan `ControladorReservas` y `MenuConsola` para separar la interfaz del flujo de los casos de uso.
-- Se incorporan `CalculadoraPrecioReserva`, `Promocion`, `PromocionAnticipada` y `PromocionGrupo` para aplicar OCP y encapsular el cálculo de promociones.
-- Se incorporan `GestorPagos` y `GestorCancelaciones` para separar las políticas de pagos y cancelaciones, en línea con SRP.
-- Se incorpora `RepositorioReservas` junto con `RepositorioReservasArchivo` para que la lógica dependa de una abstracción y no del archivo concreto, aplicando DIP.
-- `Salida` y `Reserva` conservan las responsabilidades sobre la información que conocen: disponibilidad, estado y saldo.
-- `CalculadoraPrecioReserva`, `GestorPagos` y `GestorCancelaciones` son clases artificiales que ubican los cálculos y políticas fuera de `Reserva`, aplicando Fabricación Pura.
-- `DatosPasajero` desacopla los datos de entrada del proceso de creación y permite que `Reserva` administre la incorporación de sus pasajeros, aplicando Creador.
-- `Reserva` incorpora los servicios adicionales, el seguro obligatorio en tours de aventura y el vencimiento de la reserva pendiente (`agregarServicioAdicional()`, `incluirSeguroObligatorio()`, `establecerVencimiento()`, `estaVencida()`), y `ControladorReservas` coordina estos pasos junto con el pago total inmediato.
-- `Salida` incorpora `validarCondicionesInicio()`, `iniciar()` y `finalizar()` para aplicar las reglas de operación (RN29 y RN30).
-- Se agregan excepciones de dominio para representar incumplimientos de reglas en los flujos de creación y cancelación.
+**Cambios por SOLID y GRASP**
 
-Estos cambios se reflejan en el diagrama final y se justifican en `docs/solid-grasp.md`.
+- `Reserva` deja de concentrar el cálculo del precio, los pagos y la cancelación. Se incorporan `CalculadoraPrecioReserva`, `GestorPagos` y `GestorCancelaciones` (SRP y Fabricación Pura).
+- Se incorporan `Promocion`, `PromocionAnticipada` y `PromocionGrupo` para poder agregar promociones sin modificar el cálculo (OCP).
+- Se incorporan `RepositorioAgencia` y `RepositorioAgenciaArchivo`, y la clase raíz `Agencia`, para que la lógica dependa de una abstracción y no del archivo concreto (DIP). `Agencia` guarda las colecciones del sistema y ofrece las búsquedas.
+- Se incorporan `MenuConsola`, `ControladorReservas` y `ControladorOperaciones` para separar la interfaz del flujo de los casos de uso, y `GeneradorReportes` para los reportes (Controlador).
+- `DatosPasajero` desacopla los datos de entrada del proceso de creación, y `Reserva` crea a sus `Pasajero` y `NotaAjuste` (Creador).
+- `Salida`, `Reserva` y `Pasajero` conservan las responsabilidades sobre la información que conocen: cupos, días hasta el inicio, pago total exigido, saldo y factor de tarifa (Experto).
+- Se agregan las excepciones de dominio derivadas de `ReglaNegocioException`.
+- `CalculadoraPrecioReserva` recibe la lista de `Promocion` en su constructor (agregación), de modo que agregar una promoción nueva no obliga a modificarla (OCP).
+
+**Correcciones de consistencia respecto de la versión anterior**
+
+- `Salida` ahora conoce a sus `Reserva` y `Guia` conoce a sus `Salida` (asociaciones sin dirección única), porque ambas necesitan esa información para calcular cupos y disponibilidad. Este cambio también se aplicó al diagrama inicial.
+- `ServicioAdicional` pasa a pertenecer a un `Tour` y tiene el atributo `obligatorio`. Se elimina la relación redundante `Reserva`–`ServicioAdicional`: los servicios se contratan por pasajero.
+- La regla de «faltan 10 días o menos» se mueve del controlador a `Salida` (`exigePagoTotal`), y `diasHastaSalida` pasa de `Reserva` a `Salida` (`diasHastaInicio`).
+- Se quitan los métodos públicos `establecerEstado` y `definirTotal`: la reserva nace en estado pendiente y el vencimiento lo calcula la propia `Reserva` (`iniciarRetencion`).
+- `Coordinador` y `Administrador` quedan solo con sus datos: la lógica de operación pasa a `ControladorOperaciones` y los reportes a `GeneradorReportes`.
+- `Salida.verificarVencimientos` anula las reservas vencidas y libera sus cupos antes de calcular la disponibilidad (S09), y `Salida.finalizar` finaliza las reservas vigentes (`Reserva.finalizar`). `Pasajero.tipoEsCompatible` valida que el tipo de pasajero sea coherente con la edad (S16).
+- `crearReserva` se divide en `iniciarReserva` y `finalizarReserva`, porque la selección de servicios ocurre entre ambos pasos.
+- `Salida` implementa `Comparable` (orden natural por fecha de inicio) para cumplir con el uso de ordenamiento; los reportes usan además un `Comparator`.
+
+Estos cambios se justifican en `docs/solid-grasp.md`.
