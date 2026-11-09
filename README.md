@@ -65,7 +65,7 @@ El cliente, el guía de turismo y los proveedores participan de los procesos del
 
 ### 4.1. Modelado UML
 
-- **Casos de uso:** cuatro diagramas por módulo (administración, reservas, pagos y operaciones), con relaciones «include» justificadas y escenarios alternativos descriptos en las fichas. No se agregan relaciones «extend» artificiales.
+- **Casos de uso:** cuatro diagramas por módulo (administración, reservas, pagos y operaciones), con relaciones «include» y una relación «extend» (los servicios adicionales opcionales, CU11, extienden la creación de una reserva, CU08), y escenarios alternativos descriptos en las fichas.
 - **Diagrama de clases inicial:** incluye las jerarquías `Persona` (`Empleado`, `Cliente`, `Pasajero`) y `Tour` (`TourAventura`, `TourCultural`, `TourNaturaleza`), con sobreescritura de métodos.
 - **Diagramas de secuencia:** CU08 *Crear reserva* (con flujos alternativos por cupos insuficientes y requisitos no cumplidos) y CU15 *Cancelar reserva* (con política de devolución y reserva no cancelable).
 - **Diagrama de clases final:** incorpora los cambios derivados de la aplicación de patrones, con su nota de cambios.
@@ -122,7 +122,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 - **Paradigma:** Programación Orientada a Objetos.
 - **Modelado:** UML con PlantUML.
 - **Persistencia:** lectura y escritura de un archivo mediante serialización de objetos Java (S07).
-- **Interfaz:** consola con menú (a confirmar en la Etapa 2).
+- **Interfaz:** consola con menú, tal como confirmó la profesora.
 - **Control de versiones:** Git y GitHub.
 
 ## 8. Instalación y ejecución
