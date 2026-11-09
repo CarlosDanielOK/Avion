@@ -105,7 +105,6 @@ class Guia #FFF3CC {
   + getRol(): String
   + estaHabilitadoPara(cat: CategoriaTour): boolean
   + estaDisponible(inicio: LocalDate, fin: LocalDate): boolean
-  + calcularHonorarios(salida: Salida): double
 }
 
 class Coordinador #FFF3CC {
@@ -127,6 +126,7 @@ class Pasajero #FFF3CC {
   - contactoEmergencia: String
   - restricciones: String
   + calcularEdad(fecha: LocalDate): int
+  + tipoEsCompatible(fecha: LocalDate): boolean
   + obtenerFactorTarifa(fecha: LocalDate): double
 }
 
@@ -227,6 +227,7 @@ class Salida #FFF3CC {
   - listaEmitida: boolean
   + cuposOcupados(hoy: LocalDate): int
   + cuposDisponibles(hoy: LocalDate): int
+  + verificarVencimientos(hoy: LocalDate): void
   + puedeParticipar(datos: DatosPasajero): boolean
   + obtenerTarifa(): Tarifa
   + diasHastaInicio(hoy: LocalDate): int
@@ -279,6 +280,7 @@ class Reserva #FFF3CC {
   + medioDePagoUsado(): MedioPago
   + puedeCancelarse(): boolean
   + confirmar(): void
+  + finalizar(): void
   + anular(cancelacion: Cancelacion): void
   + anularPorVencimiento(): void
   + reemplazarPasajero(documento: String, datos: DatosPasajero, hoy: LocalDate): void
@@ -287,7 +289,7 @@ class Reserva #FFF3CC {
 
 class Pago #FFF3CC {
   - fecha: LocalDate
-  - importe: double
+  - importeCapital: double
   - recargo: double
   - medio: MedioPago
   - cuotas: int
@@ -379,7 +381,6 @@ class ControladorReservas #DDEEFF {
   + agregarServicioAdicional(reserva: Reserva, p: Pasajero, s: ServicioAdicional): void
   + finalizarReserva(reserva: Reserva, medio: MedioPago, cuotas: int, hoy: LocalDate): Reserva
   + registrarPago(numero: long, importe: double, medio: MedioPago, cuotas: int, hoy: LocalDate): Pago
-  + verificarVencimiento(reserva: Reserva, hoy: LocalDate): void
   + cancelarReserva(numero: long, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
   + reemplazarPasajero(numero: long, documento: String, datos: DatosPasajero, hoy: LocalDate): void
   + registrarAjuste(numero: long, motivo: String, importe: double, hoy: LocalDate): NotaAjuste
@@ -401,10 +402,10 @@ class ControladorOperaciones #DDEEFF {
 }
 
 class GeneradorReportes #DDEEFF {
-  + reporteOcupacionPorSalida(): String
-  + reporteVentasPorVendedor(): String
-  + reporteIngresosPorTour(): String
-  + reporteCancelaciones(): String
+  + reporteOcupacionPorSalida(filtros: String): String
+  + reporteVentasPorVendedor(filtros: String): String
+  + reporteIngresosPorTour(filtros: String): String
+  + reporteCancelaciones(filtros: String): String
 }
 
 ' ===================== CALCULO DE PRECIOS =====================
@@ -433,6 +434,10 @@ class GestorPagos #DDEEFF {
 
 class GestorCancelaciones #DDEEFF {
   + cancelar(reserva: Reserva, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
+}
+
+class CalculadoraHonorarios #DDEEFF {
+  + calcular(salida: Salida): Liquidacion
 }
 
 ' ===================== EXCEPCIONES =====================
@@ -471,7 +476,7 @@ ControladorReservas ..> Reserva : crea >
 
 ControladorOperaciones --> Agencia : consulta >
 ControladorOperaciones --> RepositorioAgencia : persiste mediante >
-ControladorOperaciones --> GestorCancelaciones : usa >
+ControladorOperaciones --> CalculadoraHonorarios : usa >
 
 GeneradorReportes --> Agencia : consulta >
 
@@ -479,6 +484,22 @@ CalculadoraPrecioReserva "1" --> "1..*" Promocion : evalua >
 
 GestorCancelaciones ..> Cancelacion : crea >
 GestorPagos ..> Pago : crea >
+CalculadoraHonorarios ..> Liquidacion : crea >
+
+note right of Salida
+  cuposOcupados cuenta pasajeros de reservas
+  confirmadas y pendientes vigentes; las anuladas
+  no ocupan lugares. Los menores de 3 años también
+  ocupan un lugar aunque no abonen tarifa.
+  finalizar() cambia la salida a FINALIZADA y solicita
+  finalizar() en sus reservas vigentes.
+end note
+
+note right of Pago
+  importeCapital se usa para saldo, seña y devolución.
+  recargo solo se informa cuando corresponde tarjeta
+  en cuotas y no altera el total de la reserva.
+end note
 
 Reserva ..> DatosPasajero : recibe >
 Reserva ..> Pasajero : crea >

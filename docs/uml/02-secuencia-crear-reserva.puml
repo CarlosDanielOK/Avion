@@ -32,6 +32,12 @@ AGE --> CTRL : salida
 CTRL -> AGE : buscarEmpleado(legajoVendedor)
 AGE --> CTRL : vendedor
 
+CTRL -> SAL : verificarVencimientos(hoy)
+note right of CTRL
+  Se anulan las reservas pendientes
+  vencidas y se liberan sus cupos
+  antes de consultar disponibilidad (S09).
+end note
 CTRL -> SAL : cuposDisponibles(hoy)
 SAL --> CTRL : disponibles
 
@@ -130,6 +136,11 @@ else cupos suficientes
         GP -> RES : seniaCubierta()
         RES --> GP : true
         GP -> RES : confirmar()
+        note right of GP
+          Pago conserva capital y recargo
+          por separado. El recargo del 7 %
+          solo se aplica a tarjeta en cuotas.
+        end note
         GP --> CTRL : pago
         deactivate GP
       else faltan mas de 10 dias

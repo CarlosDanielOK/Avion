@@ -69,9 +69,9 @@ El descuento de jubilados se considera una tarifa especial por tipo de pasajero;
 
 Conforme a S05 y S06, primero se determina la tarifa por pasajero, luego se aplica la promoción comercial elegida sobre el tour y finalmente se suman los adicionales.
 
-El recargo del 7 % se aplicará únicamente al importe financiado con tarjeta en cuotas.
+El recargo del 7 % se aplicará únicamente al importe de capital que se registre en un pago con tarjeta en cuotas. El total de la reserva representa el precio de los servicios, sin recargo; cada `Pago` conservará por separado el importe de capital y el recargo aplicado. El saldo de la reserva se calculará sobre el capital pendiente, mientras que el importe efectivamente cobrado será capital más recargo.
 
-Este orden de cálculo es una interpretación propuesta, pendiente de validación.
+Este orden de cálculo es una interpretación adoptada por el grupo. La devolución se calcula sobre el capital abonado, sin recargos, de acuerdo con S17.
 
 ### S12 – Estados de la reserva
 

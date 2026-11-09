@@ -375,6 +375,8 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 6. Actualiza el saldo mediante CU13.
 7. Evalúa las condiciones de confirmación de la reserva.
 
+**Criterio económico:** El importe ingresado se separa en capital y recargo. El saldo y la condición de seña se calculan sobre el capital; el importe efectivamente cobrado incluye el recargo cuando corresponde.
+
 **Flujos alternativos:**
 - Si el pago es inválido, se solicita corrección.
 - Si se alcanza la seña requerida, se evalúa la confirmación mediante CU14.
@@ -589,7 +591,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 6. El sistema comprueba que el estado de la salida permita iniciar la operación.
 7. Si todas las condiciones se cumplen, cambia el estado de la salida a **en curso**.
 8. Al concluir la operación, el coordinador registra la finalización.
-9. El sistema verifica que la salida se encuentre **en curso** y cambia su estado a **finalizada**.
+9. El sistema verifica que la salida se encuentre **en curso**, cambia su estado a **finalizada** y finaliza las reservas vigentes asociadas a la salida.
 
 **Flujos alternativos:**
 
@@ -598,7 +600,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 - **Vehículo no asignado o con capacidad insuficiente:** El sistema impide iniciar la salida hasta que se asigne un vehículo que cumpla RN09.
 - **Estado incompatible:** El sistema rechaza la transición e informa que la operación no está permitida.
 
-**Postcondición:** Salida en curso o finalizada, según la operación registrada.
+**Postcondición:** Salida en curso o finalizada, según la operación registrada; al finalizar, sus reservas vigentes quedan en estado finalizada.
 
 **Trazabilidad:** RF21 · RN04, RN08–RN09, RN29–RN31.
 
@@ -615,7 +617,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 2. El sistema obtiene los días trabajados.
 3. Consulta el honorario fijo diario.
 4. Calcula el 5 % de las ventas de servicios adicionales.
-5. Determina el importe total.
+5. La `CalculadoraHonorarios` determina el importe total a partir de los días de la salida, el honorario diario del guía y las ventas de adicionales.
 6. Registra la liquidación.
 
 **Flujos alternativos:**

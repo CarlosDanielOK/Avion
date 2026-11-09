@@ -15,12 +15,15 @@ Esta carpeta contiene los archivos fuente PlantUML (`.puml`), sus imágenes expo
 **Cambios por SOLID y GRASP**
 
 - `Reserva` deja de concentrar el cálculo del precio, los pagos y la cancelación. Se incorporan `CalculadoraPrecioReserva`, `GestorPagos` y `GestorCancelaciones` (SRP y Fabricación Pura).
+- La liquidación de honorarios se concentra en `CalculadoraHonorarios`; `ControladorOperaciones` la utiliza luego de verificar que la salida esté finalizada (SRP y Fabricación Pura).
 - Se incorporan `Promocion`, `PromocionAnticipada` y `PromocionGrupo` para poder agregar promociones sin modificar el cálculo (OCP).
 - Se incorporan `RepositorioAgencia` y `RepositorioAgenciaArchivo`, y la clase raíz `Agencia`, para que la lógica dependa de una abstracción y no del archivo concreto (DIP). `Agencia` guarda las colecciones del sistema y ofrece las búsquedas.
 - Se incorporan `MenuConsola`, `ControladorReservas` y `ControladorOperaciones` para separar la interfaz del flujo de los casos de uso, y `GeneradorReportes` para los reportes (Controlador).
 - `DatosPasajero` desacopla los datos de entrada del proceso de creación, y `Reserva` crea a sus `Pasajero` y `NotaAjuste` (Creador).
 - `Salida`, `Reserva` y `Pasajero` conservan las responsabilidades sobre la información que conocen: cupos, días hasta el inicio, pago total exigido, saldo y factor de tarifa (Experto).
 - Se agregan las excepciones de dominio derivadas de `ReglaNegocioException`.
+- `Salida.verificarVencimientos` libera reservas pendientes vencidas antes de calcular disponibilidad; `Salida.finalizar` finaliza las reservas vigentes asociadas.
+- `Pago` separa el capital del recargo por tarjeta en cuotas; los reportes reciben filtros textuales para representar el criterio de consulta sin modelar DTOs.
 
 **Correcciones de consistencia respecto de la versión anterior**
 
