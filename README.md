@@ -49,7 +49,7 @@ El alcance funcional previsto incluye los siguientes procesos:
 - Liquidación de honorarios de guías.
 - Reportes: ocupación por salida, ventas por vendedor, ingresos por tour y cancelaciones.
 
-El detalle completo se encuentra en los documentos de análisis (ver [sección 5](#5-documentación)): 24 requerimientos funcionales (RF01–RF24), 33 reglas de negocio (RN01–RN33), 21 supuestos (S01–S21) y 24 casos de uso (CU01–CU24).
+El detalle completo se encuentra en los documentos de análisis (ver [sección 5](#5-documentación)): 24 requerimientos funcionales (RF01–RF24), 33 reglas de negocio (RN01–RN33), 22 supuestos (S01–S22) y 24 casos de uso (CU01–CU24).
 
 ## 3. Actores del sistema
 
@@ -80,7 +80,7 @@ El cliente, el guía de turismo y los proveedores participan de los procesos del
 | GRASP – Experto en Información | Cada clase resuelve lo que conoce (cupos en `Salida`, saldo en `Reserva`). | `Salida`, `Reserva` |
 | GRASP – Creador | `Reserva` incorpora y administra a sus pasajeros. | `Reserva`, `Pasajero` |
 | GRASP – Controlador | Coordina las operaciones de los casos de uso y delega responsabilidades. | `ControladorReservas`, `ControladorOperaciones` |
-| GRASP – Fabricación Pura | Los cálculos y políticas que no pertenecen a una clase del negocio se ubican en clases propias. | `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones`, `CalculadoraHonorarios` |
+| GRASP – Fabricación Pura | Los cálculos y políticas que no pertenecen a una clase del negocio se ubican en clases propias. | `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` |
 
 La justificación completa de cada decisión (problema detectado, decisión adoptada y ventaja) se encuentra en [`docs/solid-grasp.md`](docs/solid-grasp.md).
 
@@ -93,7 +93,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 | [`docs/analisis-enunciado.md`](docs/analisis-enunciado.md) | Análisis del enunciado, actores y alcance. |
 | [`docs/requerimientos-funcionales.md`](docs/requerimientos-funcionales.md) | Requerimientos funcionales RF01–RF24. |
 | [`docs/reglas-negocio.md`](docs/reglas-negocio.md) | Reglas de negocio RN01–RN33. |
-| [`docs/supuestos-adoptados.md`](docs/supuestos-adoptados.md) | Supuestos S01–S21. |
+| [`docs/supuestos-adoptados.md`](docs/supuestos-adoptados.md) | Supuestos S01–S22. |
 | [`docs/casos-de-uso.md`](docs/casos-de-uso.md) | Diagramas y fichas de casos de uso, y matriz de trazabilidad. |
 
 ### Diseño y diagramas
@@ -108,7 +108,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 ```text
 .
 ├── docs/                 Documentación del proyecto
-│   └── uml/              Diagramas UML (.puml y .svg)
+│   └── uml/              Diagramas UML (.puml, .png y .svg)
 ├── src/                  Código fuente Java (Etapa 2)
 ├── test/                 Pruebas unitarias (Etapa 2)
 └── README.md

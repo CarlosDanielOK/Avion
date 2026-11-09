@@ -17,6 +17,7 @@ participant ":Pasajero" as PAS
 participant ":CalculadoraPrecioReserva" as CALC
 participant "p:Promocion" as PROMO
 participant ":GestorPagos" as GP
+participant ":Pago" as PAG
 participant ":RepositorioAgencia" as REPO
 
 == Fase 1: iniciar la reserva (cupos, requisitos y pasajeros) ==
@@ -34,9 +35,9 @@ AGE --> CTRL : vendedor
 
 CTRL -> SAL : verificarVencimientos(hoy)
 note right of CTRL
-  Se anulan las reservas pendientes
-  vencidas y se liberan sus cupos
-  antes de consultar disponibilidad (S09).
+  Se anulan las reservas vencidas y se
+  liberan sus cupos antes de consultar
+  la disponibilidad (S09).
 end note
 CTRL -> SAL : cuposDisponibles(hoy)
 SAL --> CTRL : disponibles
@@ -132,15 +133,22 @@ else cupos suficientes
       alt exige pago total (faltan 10 dias o menos)
         CTRL -> GP : registrarPago(reserva, total, medio, cuotas, fecha)
         activate GP
-        GP -> RES : registrarPago(pago)
+        GP -> GP : recargo = 7 % del importe si es tarjeta en cuotas
+        GP -> RES : registrarPago(importe, recargo, medio, cuotas, fecha)
+        activate RES
+        create PAG
+        RES -> PAG : <<create>> new Pago(fecha, importe, recargo, medio, cuotas)
+        note right of PAG
+          GRASP Creador: la reserva compone
+          a sus pagos y los crea.
+          importe = capital abonado;
+          recargo no cambia el total.
+        end note
+        RES --> GP : pago
+        deactivate RES
         GP -> RES : seniaCubierta()
         RES --> GP : true
         GP -> RES : confirmar()
-        note right of GP
-          Pago conserva capital y recargo
-          por separado. El recargo del 7 %
-          solo se aplica a tarjeta en cuotas.
-        end note
         GP --> CTRL : pago
         deactivate GP
       else faltan mas de 10 dias

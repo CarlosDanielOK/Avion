@@ -5,7 +5,7 @@
 
 A partir del análisis del enunciado de la agencia Rumbo Sur, se identificaron aspectos que requieren definiciones adicionales para garantizar un funcionamiento coherente del sistema.
 
-Los siguientes supuestos constituyen decisiones preliminares del grupo y deberán validarse antes de la implementación.
+Los siguientes supuestos son decisiones adoptadas por el grupo antes de la implementación.
 
 ## 2. Supuestos adoptados
 
@@ -59,7 +59,7 @@ La anulación liberará los cupos retenidos y dejará registrado el cambio de es
 
 Los días de anticipación para cancelaciones se calcularán como días calendario completos entre la fecha de cancelación y la fecha de inicio de la salida.
 
-Este criterio será utilizado de manera uniforme para RN23 a RN28 y deberá validarse con el grupo.
+Este criterio será utilizado de manera uniforme para RN23 a RN28 y fue adoptado por el grupo.
 
 Los tramos se interpretan de la siguiente manera: con 30 días o más de anticipación se devuelve el 90 %; de 29 a 15 días, el 50 %; de 14 a 7 días, el 20 %; con menos de 7 días no hay devolución. Si la cancelación la provoca la agencia, la devolución es del 100 % sin importar los días.
 
@@ -69,7 +69,7 @@ El descuento de jubilados se considera una tarifa especial por tipo de pasajero;
 
 Conforme a S05 y S06, primero se determina la tarifa por pasajero, luego se aplica la promoción comercial elegida sobre el tour y finalmente se suman los adicionales.
 
-El recargo del 7 % se aplicará únicamente al importe de capital que se registre en un pago con tarjeta en cuotas. El total de la reserva representa el precio de los servicios, sin recargo; cada `Pago` conservará por separado el importe de capital y el recargo aplicado. El saldo de la reserva se calculará sobre el capital pendiente, mientras que el importe efectivamente cobrado será capital más recargo.
+El recargo del 7 % se aplicará únicamente al importe de capital que se registre en un pago con tarjeta en cuotas. El total de la reserva representa el precio de los servicios, sin recargo; cada `Pago` guarda por separado su `importe` (capital abonado, sin recargo) y su `recargo`. El saldo de la reserva se calculará sobre el capital pendiente, mientras que el importe efectivamente cobrado será capital más recargo.
 
 Este orden de cálculo es una interpretación adoptada por el grupo. La devolución se calcula sobre el capital abonado, sin recargos, de acuerdo con S17.
 
@@ -114,3 +114,7 @@ La temporada y la tarifa base de una salida se determinan con la tarifa del tour
 ### S21 – Servicios adicionales de un tour
 
 Cada servicio adicional pertenece a un tour y se marca como opcional u obligatorio para ese tour. Los servicios se contratan por pasajero. Los servicios obligatorios se incorporan automáticamente a todos los pasajeros al crear la reserva; en los tours de aventura, el seguro de viaje es un servicio obligatorio (RN19).
+
+### S22 – Notas de ajuste
+
+Una nota de ajuste tiene un importe que puede ser positivo (aumenta el total de la reserva) o negativo (lo reduce). No elimina ni modifica ningún pago ya registrado (RN32). El saldo de la reserva es: total + suma de los ajustes − capital abonado.

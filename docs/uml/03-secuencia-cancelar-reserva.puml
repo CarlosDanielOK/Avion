@@ -16,7 +16,7 @@ participant ":Salida" as SAL
 participant ":Cancelacion" as CAN
 participant ":RepositorioAgencia" as REPO
 
-Vendedor -> UI : selecciona cancelarReserva(numero, motivo, porAgencia)
+Vendedor -> UI : cancelarReserva(numero, motivo, porAgencia)
 UI -> CTRL : cancelarReserva(numero, motivo, porAgencia, hoy)
 activate CTRL
 

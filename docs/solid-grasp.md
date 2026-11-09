@@ -4,7 +4,7 @@
 
 La aplicación de los principios SOLID y los patrones GRASP tiene como objetivo establecer una distribución adecuada de responsabilidades entre las clases del Sistema de Gestión Rumbo Sur, favoreciendo la cohesión, el bajo acoplamiento, la extensibilidad y el mantenimiento del software.
 
-Las decisiones propuestas se fundamentan en los requerimientos funcionales RF01–RF24, las reglas de negocio RN01–RN33, los supuestos S01–S21 y los casos de uso previamente identificados.
+Las decisiones propuestas se fundamentan en los requerimientos funcionales RF01–RF24, las reglas de negocio RN01–RN33, los supuestos S01–S22 y los casos de uso previamente identificados.
 
 Dado que el proyecto se encuentra en la etapa de diseño, los problemas descriptos representan riesgos potenciales de implementación y no defectos comprobados en código existente.
 
@@ -90,7 +90,6 @@ Se propone distribuir las responsabilidades entre clases especializadas:
 - **`CalculadoraPrecioReserva`:** calcula el importe correspondiente al tour, las promociones y los servicios adicionales.
 - **`GestorPagos`:** coordina el registro de pagos y aplica las condiciones económicas correspondientes al medio de pago.
 - **`GestorCancelaciones`:** aplica la política de cancelación y determina los importes de devolución.
-- **`CalculadoraHonorarios`:** calcula la liquidación de una salida finalizada a partir de los días trabajados, el honorario diario y las ventas de servicios adicionales.
 
 La clase `Reserva` conserva las operaciones propias de su estado, como calcular el saldo pendiente, registrar los pagos asociados, confirmar o anular la reserva y verificar su vencimiento.
 
@@ -98,7 +97,7 @@ Las clases gestoras coordinan procesos especializados que requieren consultar o 
 
 #### Clases involucradas
 
-`Reserva`, `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` y `CalculadoraHonorarios`.
+`Reserva`, `CalculadoraPrecioReserva`, `GestorPagos` y `GestorCancelaciones`.
 
 #### Ventaja obtenida
 
@@ -231,7 +230,7 @@ El patrón Experto en Información establece que una responsabilidad debe asigna
 
 Se propone distribuir las responsabilidades de la siguiente manera:
 
-- **`Salida`:** conoce su capacidad y la lista de sus reservas (asociación `Salida`–`Reserva` en el diagrama), por lo que puede determinar los cupos disponibles. También conoce su fecha de inicio, por lo que responde cuántos días faltan (`diasHastaInicio`) y si corresponde exigir el pago total (`exigePagoTotal`, faltan 10 días o menos).
+- **`Salida`:** conoce su capacidad y la lista de sus reservas (asociación `Salida`–`Reserva` en el diagrama), por lo que puede determinar los cupos disponibles. También conoce su fecha de inicio, por lo que responde cuántos días faltan (`diasHastaInicio`) y si corresponde exigir el pago total (`exigePagoTotal`, faltan 10 días o menos). Además es quien anula las reservas vencidas de su lista (`verificarVencimientos`) y quien finaliza sus reservas cuando termina (`finalizar`).
 - **`Pasajero`:** conoce su fecha de nacimiento y su tipo, por lo que calcula su factor de tarifa (`obtenerFactorTarifa`).
 - **`Guia`:** conoce sus salidas asignadas y por eso responde si está disponible en un rango de fechas.
 - **`Reserva`:** conoce el importe total y los pagos asociados, por lo que puede calcular el saldo pendiente.
@@ -282,7 +281,7 @@ El `ControladorReservas` coordinará la creación de la reserva y verificará pr
 
 Una vez superadas esas validaciones, `Reserva` administrará la creación y asociación de sus pasajeros.
 
-Esta decisión se fundamenta en que `Reserva` agrupa y administra a los pasajeros vinculados con una operación comercial. Por el mismo criterio, `Reserva` crea sus `NotaAjuste` (`registrarAjuste`).
+Esta decisión se fundamenta en que `Reserva` agrupa y administra a los pasajeros vinculados con una operación comercial. Por el mismo criterio, `Reserva` crea sus `Pago` (`registrarPago`, después de que `GestorPagos` calcula el recargo) y sus `NotaAjuste` (`registrarAjuste`).
 
 La propia `Reserva` es creada por `ControladorReservas`, porque es la clase que recibe los datos iniciales (cliente, salida, vendedor y número de reserva): el patrón Creador también admite como creador a quien dispone de los datos de inicialización.
 
@@ -329,7 +328,6 @@ Este controlador delegará las operaciones en las clases especializadas:
 - **`CalculadoraPrecioReserva`:** determinación de importes.
 - **`GestorPagos`:** registro de pagos y aplicación de condiciones de cobro.
 - **`GestorCancelaciones`:** aplicación de la política de devolución.
-- **`CalculadoraHonorarios`:** cálculo de la liquidación de una salida finalizada.
 - **`Agencia` y `RepositorioAgencia`:** búsqueda de entidades y almacenamiento de los datos.
 
 El controlador coordinará el flujo de trabajo sin concentrar los cálculos específicos de cada regla de negocio.
@@ -342,7 +340,7 @@ Ante una solicitud de cancelación, recuperará la reserva, verificará si puede
 
 #### Clases involucradas
 
-`ControladorReservas`, `ControladorOperaciones`, `Reserva`, `Salida`, `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones`, `CalculadoraHonorarios`, `Agencia` y `RepositorioAgencia`.
+`ControladorReservas`, `Reserva`, `Salida`, `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones`, `Agencia` y `RepositorioAgencia`.
 
 #### Ventaja obtenida
 
@@ -371,9 +369,8 @@ El patrón Fabricación Pura propone crear clases que no representan directament
 Se crean las siguientes clases especializadas:
 
 - **`CalculadoraPrecioReserva`:** calcula el total a partir de la tarifa de la salida, el factor correspondiente a cada pasajero, las promociones y los servicios adicionales.
-- **`GestorPagos`:** coordina el registro de pagos y aplica el recargo correspondiente cuando se utiliza financiación con tarjeta.
+- **`GestorPagos`:** calcula el recargo correspondiente cuando se utiliza financiación con tarjeta y delega en `Reserva` el registro del pago.
 - **`GestorCancelaciones`:** aplica la política de cancelación, calcula el porcentaje de devolución y determina el importe a reintegrar.
-- **`CalculadoraHonorarios`:** concentra el cálculo de honorarios, que combina información de la salida, el guía y los servicios adicionales vendidos.
 
 La clase `Reserva` conserva sus datos y las operaciones sobre su propio estado, como `totalAbonado()`, `calcularSaldo()`, `confirmar()` y `anular()`.
 
@@ -386,7 +383,7 @@ Esta decisión se diferencia del principio SRP:
 
 #### Clases involucradas
 
-`CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones`, `CalculadoraHonorarios` y `Reserva`.
+`CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` y `Reserva`.
 
 #### Ventaja obtenida
 
@@ -407,7 +404,7 @@ La siguiente tabla resume cómo las decisiones de diseño propuestas permiten ab
 | P03 | Acoplamiento entre negocio y persistencia | SOLID: DIP | Utilizar `RepositorioAgencia` como abstracción de almacenamiento. |
 | P04 | Distribución inadecuada de cálculos | GRASP: Experto en Información | Asignar el cálculo de cupos a `Salida` y el de saldos a `Reserva`. |
 | P05 | Interfaz acoplada a procesos de negocio | GRASP: Controlador | Incorporar `ControladorReservas` para coordinar los casos de uso. |
-| P06 | Cálculos y políticas sin lugar natural en el dominio | GRASP: Fabricación Pura | Crear `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` y `CalculadoraHonorarios`. |
+| P06 | Cálculos y políticas sin lugar natural en el dominio | GRASP: Fabricación Pura | Crear `CalculadoraPrecioReserva`, `GestorPagos` y `GestorCancelaciones`. |
 
 El patrón **GRASP Creador** complementa estas decisiones al establecer que `Reserva` administra la creación e incorporación de sus pasajeros, manteniendo consistente la relación entre ambos objetos.
 

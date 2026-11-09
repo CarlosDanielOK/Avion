@@ -1,6 +1,6 @@
 # 2. Diagrama de casos de uso
 
-Los casos de uso se identificaron a partir de los 24 requerimientos funcionales (RF01–RF24), las reglas de negocio RN01–RN33 y los supuestos S01–S21.
+Los casos de uso se identificaron a partir de los 24 requerimientos funcionales (RF01–RF24), las reglas de negocio RN01–RN33 y los supuestos S01–S22.
 
 Se consideran actores directos del sistema al Administrador, al Vendedor y al Coordinador de operaciones.
 
@@ -64,7 +64,7 @@ El Administrador gestiona tours, itinerarios, tarifas y proveedores, y consulta 
 
 **Figura 1. Diagrama de casos de uso de gestión administrativa.**
 
-![Diagrama UML de gestión administrativa](uml/casos-uso-administracion.svg)
+![Diagrama UML de gestión administrativa](uml/casos-uso-administracion.png)
 
 ### 2.2.2. Gestión comercial y reservas
 
@@ -72,7 +72,7 @@ El Vendedor registra clientes y pasajeros, crea y modifica reservas, calcula pre
 
 **Figura 2. Diagrama de casos de uso de gestión comercial y reservas.**
 
-![Diagrama UML de gestión comercial y reservas](uml/casos-uso-reservas.svg)
+![Diagrama UML de gestión comercial y reservas](uml/casos-uso-reservas.png)
 
 ### 2.2.3. Pagos y cancelaciones
 
@@ -80,7 +80,7 @@ El Vendedor registra pagos, controla saldos, confirma o anula reservas, gestiona
 
 **Figura 3. Diagrama de casos de uso de pagos y cancelaciones.**
 
-![Diagrama UML de pagos y cancelaciones](uml/casos-uso-pagos.svg)
+![Diagrama UML de pagos y cancelaciones](uml/casos-uso-pagos.png)
 
 ### 2.2.4. Gestión operativa
 
@@ -88,7 +88,7 @@ El Coordinador de operaciones programa salidas, administra y asigna recursos, em
 
 **Figura 4. Diagrama de casos de uso de gestión operativa.**
 
-![Diagrama UML de gestión operativa](uml/casos-uso-operaciones.svg)
+![Diagrama UML de gestión operativa](uml/casos-uso-operaciones.png)
 
 ## 2.3. Descripciones textuales de casos de uso
 
@@ -375,13 +375,13 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 6. Actualiza el saldo mediante CU13.
 7. Evalúa las condiciones de confirmación de la reserva.
 
-**Criterio económico:** El importe ingresado se separa en capital y recargo. El saldo y la condición de seña se calculan sobre el capital; el importe efectivamente cobrado incluye el recargo cuando corresponde.
-
 **Flujos alternativos:**
 - Si el pago es inválido, se solicita corrección.
 - Si se alcanza la seña requerida, se evalúa la confirmación mediante CU14.
 
 **Postcondición:** Pago registrado y saldo actualizado.
+
+**Criterio económico:** El importe ingresado es el capital abonado. Si el pago es con tarjeta en cuotas, el sistema calcula el recargo del 7 % sobre ese capital y registra ambos por separado (el monto cobrado es capital + recargo). La seña y el saldo se calculan siempre sobre el capital.
 
 **Trazabilidad:** RF12 · RN20–RN22 · S04, S11.
 
@@ -617,7 +617,7 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 2. El sistema obtiene los días trabajados.
 3. Consulta el honorario fijo diario.
 4. Calcula el 5 % de las ventas de servicios adicionales.
-5. La `CalculadoraHonorarios` determina el importe total a partir de los días de la salida, el honorario diario del guía y las ventas de adicionales.
+5. Determina el importe total.
 6. Registra la liquidación.
 
 **Flujos alternativos:**
@@ -659,14 +659,12 @@ Las siguientes fichas describen el comportamiento esperado del sistema. Cada una
 
 **Flujo principal:**
 1. El administrador selecciona el tipo de reporte.
-2. Elige ocupación, ventas por vendedor, ingresos por tour o cancelaciones.
-3. Establece los filtros correspondientes.
-4. El sistema procesa la información.
-5. Muestra el reporte.
+2. Elige ocupación por salida, ventas por vendedor, ingresos por tour o cancelaciones.
+3. El sistema procesa la información de todas las operaciones registradas.
+4. Muestra el reporte por consola.
 
 **Flujos alternativos:**
 - Si no existen datos, se presenta un reporte vacío con una aclaración.
-- Si los filtros son inválidos, se solicita corregirlos.
 
 **Postcondición:** Reporte generado y disponible para consulta.
 

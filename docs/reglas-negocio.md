@@ -81,7 +81,7 @@ Una reserva se confirmará al abonar una seña equivalente al 30 % del importe t
 El saldo pendiente deberá abonarse hasta diez días antes de la salida. En caso contrario, la reserva se anulará y los lugares ocupados volverán a estar disponibles.
 
 ### RN22 – Medios de pago y recargos
-Los pagos podrán realizarse en cuotas mediante efectivo, transferencia o tarjeta. Los pagos con tarjeta en cuotas tendrán un recargo del 7 % sobre el capital de ese pago. El recargo se registra separado del importe de capital, no modifica el total de la reserva ni la base de cálculo de una devolución.
+Los pagos podrán realizarse en cuotas mediante efectivo, transferencia o tarjeta. Los pagos con tarjeta en cuotas tendrán un recargo del 7 % sobre el capital de ese pago. El recargo se registra separado del importe abonado, no modifica el total de la reserva ni la base de cálculo de una devolución (S11).
 
 ## 3. Cancelaciones y modificaciones
 
@@ -115,7 +115,7 @@ No se podrá iniciar una salida sin una lista de pasajeros emitida, un guía asi
 Los honorarios de los guías se liquidarán únicamente por salidas finalizadas.
 
 ### RN32 – Cálculo de honorarios
-Los honorarios se calcularán mediante un monto fijo por día trabajado, más un 5 % de las ventas de servicios adicionales de la salida. La liquidación será calculada por el componente responsable de liquidaciones a partir de la salida finalizada y su guía asignado.
+Los honorarios se calcularán mediante un monto fijo por día trabajado, más un 5 % de las ventas de servicios adicionales de la salida.
 
 ### RN33 – Conservación de reservas pagadas
-Una reserva pagada no podrá eliminarse. Las correcciones deberán registrarse mediante notas de ajuste, cuyo importe puede ser positivo o negativo y se aplica al saldo o al total informado sin eliminar el movimiento original.
+Una reserva pagada no podrá eliminarse. Las correcciones deberán registrarse mediante notas de ajuste, que no eliminan el movimiento original (S22).

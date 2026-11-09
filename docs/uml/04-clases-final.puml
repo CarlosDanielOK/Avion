@@ -2,6 +2,7 @@
 title Rumbo Sur - Diagrama de clases final (SOLID y GRASP)
 
 skinparam shadowing false
+skinparam packageStyle rectangle
 skinparam classAttributeIconSize 0
 skinparam backgroundColor White
 skinparam class {
@@ -12,6 +13,7 @@ skinparam class {
 hide empty members
 left to right direction
 
+package "Enumeraciones" {
 ' ===================== ENUMERACIONES =====================
 
 enum CategoriaTour {
@@ -78,6 +80,9 @@ enum TipoProveedor {
   TRANSPORTISTA
 }
 
+}
+
+package "Modelo del negocio" {
 ' ===================== PERSONAS =====================
 
 abstract class Persona {
@@ -105,6 +110,7 @@ class Guia #FFF3CC {
   + getRol(): String
   + estaHabilitadoPara(cat: CategoriaTour): boolean
   + estaDisponible(inicio: LocalDate, fin: LocalDate): boolean
+  + calcularHonorarios(salida: Salida): double
 }
 
 class Coordinador #FFF3CC {
@@ -273,7 +279,7 @@ class Reserva #FFF3CC {
   + estaVencida(hoy: LocalDate): boolean
   + ocupaCupos(hoy: LocalDate): boolean
   + cantidadPasajeros(): int
-  + registrarPago(pago: Pago): void
+  + registrarPago(importe: double, recargo: double, medio: MedioPago, cuotas: int, fecha: LocalDate): Pago
   + totalAbonado(): double
   + calcularSaldo(): double
   + seniaCubierta(): boolean
@@ -290,7 +296,7 @@ class Reserva #FFF3CC {
 
 class Pago #FFF3CC {
   - fecha: LocalDate
-  - importeCapital: double
+  - importe: double
   - recargo: double
   - medio: MedioPago
   - cuotas: int
@@ -313,12 +319,15 @@ class NotaAjuste {
 Reserva "0..*" --> "1" Cliente : titular >
 Reserva "0..*" --> "1" Vendedor : atendida por >
 Salida "1" -- "0..*" Reserva : recibe >
-Reserva "1" *-- "1..*" Pasajero : incluye >
-Reserva "1" *-- "0..*" Pago : se abona con >
-Reserva "1" *-- "0..*" NotaAjuste : corrige con >
+Reserva "1" *-- "1..*" Pasajero : incluye y crea >
+Reserva "1" *-- "0..*" Pago : se abona con y crea >
+Reserva "1" *-- "0..*" NotaAjuste : corrige con y crea >
 Reserva "1" -- "0..1" Cancelacion : puede tener >
 Pasajero "0..*" -- "0..*" ServicioAdicional : contrata >
 
+}
+
+package "Raiz y persistencia" {
 ' ===================== RAIZ DEL SISTEMA Y PERSISTENCIA =====================
 
 class Agencia #DDEEFF {
@@ -357,9 +366,20 @@ note right of Agencia
   Cliente, Empleado, Vehiculo y Proveedor.
 end note
 
+Agencia o-- "0..*" Tour
+Agencia o-- "0..*" Salida
+Agencia o-- "0..*" Reserva
+Agencia o-- "0..*" Cliente
+Agencia o-- "0..*" Empleado
+Agencia o-- "0..*" Vehiculo
+Agencia o-- "0..*" Proveedor
+
 RepositorioAgencia <|.. RepositorioAgenciaArchivo
 RepositorioAgencia ..> Agencia : persiste >
 
+}
+
+package "Control e interfaz" {
 ' ===================== CONTROL E INTERFAZ =====================
 
 class DatosPasajero #DDEEFF {
@@ -382,6 +402,7 @@ class ControladorReservas #DDEEFF {
   + agregarServicioAdicional(reserva: Reserva, p: Pasajero, s: ServicioAdicional): void
   + finalizarReserva(reserva: Reserva, medio: MedioPago, cuotas: int, hoy: LocalDate): Reserva
   + registrarPago(numero: long, importe: double, medio: MedioPago, cuotas: int, hoy: LocalDate): Pago
+  + verificarVencimientos(idSalida: long, hoy: LocalDate): void
   + cancelarReserva(numero: long, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
   + reemplazarPasajero(numero: long, documento: String, datos: DatosPasajero, hoy: LocalDate): void
   + registrarAjuste(numero: long, motivo: String, importe: double, hoy: LocalDate): NotaAjuste
@@ -403,12 +424,15 @@ class ControladorOperaciones #DDEEFF {
 }
 
 class GeneradorReportes #DDEEFF {
-  + reporteOcupacionPorSalida(filtros: String): String
-  + reporteVentasPorVendedor(filtros: String): String
-  + reporteIngresosPorTour(filtros: String): String
-  + reporteCancelaciones(filtros: String): String
+  + reporteOcupacionPorSalida(): String
+  + reporteVentasPorVendedor(): String
+  + reporteIngresosPorTour(): String
+  + reporteCancelaciones(): String
 }
 
+}
+
+package "Servicios de calculo, pagos y cancelaciones" {
 ' ===================== CALCULO DE PRECIOS =====================
 
 class CalculadoraPrecioReserva #DDEEFF {
@@ -439,10 +463,9 @@ class GestorCancelaciones #DDEEFF {
   + cancelar(reserva: Reserva, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
 }
 
-class CalculadoraHonorarios #DDEEFF {
-  + calcular(salida: Salida): Liquidacion
 }
 
+package "Excepciones" {
 ' ===================== EXCEPCIONES =====================
 
 class ReglaNegocioException <<Exception>> #DDEEFF
@@ -452,6 +475,8 @@ class PagoRequeridoException <<Exception>> #DDEEFF
 class ReservaNoCancelableException <<Exception>> #DDEEFF
 class OperacionNoPermitidaException <<Exception>> #DDEEFF
 class EntidadNoEncontradaException <<Exception>> #DDEEFF
+
+}
 
 ' ===================== RELACIONES SOLID Y GRASP =====================
 
@@ -479,34 +504,32 @@ ControladorReservas ..> Reserva : crea >
 
 ControladorOperaciones --> Agencia : consulta >
 ControladorOperaciones --> RepositorioAgencia : persiste mediante >
-ControladorOperaciones --> CalculadoraHonorarios : usa >
+ControladorOperaciones --> GestorCancelaciones : usa >
 
 GeneradorReportes --> Agencia : consulta >
 
-CalculadoraPrecioReserva "1" --> "1..*" Promocion : evalua >
+CalculadoraPrecioReserva "1" o-- "1..*" Promocion : evalua >
 
 GestorCancelaciones ..> Cancelacion : crea >
-GestorPagos ..> Pago : crea >
-CalculadoraHonorarios ..> Liquidacion : crea >
+ControladorOperaciones ..> Liquidacion : crea >
+
+Reserva ..> DatosPasajero : recibe >
 
 note right of Salida
-  cuposOcupados cuenta pasajeros de reservas
-  confirmadas y pendientes vigentes; las anuladas
-  no ocupan lugares. Los menores de 3 años también
-  ocupan un lugar aunque no abonen tarifa.
-  finalizar() cambia la salida a FINALIZADA y solicita
-  finalizar() en sus reservas vigentes.
+  cuposOcupados cuenta los pasajeros de las reservas
+  pendientes vigentes y confirmadas; las anuladas no
+  ocupan lugares. Los menores de 3 anios tambien ocupan
+  un lugar aunque no abonen tarifa.
+  verificarVencimientos anula las reservas vencidas.
+  finalizar() pasa la salida a FINALIZADA y finaliza
+  sus reservas vigentes.
 end note
 
 note right of Pago
-  importeCapital se usa para saldo, seña y devolución.
-  recargo solo se informa cuando corresponde tarjeta
-  en cuotas y no altera el total de la reserva.
+  importe es el capital abonado (sin recargo) y se usa
+  para saldo, sena y devolucion. recargo solo se informa
+  con tarjeta en cuotas (7 %) y no cambia el total.
 end note
-
-Reserva ..> DatosPasajero : recibe >
-Reserva ..> Pasajero : crea >
-Reserva ..> NotaAjuste : crea >
 
 legend right
   Azul: clase nueva por SOLID/GRASP
