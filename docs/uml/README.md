@@ -34,4 +34,4 @@ Esta carpeta contiene los archivos fuente PlantUML (`.puml`), sus imágenes expo
 - `crearReserva` se divide en `iniciarReserva` y `finalizarReserva`, porque la selección de servicios ocurre entre ambos pasos.
 - `Salida` implementa `Comparable` (orden natural por fecha de inicio) para cumplir con el uso de ordenamiento; los reportes usan además un `Comparator`.
 
-Estos cambios se justifican en `docs/solid-grasp.md`.
+Estos cambios se justifican en [`../diseno/solid-grasp.md`](../diseno/solid-grasp.md).

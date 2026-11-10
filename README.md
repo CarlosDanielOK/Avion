@@ -9,8 +9,8 @@
 | **Modelado** | UML |
 | **Estado actual** | Etapa 1 finalizada – Etapa 2 pendiente de implementación |
 | **Entrega Etapa 1** | 25/10/2026 (tag `etapa-1`) |
-| **Entrega Etapa 2** | 04/11/2026 (tag `etapa-2`) |
-| **Defensa** | 11/11/2026 |
+| **Entrega Etapa 2** | 12/11/2026 (tag `etapa-2`) |
+| **Defensa** | 19/11/2026 (jueves) |
 
 ---
 
@@ -82,7 +82,7 @@ El cliente, el guía de turismo y los proveedores participan de los procesos del
 | GRASP – Controlador | Coordina las operaciones de los casos de uso y delega responsabilidades. | `ControladorReservas`, `ControladorOperaciones` |
 | GRASP – Fabricación Pura | Los cálculos y políticas que no pertenecen a una clase del negocio se ubican en clases propias. | `CalculadoraPrecioReserva`, `GestorPagos`, `GestorCancelaciones` |
 
-La justificación completa de cada decisión (problema detectado, decisión adoptada y ventaja) se encuentra en [`docs/solid-grasp.md`](docs/solid-grasp.md).
+La justificación completa de cada decisión (problema detectado, decisión adoptada y ventaja) se encuentra en [`docs/diseno/solid-grasp.md`](docs/diseno/solid-grasp.md).
 
 ## 5. Documentación
 
@@ -90,25 +90,29 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 
 | Documento | Contenido |
 |---|---|
-| [`docs/analisis-enunciado.md`](docs/analisis-enunciado.md) | Análisis del enunciado, actores y alcance. |
-| [`docs/requerimientos-funcionales.md`](docs/requerimientos-funcionales.md) | Requerimientos funcionales RF01–RF24. |
-| [`docs/reglas-negocio.md`](docs/reglas-negocio.md) | Reglas de negocio RN01–RN33. |
-| [`docs/supuestos-adoptados.md`](docs/supuestos-adoptados.md) | Supuestos S01–S22. |
-| [`docs/casos-de-uso.md`](docs/casos-de-uso.md) | Diagramas y fichas de casos de uso, y matriz de trazabilidad. |
+| [`docs/analisis/analisis-enunciado.md`](docs/analisis/analisis-enunciado.md) | Análisis del enunciado, actores y alcance. |
+| [`docs/analisis/requerimientos-funcionales.md`](docs/analisis/requerimientos-funcionales.md) | Requerimientos funcionales RF01–RF24. |
+| [`docs/analisis/reglas-negocio.md`](docs/analisis/reglas-negocio.md) | Reglas de negocio RN01–RN33. |
+| [`docs/analisis/supuestos-adoptados.md`](docs/analisis/supuestos-adoptados.md) | Supuestos S01–S22. |
+| [`docs/analisis/casos-de-uso.md`](docs/analisis/casos-de-uso.md) | Diagramas y fichas de casos de uso, y matriz de trazabilidad. |
 
 ### Diseño y diagramas
 
 | Documento | Contenido |
 |---|---|
-| [`docs/solid-grasp.md`](docs/solid-grasp.md) | Aplicación y fundamentación de SOLID y GRASP. |
+| [`docs/diseno/solid-grasp.md`](docs/diseno/solid-grasp.md) | Aplicación y fundamentación de SOLID y GRASP. |
 | [`docs/uml/`](docs/uml) | Diagramas UML (imagen exportada y fuente PlantUML) y nota de cambios. |
+| [Documento integral del TPO](<docs/TPO_JT_POO (3).pdf>) | Entregable en formato PDF. |
 
 ## 6. Estructura del repositorio
 
 ```text
 .
 ├── docs/                 Documentación del proyecto
-│   └── uml/              Diagramas UML (.puml, .png y .svg)
+│   ├── analisis/         Análisis, requerimientos, reglas, supuestos y casos de uso
+│   ├── diseno/           Fundamentación de SOLID y GRASP
+│   ├── uml/              Diagramas UML (.puml, .png, .svg y .pdf)
+│   └── TPO_JT_POO (3).pdf
 ├── src/                  Código fuente Java (Etapa 2)
 ├── test/                 Pruebas unitarias (Etapa 2)
 └── README.md
@@ -143,8 +147,8 @@ El proyecto se desarrolla de forma colaborativa en GitHub:
 | Etapa | Contenido | Entrega | Estado |
 |---|---|---|---|
 | **Etapa 1** | Análisis, casos de uso, diagramas de clases y secuencia, SOLID y GRASP. | 25/10/2026 | Finalizada |
-| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 04/11/2026 | En preparación |
-| **Defensa** | Presentación oral y demostración del sistema. | 11/11/2026 | Pendiente |
+| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 12/11/2026 | En preparación |
+| **Defensa** | Presentación oral y demostración del sistema. | 19/11/2026 (jueves) | Pendiente |
 
 ## 11. Integrantes
 
