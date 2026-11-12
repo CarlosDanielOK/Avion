@@ -24,6 +24,7 @@ public class Reserva implements Serializable {
     private LocalDateTime fechaCreacion;
     private EstadoReserva estado;
     private double importeTotal;
+    private double importeServiciosAdicionales;
     private Cancelacion cancelacion;
 
     public Reserva(int id, Cliente cliente,
@@ -338,4 +339,69 @@ public class Reserva implements Serializable {
     public Cancelacion getCancelacion() {
         return cancelacion;
     }
+
+    public int getNumero() {
+        return getId();
+    }
+
+    public int cantidadPasajeros() {
+        return obtenerCantidadPasajeros();
+    }
+
+    public boolean ocupaCupos(LocalDate hoy) {
+        if (hoy == null) {
+            throw new IllegalArgumentException(
+                    "La fecha es obligatoria");
+        }
+
+        if (estado == EstadoReserva.CONFIRMADA) {
+            return true;
+        }
+
+        return estado == EstadoReserva.PENDIENTE
+                && !estaVencida(salida.getFechaInicio());
+    }
+
+    public void anularPorVencimiento() {
+        if (estado != EstadoReserva.PENDIENTE) {
+            return;
+        }
+
+        if (!estaVencida(salida.getFechaInicio())) {
+            throw new IllegalStateException(
+                    "La reserva todavia no esta vencida");
+        }
+
+        cambiarEstado(EstadoReserva.ANULADA);
+    }
+
+    public void finalizar() {
+        if (estado == EstadoReserva.CONFIRMADA) {
+            cambiarEstado(EstadoReserva.FINALIZADA);
+        }
+    }
+
+    public boolean puedeCancelarse() {
+        return estado == EstadoReserva.PENDIENTE
+                || estado == EstadoReserva.CONFIRMADA;
+    }
+
+    public void actualizarServiciosAdicionales(double importe) {
+        if (!Double.isFinite(importe) || importe < 0) {
+            throw new IllegalArgumentException(
+                    "El importe de adicionales no es valido");
+        }
+
+        if (estado != EstadoReserva.PENDIENTE || !pagos.isEmpty()) {
+            throw new IllegalStateException(
+                    "No se pueden modificar los adicionales");
+        }
+
+        this.importeServiciosAdicionales = importe;
+    }
+
+    public double totalServiciosAdicionales() {
+        return importeServiciosAdicionales;
+    }
 }
+

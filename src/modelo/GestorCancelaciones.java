@@ -68,4 +68,38 @@ public class GestorCancelaciones {
                 porcentaje,
                 importeDevuelto);
     }
+    public Cancelacion cancelar(
+            Reserva reserva,
+            String motivo,
+            boolean cancelacionAgencia,
+            LocalDate hoy) {
+
+        if (reserva == null || hoy == null) {
+            throw new IllegalArgumentException(
+                    "La reserva y la fecha son obligatorias");
+        }
+
+        if (!reserva.puedeCancelarse()) {
+            throw new IllegalStateException(
+                    "La reserva no puede cancelarse");
+        }
+
+        double porcentaje = calcularPorcentajeDevolucion(
+                hoy,
+                reserva.getSalida().getFechaInicio(),
+                cancelacionAgencia);
+
+        double importeDevuelto =
+                reserva.calcularTotalPagado() * porcentaje;
+
+        Cancelacion cancelacion = new Cancelacion(
+                hoy,
+                motivo,
+                cancelacionAgencia,
+                porcentaje,
+                importeDevuelto);
+
+        reserva.registrarCancelacion(cancelacion);
+        return cancelacion;
+    }
 }

@@ -73,6 +73,7 @@ public class ControladorReservas {
                 reserva, tarifaBase,
                 fechaSalida, totalAdicionales);
 
+        reserva.actualizarServiciosAdicionales(totalAdicionales);
         reserva.actualizarImporteTotal(total);
         return total;
     }
@@ -247,3 +248,4 @@ public class ControladorReservas {
         return reserva;
     }
 }
+
