@@ -155,3 +155,70 @@ El proyecto se desarrolla de forma colaborativa en GitHub:
 - Bianca Chancalay
 - Carlos Daniel Lazo
 - Guadalupe Olivera
+
+
+## 12. Implementación y pruebas — Etapa 2
+
+### Implementación del sistema
+
+Rumbo Sur es un sistema de gestión para una agencia de turismo, desarrollado en Java 17 mediante programación orientada a objetos.
+
+El sistema contempla la administración de tours, salidas, clientes, reservas, pasajeros, pagos, cancelaciones y recursos operativos.
+
+El código fuente está organizado en los paquetes:
+
+- `modelo`: entidades y reglas de negocio.
+- `controladores`: coordinación de las operaciones.
+- `enumeraciones`: estados y tipos utilizados.
+- `excepciones`: manejo de errores del negocio.
+- `persistencia`: almacenamiento y recuperación de datos.
+- `pruebas`: comprobaciones de funcionalidades.
+
+### Requisitos
+
+- JDK 17.
+- IntelliJ IDEA o una terminal compatible con Java.
+- Git para descargar el repositorio.
+
+### Instalación y compilación
+
+Clonar el repositorio:
+
+```powershell
+git clone https://github.com/CarlosDanielOK/Avion.git
+cd Avion
+```
+
+Compilar desde PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force out
+javac -encoding UTF-8 -d out (Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object FullName)
+```
+
+La compilación conjunta se verificó en una rama temporal de integración.
+
+La ejecución completa desde la clase principal queda pendiente de verificación.
+
+### Pruebas realizadas
+
+Se efectuaron comprobaciones individuales sobre pagos y cancelaciones.
+
+| Prueba | Resultado esperado |
+|---|---|
+| Pago en efectivo de $100.000 | $100.000 |
+| Pago con tarjeta en 3 cuotas de $100.000 | $107.000 |
+| Cancelación con 35 días de anticipación | Devolución del 90% |
+| Cancelación con 20 días de anticipación | Devolución del 50% |
+| Cancelación con 10 días de anticipación | Devolución del 20% |
+| Cancelación con 3 días de anticipación | Sin devolución |
+| Cancelación por parte de la agencia | Devolución del 100% |
+
+### Integración y estado del proyecto
+
+Durante la integración se corrigieron diferencias entre los métodos de los módulos de reservas y operaciones.
+
+Se consiguió compilar conjuntamente las clases disponibles sin errores.
+
+Quedan pendientes las pruebas funcionales integrales, especialmente de los casos CU08 y CU15, así como la verificación de la ejecución completa del sistema.
+
