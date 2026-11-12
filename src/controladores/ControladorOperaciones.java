@@ -19,14 +19,13 @@ import modelo.Tarifa;
 import modelo.Tour;
 import modelo.Vehiculo;
 import persistencia.RepositorioAgencia;
-import servicios.GestorCancelaciones;
+import modelo.GestorCancelaciones;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
 /**
  * Controlador GRASP de la gestión del catálogo y la operación (CU01-03 y
  * CU18-23).
@@ -40,7 +39,7 @@ public class ControladorOperaciones {
     private final GestorCancelaciones gestorCancelaciones;
 
     public ControladorOperaciones(Agencia agencia, RepositorioAgencia repositorio,
-            GestorCancelaciones gestorCancelaciones) {
+                                  GestorCancelaciones gestorCancelaciones) {
         this.agencia = agencia;
         this.repositorio = repositorio;
         this.gestorCancelaciones = gestorCancelaciones;
@@ -62,7 +61,7 @@ public class ControladorOperaciones {
      * duración ni cupos.
      */
     public void modificarTour(String codigo, String nombre, String descripcion, int duracionDias,
-            int cupoMinimo, int cupoMaximo) throws ReglaNegocioException {
+                              int cupoMinimo, int cupoMaximo) throws ReglaNegocioException {
         Tour tour = agencia.buscarTour(codigo);
         boolean cambiaOperacion = duracionDias != tour.getDuracionDias()
                 || cupoMinimo != tour.getCupoMinimo() || cupoMaximo != tour.getCupoMaximo();
@@ -128,6 +127,9 @@ public class ControladorOperaciones {
     /** Crea una salida validando las condiciones del tour (S18, S20, RN19). */
     public Salida programarSalida(String codigoTour, LocalDate inicio, LocalDate fin, int cupo)
             throws ReglaNegocioException {
+        if (inicio == null || fin == null || fin.isBefore(inicio) || inicio.isBefore(LocalDate.now())) {
+            throw new OperacionNoPermitidaException("Las fechas deben ser válidas y la salida no puede comenzar en el pasado");
+        }
         Tour tour = agencia.buscarTour(codigoTour);
         long dias = ChronoUnit.DAYS.between(inicio, fin) + 1;
         if (dias != tour.getDuracionDias()) {
@@ -181,7 +183,22 @@ public class ControladorOperaciones {
             throw new RequisitosNoCumplidosException("El legajo " + legajoGuia + " no corresponde a un guía");
         }
         Vehiculo vehiculo = agencia.buscarVehiculo(patente);
-        salida.asignarGuia((Guia) empleado);
+        Guia guia = (Guia) empleado;
+        // Se valida el vehículo antes de modificar la asociación del guía,
+        // para evitar una asignación parcial si el vehículo no está disponible.
+        if (vehiculo.getCapacidad() < salida.getCupoMaximo()) {
+            throw new RequisitosNoCumplidosException("El vehículo no alcanza la capacidad requerida");
+        }
+        for (Salida otra : agencia.getSalidas()) {
+            if (otra == salida || otra.getEstado() == EstadoSalida.CANCELADA) continue;
+            boolean seSuperpone = !otra.getFechaFin().isBefore(salida.getFechaInicio())
+                    && !otra.getFechaInicio().isAfter(salida.getFechaFin());
+            if (seSuperpone && otra.getVehiculo() != null
+                    && otra.getVehiculo().getPatente().equalsIgnoreCase(vehiculo.getPatente())) {
+                throw new RequisitosNoCumplidosException("El vehículo ya está asignado a otra salida en esas fechas");
+            }
+        }
+        salida.asignarGuia(guia);
         salida.asignarVehiculo(vehiculo);
         guardar();
     }
@@ -189,6 +206,7 @@ public class ControladorOperaciones {
     /** CU20 */
     public List<Pasajero> emitirListaPasajeros(long idSalida) throws ReglaNegocioException {
         Salida salida = agencia.buscarSalida(idSalida);
+        salida.verificarVencimientos(LocalDate.now());
         List<Pasajero> lista = salida.emitirLista();
         guardar();
         return lista;
