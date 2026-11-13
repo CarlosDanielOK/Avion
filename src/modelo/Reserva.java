@@ -21,6 +21,7 @@ public class Reserva implements Serializable {
     private Vendedor vendedor;
     private List<Pasajero> pasajeros;
     private List<Pago> pagos;
+    private List<NotaAjuste> notasAjuste;
     private LocalDateTime fechaCreacion;
     private EstadoReserva estado;
     private double importeTotal;
@@ -47,6 +48,7 @@ public class Reserva implements Serializable {
         this.vendedor = vendedor;
         this.pasajeros = new ArrayList<>();
         this.pagos = new ArrayList<>();
+        this.notasAjuste = new ArrayList<>();
         this.fechaCreacion = LocalDateTime.now();
         this.estado = EstadoReserva.PENDIENTE;
         this.importeTotal = 0;
@@ -85,6 +87,30 @@ public class Reserva implements Serializable {
 
     public int obtenerCantidadPasajeros() {
         return pasajeros.size();
+    }
+
+    public void incluirServiciosObligatorios() {
+        verificarModificacion();
+        for (Pasajero pasajero : pasajeros) {
+            for (ServicioAdicional servicio : salida.getTour().obtenerServiciosObligatorios()) {
+                if (!tieneServicio(pasajero, servicio)) {
+                    pasajero.agregarServicioAdicional(servicio);
+                }
+            }
+        }
+        actualizarTotalServiciosAdicionales();
+    }
+
+    public void agregarServicioAdicional(Pasajero pasajero, ServicioAdicional servicio) {
+        verificarModificacion();
+        if (pasajero == null || !pasajeros.contains(pasajero)) {
+            throw new IllegalArgumentException("El pasajero no pertenece a la reserva");
+        }
+        if (!salida.getTour().getServicios().contains(servicio)) {
+            throw new IllegalArgumentException("El servicio no pertenece al tour de la reserva");
+        }
+        pasajero.agregarServicioAdicional(servicio);
+        actualizarTotalServiciosAdicionales();
     }
 
     // REGISTRAR PAGO
@@ -245,6 +271,50 @@ public class Reserva implements Serializable {
         this.cancelacion = cancelacion;
     }
 
+    public void reemplazarPasajero(String documento, DatosPasajero datos, LocalDate hoy) {
+        if (estado != EstadoReserva.PENDIENTE && estado != EstadoReserva.CONFIRMADA) {
+            throw new IllegalStateException("La reserva no admite reemplazos en su estado actual");
+        }
+        if (hoy == null || datos == null) {
+            throw new IllegalArgumentException("Los datos y la fecha son obligatorios");
+        }
+        if (hoy.isAfter(salida.getFechaInicio().minusDays(3))) {
+            throw new IllegalStateException("El reemplazo solo puede hacerse hasta 3 días antes de la salida");
+        }
+        if (!salida.puedeParticipar(datos)) {
+            throw new IllegalArgumentException("El pasajero no cumple los requisitos del tour");
+        }
+        int indice = indicePasajero(documento);
+        for (Pasajero pasajero : pasajeros) {
+            if (pasajero.getDocumento().equalsIgnoreCase(datos.getDocumento())) {
+                throw new IllegalArgumentException("El pasajero reemplazante ya está en la reserva");
+            }
+        }
+        Pasajero reemplazante = new Pasajero(datos.getNombre(), datos.getApellido(),
+                datos.getDocumento(), pasajeros.get(indice).getTelefono(),
+                datos.getFechaNacimiento(), datos.getTipoPasajero(),
+                datos.getTelefonoEmergencia(), datos.getRestricciones());
+        for (ServicioAdicional servicio : pasajeros.get(indice).getServiciosAdicionales()) {
+            reemplazante.agregarServicioAdicional(servicio);
+        }
+        pasajeros.set(indice, reemplazante);
+    }
+
+    public NotaAjuste registrarAjuste(String motivo, double importe, LocalDate fecha) {
+        if (fecha == null || motivo == null || motivo.isBlank() || importe == 0) {
+            throw new IllegalArgumentException("Fecha, motivo e importe válido son obligatorios");
+        }
+        double nuevoTotal = importeTotal + importe;
+        if (nuevoTotal < calcularTotalPagado()) {
+            throw new IllegalArgumentException("El ajuste no puede dejar un saldo cobrado superior al total");
+        }
+        int id = notasAjuste.size() + 1;
+        NotaAjuste nota = new NotaAjuste(id, fecha, motivo, importe, this);
+        notasAjuste.add(nota);
+        importeTotal = nuevoTotal;
+        return nota;
+    }
+
     // VERIFICAR VENCIMIENTO
     public boolean estaVencida(LocalDate fechaSalida) {
 
@@ -324,6 +394,10 @@ public class Reserva implements Serializable {
         return Collections.unmodifiableList(pagos);
     }
 
+    public List<NotaAjuste> getNotasAjuste() {
+        return Collections.unmodifiableList(notasAjuste);
+    }
+
     public LocalDateTime getFechaCreacion() {
         return fechaCreacion;
     }
@@ -401,7 +475,38 @@ public class Reserva implements Serializable {
     }
 
     public double totalServiciosAdicionales() {
-        return importeServiciosAdicionales;
+        double total = 0;
+        for (Pasajero pasajero : pasajeros) {
+            total += pasajero.totalServiciosAdicionales();
+        }
+        return total > 0 ? total : importeServiciosAdicionales;
+    }
+
+    private void verificarModificacion() {
+        if (estado != EstadoReserva.PENDIENTE || !pagos.isEmpty()) {
+            throw new IllegalStateException("La reserva ya no admite modificaciones");
+        }
+    }
+
+    private boolean tieneServicio(Pasajero pasajero, ServicioAdicional servicio) {
+        for (ServicioAdicional existente : pasajero.getServiciosAdicionales()) {
+            if (existente.getNombre().equalsIgnoreCase(servicio.getNombre())) return true;
+        }
+        return false;
+    }
+
+    private int indicePasajero(String documento) {
+        if (documento == null || documento.isBlank()) {
+            throw new IllegalArgumentException("El documento es obligatorio");
+        }
+        for (int i = 0; i < pasajeros.size(); i++) {
+            if (pasajeros.get(i).getDocumento().equalsIgnoreCase(documento)) return i;
+        }
+        throw new IllegalArgumentException("No existe el pasajero indicado");
+    }
+
+    private void actualizarTotalServiciosAdicionales() {
+        importeServiciosAdicionales = totalServiciosAdicionales();
     }
 }
 

@@ -15,6 +15,7 @@ import modelo.Agencia;
 import modelo.Actividad;
 import modelo.Cancelacion;
 import modelo.Cliente;
+import modelo.DatosPasajero;
 import modelo.Empleado;
 import modelo.Guia;
 import modelo.Liquidacion;
@@ -31,6 +32,7 @@ import modelo.TourNaturaleza;
 import modelo.Vehiculo;
 import modelo.Vendedor;
 import modelo.Pago;
+import modelo.NotaAjuste;
 import persistencia.RepositorioAgencia;
 
 import java.time.LocalDate;
@@ -354,7 +356,8 @@ public class MenuConsola {
     private void menuReservas() throws ReglaNegocioException {
         System.out.println("\n-- Reservas --");
         System.out.println("1. Listar\n2. Registrar cliente\n3. Crear reserva\n4. Calcular precio");
-        System.out.println("5. Registrar pago\n6. Confirmar\n7. Cancelar\n0. Volver");
+        System.out.println("5. Registrar pago\n6. Confirmar\n7. Cancelar\n8. Contratar adicional");
+        System.out.println("9. Reemplazar pasajero\n10. Registrar nota de ajuste\n0. Volver");
         switch (leerEntero("Opción: ")) {
             case 1: listarReservas(); break;
             case 2: registrarCliente(); break;
@@ -379,6 +382,34 @@ public class MenuConsola {
                 Cancelacion cancelacion = reservas.cancelarReserva(leerEntero("Reserva: "),
                         leerTexto("Motivo: "), leerFecha("Fecha de salida"), false);
                 System.out.println("Reserva cancelada. Devolución: $" + cancelacion.getImporteDevuelto());
+                break;
+            case 8:
+                int reservaAdicional = leerEntero("Reserva: ");
+                Reserva reserva = reservas.buscarReserva(reservaAdicional);
+                if (reserva == null) throw new IllegalArgumentException("No existe la reserva indicada.");
+                String nombreServicio = leerTexto("Nombre del servicio: ");
+                ServicioAdicional servicio = reserva.getSalida().getTour().getServicios().stream()
+                        .filter(s -> s.getNombre().equalsIgnoreCase(nombreServicio))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("No existe ese servicio en el tour."));
+                reservas.agregarServicioAdicional(reservaAdicional,
+                        leerTexto("Documento del pasajero: "), servicio);
+                System.out.println("Servicio adicional contratado.");
+                break;
+            case 9:
+                reservas.reemplazarPasajero(leerEntero("Reserva: "),
+                        leerTexto("Documento del pasajero actual: "),
+                        new DatosPasajero(leerTexto("Nombre: "), leerTexto("Apellido: "),
+                                leerTexto("Documento nuevo: "), leerFecha("Fecha de nacimiento"),
+                                leerEnum("Tipo de pasajero", TipoPasajero.values()),
+                                leerTexto("Contacto de emergencia: "), leerTexto("Restricciones: ")),
+                        leerFecha("Fecha de hoy"));
+                System.out.println("Pasajero reemplazado.");
+                break;
+            case 10:
+                NotaAjuste nota = reservas.registrarAjuste(leerEntero("Reserva: "),
+                        leerTexto("Motivo: "), leerDecimal("Importe (+/-): "), leerFecha("Fecha"));
+                System.out.println("Nota registrada: " + nota);
                 break;
             case 0: break;
             default: System.out.println("Opción inválida.");

@@ -3,11 +3,14 @@ package controladores;
 import enumeraciones.EstadoReserva;
 import enumeraciones.MedioPago;
 import enumeraciones.TipoPasajero;
+import enumeraciones.TipoServicio;
 import modelo.Agencia;
 import modelo.Cliente;
+import modelo.DatosPasajero;
 import modelo.Pasajero;
 import modelo.Reserva;
 import modelo.Salida;
+import modelo.ServicioAdicional;
 import modelo.Tarifa;
 import modelo.TourCultural;
 import modelo.Vendedor;
@@ -30,6 +33,8 @@ public class ControladorReservasTest {
         ControladorReservas controlador = new ControladorReservas(agencia, repositorio);
         LocalDate salidaFecha = LocalDate.now().plusDays(30);
         TourCultural tour = new TourCultural("CUL01", "Tour cultural", "Descripción", 2, 1, 4);
+        ServicioAdicional traslado = new ServicioAdicional("Traslado", 100, TipoServicio.TRASLADO, false);
+        tour.agregarServicioAdicional(traslado);
         tour.agregarTarifa(new Tarifa(enumeraciones.Temporada.MEDIA,
                 LocalDate.now().minusDays(1), salidaFecha.plusDays(1), 1000));
         Salida salida = new Salida(1, tour, salidaFecha, salidaFecha.plusDays(1), 4);
@@ -46,10 +51,20 @@ public class ControladorReservasTest {
         verificar(agencia.getReservas().contains(reserva), "la reserva se registra en la agencia");
         verificar(salida.cuposOcupados(LocalDate.now()) == 1, "la reserva retiene un cupo");
 
-        controlador.calcularPrecio(1, 1000, salidaFecha, 0);
-        controlador.registrarPago(1, 1, 1000, MedioPago.EFECTIVO, 1);
+        controlador.agregarServicioAdicional(1, "789", traslado);
+        controlador.calcularPrecio(1, 1000, salidaFecha, reserva.totalServiciosAdicionales());
+        controlador.registrarPago(1, 1, 1100, MedioPago.EFECTIVO, 1);
         controlador.confirmarReserva(1, salidaFecha);
         verificar(reserva.getEstado() == EstadoReserva.CONFIRMADA, "la reserva se confirma con el pago");
+
+        controlador.reemplazarPasajero(1, "789",
+                new DatosPasajero("Pedro", "Ruiz", "790", LocalDate.of(1990, 1, 1),
+                        TipoPasajero.ADULTO, "11", ""), LocalDate.now());
+        verificar(reserva.getPasajeros().get(0).getDocumento().equals("790"),
+                "se reemplaza el pasajero sin modificar el precio");
+        controlador.registrarAjuste(1, "Diferencia administrativa", 50, LocalDate.now());
+        verificar(reserva.getNotasAjuste().size() == 1 && reserva.getImporteTotal() == 1150,
+                "la nota de ajuste modifica el total sin borrar pagos");
 
         controlador.cancelarReserva(1, "Motivo de prueba", salidaFecha, false);
         verificar(reserva.getEstado() == EstadoReserva.ANULADA, "la reserva se cancela");

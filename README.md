@@ -203,4 +203,4 @@ Además, se ejecutó una prueba de humo del menú: carga de datos de ejemplo, ge
 
 La compilación conjunta no presenta errores. Los casos CU04, CU05 y CU24 cuentan con implementación y pruebas específicas. La interfaz también incorpora opciones para completar el catálogo y administrar recursos operativos.
 
-El módulo de reservas está integrado con la raíz `Agencia` y el repositorio compartido. El menú permite registrar clientes, crear reservas controlando cupos, calcular precios, registrar pagos, confirmar y cancelar reservas. La prueba `ControladorReservasTest` verifica el flujo integrado y la persistencia se ejecuta después de cada modificación.
+El módulo de reservas está integrado con la raíz `Agencia` y el repositorio compartido. El menú permite registrar clientes, crear reservas controlando cupos, calcular precios, contratar servicios por pasajero, registrar pagos, confirmar, cancelar, reemplazar pasajeros y registrar notas de ajuste. La prueba `ControladorReservasTest` verifica el flujo integrado y la persistencia se ejecuta después de cada modificación.

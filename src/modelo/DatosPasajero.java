@@ -1,6 +1,7 @@
 
 package modelo;
 
+import enumeraciones.TipoPasajero;
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -12,6 +13,7 @@ public class DatosPasajero implements Serializable {
     private final String apellido;
     private final String documento;
     private final LocalDate fechaNacimiento;
+    private final TipoPasajero tipoPasajero;
     private final String telefonoEmergencia;
     private final String restricciones;
 
@@ -20,6 +22,18 @@ public class DatosPasajero implements Serializable {
             String apellido,
             String documento,
             LocalDate fechaNacimiento,
+            String telefonoEmergencia,
+            String restricciones) {
+        this(nombre, apellido, documento, fechaNacimiento, TipoPasajero.ADULTO,
+                telefonoEmergencia, restricciones);
+    }
+
+    public DatosPasajero(
+            String nombre,
+            String apellido,
+            String documento,
+            LocalDate fechaNacimiento,
+            TipoPasajero tipoPasajero,
             String telefonoEmergencia,
             String restricciones) {
 
@@ -43,11 +57,15 @@ public class DatosPasajero implements Serializable {
             throw new IllegalArgumentException(
                     "La fecha de nacimiento no es valida");
         }
+        if (tipoPasajero == null) {
+            throw new IllegalArgumentException("El tipo de pasajero es obligatorio");
+        }
 
         this.nombre = nombre.trim();
         this.apellido = apellido.trim();
         this.documento = documento.trim();
         this.fechaNacimiento = fechaNacimiento;
+        this.tipoPasajero = tipoPasajero;
         this.telefonoEmergencia = telefonoEmergencia;
         this.restricciones = restricciones;
     }
@@ -66,6 +84,10 @@ public class DatosPasajero implements Serializable {
 
     public LocalDate getFechaNacimiento() {
         return fechaNacimiento;
+    }
+
+    public TipoPasajero getTipoPasajero() {
+        return tipoPasajero;
     }
 
     public String getTelefonoEmergencia() {

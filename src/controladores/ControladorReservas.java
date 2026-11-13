@@ -56,10 +56,20 @@ public class ControladorReservas {
         }
 
         Salida salida = reserva.getSalida();
+        for (Pasajero pasajero : reserva.getPasajeros()) {
+            DatosPasajero datos = new DatosPasajero(pasajero.getNombre(),
+                    pasajero.getApellido(), pasajero.getDocumento(),
+                    pasajero.getFechaNacimiento(), pasajero.getTipoPasajero(),
+                    pasajero.getContactoEmergencia(), pasajero.getRestricciones());
+            if (!salida.puedeParticipar(datos)) {
+                throw new IllegalArgumentException("Un pasajero no cumple los requisitos del tour");
+            }
+        }
         if (salida.cuposDisponibles(LocalDate.now()) < reserva.obtenerCantidadPasajeros()) {
             throw new IllegalStateException("No hay cupos suficientes para la reserva");
         }
 
+        reserva.incluirServiciosObligatorios();
         salida.agregarReserva(reserva);
         agencia.agregarReserva(reserva);
         guardar();
@@ -255,6 +265,29 @@ public class ControladorReservas {
         return anulada;
     }
 
+    public void agregarServicioAdicional(int idReserva, String documentoPasajero,
+                                         ServicioAdicional servicio) {
+        Reserva reserva = obtenerReserva(idReserva);
+        Pasajero pasajero = buscarPasajero(reserva, documentoPasajero);
+        reserva.agregarServicioAdicional(pasajero, servicio);
+        guardar();
+    }
+
+    public void reemplazarPasajero(int idReserva, String documento,
+                                   DatosPasajero datos, LocalDate hoy) {
+        Reserva reserva = obtenerReserva(idReserva);
+        reserva.reemplazarPasajero(documento, datos, hoy);
+        guardar();
+    }
+
+    public NotaAjuste registrarAjuste(int idReserva, String motivo,
+                                      double importe, LocalDate fecha) {
+        Reserva reserva = obtenerReserva(idReserva);
+        NotaAjuste nota = reserva.registrarAjuste(motivo, importe, fecha);
+        guardar();
+        return nota;
+    }
+
     // LISTAR RESERVAS
     public List<Reserva> listarReservas() {
         return agencia.getReservas();
@@ -271,6 +304,13 @@ public class ControladorReservas {
         }
 
         return reserva;
+    }
+
+    private Pasajero buscarPasajero(Reserva reserva, String documento) {
+        for (Pasajero pasajero : reserva.getPasajeros()) {
+            if (pasajero.getDocumento().equalsIgnoreCase(documento)) return pasajero;
+        }
+        throw new IllegalArgumentException("No existe el pasajero indicado");
     }
 
     private void guardar() {

@@ -73,6 +73,14 @@ La implementación se organizó mediante paquetes Java que permiten separar las 
 
 Esta organización facilita la lectura del código, el mantenimiento y la integración de los módulos.
 
+### 2.5. FUNCIONALIDADES COMPLEMENTARIAS INTEGRADAS
+
+Se completaron las funcionalidades previstas en el modelo final para servicios
+adicionales por pasajero, reemplazo de pasajeros y notas de ajuste. Los servicios
+obligatorios se incorporan al registrar la reserva; el reemplazo valida la fecha
+límite y los requisitos del tour; y las notas modifican el total sin eliminar ni
+alterar pagos existentes.
+
 ---
 
 ## 3. DIFICULTADES ENCONTRADAS
