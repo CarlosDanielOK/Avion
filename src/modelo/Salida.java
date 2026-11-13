@@ -65,6 +65,7 @@ public class Salida implements Serializable, Comparable<Salida> {
         for (Reserva reserva : reservas) {
             if (reserva.estaVencida(fechaInicio, hoy)) {
                 reserva.anularPorVencimiento(fechaInicio, hoy);
+                listaEmitida = false;
             }
         }
     }
@@ -87,7 +88,12 @@ public class Salida implements Serializable, Comparable<Salida> {
 
     public double totalServiciosAdicionales() {
         double total = 0;
-        for (Reserva reserva : reservas) total += reserva.totalServiciosAdicionales();
+        for (Reserva reserva : reservas) {
+            if (reserva.getEstado() == enumeraciones.EstadoReserva.CONFIRMADA
+                    || reserva.getEstado() == enumeraciones.EstadoReserva.FINALIZADA) {
+                total += reserva.totalServiciosAdicionales();
+            }
+        }
         return total;
     }
 
@@ -116,6 +122,7 @@ public class Salida implements Serializable, Comparable<Salida> {
             throw new OperacionNoPermitidaException("No hay cupos suficientes para la reserva");
         }
         reservas.add(reserva);
+        listaEmitida = false;
         actualizarEstado(hoy);
     }
 
@@ -137,17 +144,34 @@ public class Salida implements Serializable, Comparable<Salida> {
         this.vehiculo = vehiculo;
     }
 
-    /** Genera la lista operativa solo cuando la salida alcanzó el cupo mínimo. */
+    /** Emite la lista con las reservas que mantienen una retención vigente o están confirmadas. */
     public List<Pasajero> emitirLista() throws OperacionNoPermitidaException {
-        if (estado != EstadoSalida.CONFIRMADA && estado != EstadoSalida.COMPLETA) {
-            throw new OperacionNoPermitidaException(
-                    "Solo se puede emitir la lista de una salida confirmada o completa");
+        return emitirLista(LocalDate.now());
+    }
+
+    /** Sobrecarga con fecha explícita para comprobar los vencimientos sin depender del reloj. */
+    public List<Pasajero> emitirLista(LocalDate hoy) throws OperacionNoPermitidaException {
+        if (hoy == null) {
+            throw new IllegalArgumentException("La fecha es obligatoria");
         }
+
+        verificarVencimientos(hoy);
+        actualizarEstado(hoy);
+        if (estado == EstadoSalida.CANCELADA || estado == EstadoSalida.EN_CURSO
+                || estado == EstadoSalida.FINALIZADA) {
+            throw new OperacionNoPermitidaException(
+                    "No se puede emitir la lista de una salida " + estado);
+        }
+
         List<Pasajero> pasajeros = new ArrayList<>();
         for (Reserva reserva : reservas) {
-            if (reserva.getEstado() == enumeraciones.EstadoReserva.CONFIRMADA) {
+            if (reserva.ocupaCupos(hoy)) {
                 pasajeros.addAll(reserva.getPasajeros());
             }
+        }
+        if (pasajeros.isEmpty()) {
+            throw new OperacionNoPermitidaException(
+                    "No hay reservas vigentes para emitir la lista");
         }
         listaEmitida = true;
         return pasajeros;
@@ -193,6 +217,11 @@ public class Salida implements Serializable, Comparable<Salida> {
         }
         estado = EstadoSalida.FINALIZADA;
         for (Reserva reserva : reservas) reserva.finalizar();
+    }
+
+    /** Invalida la lista si cambian los pasajeros o las reservas asociadas. */
+    void invalidarListaPasajeros() {
+        listaEmitida = false;
     }
 
     public void registrarLiquidacion(Liquidacion liquidacion) { this.liquidacion = liquidacion; }

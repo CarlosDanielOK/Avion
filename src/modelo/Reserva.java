@@ -92,6 +92,9 @@ public class Reserva implements Serializable {
 
         pasajeros.add(pasajero);
         importeTotal = 0;
+        if (salida.getReservas().contains(this)) {
+            salida.invalidarListaPasajeros();
+        }
     }
 
     public int obtenerCantidadPasajeros() {
@@ -257,6 +260,9 @@ public class Reserva implements Serializable {
         }
 
         this.estado = nuevoEstado;
+        if (nuevoEstado == EstadoReserva.ANULADA) {
+            salida.invalidarListaPasajeros();
+        }
     }
 
     // REGISTRAR CANCELACION
@@ -313,6 +319,7 @@ public class Reserva implements Serializable {
             reemplazante.agregarServicioAdicional(servicio);
         }
         pasajeros.set(indice, reemplazante);
+        salida.invalidarListaPasajeros();
     }
 
     public NotaAjuste registrarAjuste(String motivo, double importe, LocalDate fecha) {
@@ -445,6 +452,9 @@ public class Reserva implements Serializable {
     }
 
     public void anularPorVencimiento(LocalDate fechaSalida, LocalDate hoy) {
+        if (estado != EstadoReserva.PENDIENTE && estado != EstadoReserva.CONFIRMADA) {
+            return;
+        }
         if (!estaVencida(fechaSalida, hoy)) {
             throw new IllegalStateException("La reserva todavia no esta vencida");
         }

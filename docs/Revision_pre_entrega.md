@@ -7,7 +7,7 @@ La implementación Java revisada compila con `--release 17`, sus seis clases de 
 ## Correcciones aplicadas en esta revisión
 
 1. Se corrigió el vencimiento de reservas confirmadas con saldo impago: una vez superada la fecha límite de diez días, la reserva se anula y libera sus cupos.
-2. La lista de pasajeros contiene únicamente reservas confirmadas.
+2. La lista de pasajeros incluye reservas confirmadas y reservas pendientes cuya retención siga vigente; excluye reservas anuladas o vencidas. Si cambia la composición de reservas o pasajeros, la lista anterior se invalida y debe emitirse nuevamente antes de iniciar la salida.
 3. Se rechaza la creación de reservas para salidas canceladas, finalizadas o en curso.
 4. El precio se calcula con la tarifa vigente de la fecha de salida y los servicios adicionales realmente contratados; si se agrega un adicional, el precio anterior se invalida para forzar el recálculo.
 5. `CalculadoraPrecioReserva` recibe promociones por constructor y evalúa la interfaz `Promocion`, para que la extensión de promociones no requiera modificar su algoritmo.
@@ -15,6 +15,8 @@ La implementación Java revisada compila con `--release 17`, sus seis clases de 
 7. La emisión de listas y el inicio de salidas actualizan vencimientos y el cupo mínimo antes de continuar. Una salida programada no puede iniciar sin alcanzar el estado CONFIRMADA o COMPLETA; si llega a siete días sin cupo mínimo, se cancela y se procesan las devoluciones de agencia.
 8. Se registra el medio del último pago en la devolución simulada, conforme al supuesto S13.
 9. Se centralizó la actualización de vencimientos y del estado de la salida al iniciar operaciones sobre una reserva (S09). Una reserva vencida se anula antes de permitir calcular, cobrar, confirmar, cancelar o modificar; si la salida también debe cancelarse por cupo mínimo, se procesan las devoluciones completas.
+10. `Salida.totalServiciosAdicionales()` excluye reservas pendientes y anuladas de la base de cálculo de honorarios, y considera solo reservas confirmadas o finalizadas.
+11. La emisión de una lista actualiza vencimientos y el estado de la salida; los cambios posteriores en reservas o pasajeros invalidan la lista anterior para que no se inicie la salida con datos desactualizados.
 
 ## Pendientes que no pueden cerrarse con el volcado proporcionado
 

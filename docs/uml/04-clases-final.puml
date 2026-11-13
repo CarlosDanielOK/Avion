@@ -246,7 +246,9 @@ class Salida #FFF3CC {
   + asignarGuia(guia: Guia): void
   + asignarVehiculo(vehiculo: Vehiculo): void
   + emitirLista(): List<Pasajero>
+  + emitirLista(hoy: LocalDate): List<Pasajero>
   + actualizarEstado(hoy: LocalDate): void
+  ~ invalidarListaPasajeros(): void
   + validarCondicionesInicio(): void
   + iniciar(): void
   + finalizar(): void
@@ -552,11 +554,20 @@ note right of Salida
   ocupan lugares. Los menores de 3 anios tambien ocupan
   un lugar aunque no abonen tarifa.
   verificarVencimientos anula las reservas vencidas.
-  emitirLista solo admite salidas CONFIRMADAS o COMPLETAS
-  e incluye exclusivamente reservas CONFIRMADAS.
+  emitirLista primero actualiza vencimientos y estado.
+  Permite PROGRAMADA, CONFIRMADA o COMPLETA cuando hay
+  reservas vigentes; incluye pendientes no vencidas y
+  confirmadas, y excluye anuladas o vencidas.
+  No emite listas para CANCELADA, EN_CURSO o FINALIZADA.
+  totalServiciosAdicionales solo suma reservas CONFIRMADAS
+  o FINALIZADAS, excluyendo pendientes y anuladas.
   iniciar solo admite salidas CONFIRMADAS o COMPLETAS.
+  Los cambios de reservas, vencimientos, cancelaciones o
+  pasajeros invalidan una lista previamente emitida.
+  Reserva.cambiarEstado(ANULADA) también invalida la lista.
+  iniciar exige que la lista corresponda al estado actual.
   finalizar() pasa la salida a FINALIZADA y finaliza
-  sus reservas vigentes.
+  sus reservas confirmadas.
 end note
 
 note right of Pago

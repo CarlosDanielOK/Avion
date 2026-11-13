@@ -219,7 +219,7 @@ public class ControladorOperaciones {
         if (salida.getEstado() == EstadoSalida.CANCELADA) {
             throw new OperacionNoPermitidaException("No se puede emitir la lista: la salida está cancelada");
         }
-        List<Pasajero> lista = salida.emitirLista();
+        List<Pasajero> lista = salida.emitirLista(hoy);
         guardar();
         return lista;
     }

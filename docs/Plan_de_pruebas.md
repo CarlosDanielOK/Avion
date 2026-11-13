@@ -26,7 +26,7 @@ java -cp "out;out-test" modelo.CalculadoraPrecioReservaTest
 | PT01 | `AgenciaTest` – búsquedas | Tour `CUL01`, cliente documento `222`; consulta de tour inexistente `NOEXISTE` | Encontrar registros sin distinguir mayúsculas y lanzar `EntidadNoEncontradaException` si no existe | **OK** |
 | PT02 | `SalidaTest` – validaciones y cupos | Fechas invertidas; cupos fuera del rango del tour; reservas con dos pasajeros y cupo mínimo de dos | Rechazar datos inválidos; pasar a CONFIRMADA al alcanzar el mínimo y a COMPLETA al ocupar el máximo | **OK** |
 | PT03 | `SalidaTest` – vencimiento de reserva confirmada | Total $1.000; pago parcial $300; salida a 10 días; verificación al día siguiente del límite | Anular la reserva con saldo impago y liberar los cupos | **OK** |
-| PT04 | `SalidaTest` – lista de pasajeros | Una reserva confirmada y una pendiente | La lista operativa incluye solo al pasajero de la reserva confirmada | **OK** |
+| PT04 | `SalidaTest` – lista de pasajeros | Una reserva confirmada, una pendiente vigente y una anulada | La lista incluye pasajeros de reservas vigentes (pendientes no vencidas y confirmadas) y excluye las anuladas | **OK** |
 | PT05 | `ControladorReservasTest` – flujo de reserva | Tarifa base $1.000; adicional traslado $100 y excursión $200; pago; confirmación; ajuste de $50; segundo pago por transferencia y cancelación | Total inicial $1.100; total recalculado $1.300; ajuste a $1.350; cancelación libera cupos y conserva el último medio de pago | **OK** |
 | PT06 | `ControladorReservasTest` – alta y mínimo | Alta en salida previamente cancelada; salida a cinco días con una reserva que alcanza mínimo de dos pasajeros | Rechazar la primera y confirmar la salida en el segundo caso, manteniendo la reserva pendiente hasta el pago de seña | **OK** |
 | PT07 | `ControladorOperacionesTest` – recursos | Dos salidas superpuestas, un vehículo y dos guías | Rechazar el uso simultáneo del mismo vehículo y evitar una asignación parcial | **OK** |
@@ -36,8 +36,12 @@ java -cp "out;out-test" modelo.CalculadoraPrecioReservaTest
 | PT11 | Persistencia por serialización | Carga de datos de ejemplo, guardado y recuperación en archivo temporal | Recuperar 2 tours, 2 salidas y 3 reservas | **OK** |
 | PT12 | Inicio del menú | Ejecución de `Main` y selección `0` | Mostrar menú y finalizar sin excepción | **OK** |
 | PT13 | `ControladorReservasTest` – vencimiento al iniciar una operación | Reserva pendiente creada hoy; se intenta confirmar simulando una fecha tres días posterior | Aplicar S04/S09 antes de confirmar, anular la reserva vencida y liberar el cupo | **OK** |
+| PT14 | `SalidaTest` – lista con salida aún programada | Salida PROGRAMADA con una reserva pendiente cuya retención sigue vigente | Permitir emitir la lista provisional con pasajeros de reservas vigentes; no iniciar la salida hasta que su estado y recursos lo permitan | **OK** |
+| PT15 | `SalidaTest` – base de honorarios por adicionales | Servicios contratados en reservas confirmadas, finalizadas, pendientes y anuladas | Sumar únicamente servicios vendidos en reservas confirmadas/finalizadas; excluir pendientes y anuladas | **OK** |
+| PT16 | `SalidaTest` – cancelación según estado operativo | Reserva confirmada asociada a una salida EN_CURSO y luego FINALIZADA | Rechazar la cancelación en ambos estados, según S15 | **OK** |
+| PT17 | `SalidaTest` – vigencia de la lista emitida | Se emite una lista y luego se agrega o cancela una reserva | Invalidar la lista anterior y exigir una nueva emisión antes de iniciar | **OK** |
 
-**Resultado global:** compilación de todo `src/` y `test/` con `javac --release 17` sin errores; las seis clases de prueba finalizaron con `OK` y cubren los 13 escenarios automatizados documentados; las dos comprobaciones de humo también finalizaron correctamente.
+**Resultado global:** compilación de todo `src/` y `test/` con `javac --release 17` sin errores; las seis clases de prueba finalizaron con `OK` y cubren los 17 escenarios automatizados documentados; las dos comprobaciones de humo también finalizaron correctamente.
 
 ## 3. Pruebas manuales recomendadas para la demostración oral
 
@@ -53,7 +57,7 @@ Estas pruebas son una guía de ejecución manual; no se presentan como resultado
 | PM06 | Intentar confirmar a diez días o menos con saldo pendiente | La confirmación se rechaza hasta completar el pago |
 | PM07 | Cancelar con 30, 15, 7 y 6 días de anticipación y luego cancelar por agencia | Aplicar 90 %, 50 %, 20 %, 0 % y 100 %, respectivamente, sobre el capital abonado |
 | PM08 | Asignar un guía no habilitado o un vehículo con capacidad insuficiente | La asignación se rechaza y no deja una relación parcial |
-| PM09 | Emitir lista, iniciar y finalizar salida | La lista solo contiene reservas confirmadas; el inicio exige lista, guía habilitado y vehículo adecuado; al finalizar se finalizan las reservas confirmadas |
+| PM09 | Emitir lista, iniciar y finalizar salida | La lista incluye reservas vigentes (pendientes no vencidas y confirmadas) y excluye anuladas; el inicio exige estado compatible, lista, guía habilitado y vehículo adecuado; al finalizar se finalizan las reservas confirmadas |
 | PM10 | Cerrar y volver a abrir el programa con datos guardados | Los datos persisten en `datos/agencia.dat` |
 
 ## 4. Observaciones

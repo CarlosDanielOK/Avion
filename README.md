@@ -102,7 +102,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 | Documento | Contenido |
 |---|---|
 | [`docs/diseno/solid-grasp.md`](docs/diseno/solid-grasp.md) | Aplicación y fundamentación de SOLID y GRASP. |
-| [`docs/uml/`](docs/uml) | Diagramas UML, fuentes PlantUML y nota de cambios. Las fuentes de secuencia y clases finales son vigentes; sus exportaciones gráficas deben regenerarse antes de entregar. |
+| [`docs/uml/`](docs/uml) | Diagramas UML y fuentes PlantUML. La nota [`05-cambios-etapa-2.md`](docs/uml/05-cambios-etapa-2.md) justifica las diferencias entre el diseño inicial y la implementación. Las exportaciones gráficas deben regenerarse antes de entregar. |
 | [`docs/Plan_de_pruebas.md`](docs/Plan_de_pruebas.md) | Plan con entradas, resultados esperados y obtenidos, además de pruebas manuales para la defensa. |
 | [`docs/Revision_pre_entrega.md`](docs/Revision_pre_entrega.md) | Resumen de la revisión técnica, correcciones aplicadas y checklist pendiente de entrega. |
 | `docs/Documento de diseño.pdf` | PDF complementario: el binario no estaba incluido en el archivo Repomix proporcionado para esta revisión; debe recuperarse del repositorio original y actualizarse con los diagramas vigentes. |
@@ -114,7 +114,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 ├── docs/                 Documentación del proyecto
 │   ├── analisis/         Análisis, requerimientos, reglas, supuestos y casos de uso
 │   ├── diseno/           Fundamentación de SOLID y GRASP
-│   ├── uml/              Fuentes PlantUML (.puml) y exportaciones gráficas
+│   ├── uml/              Fuentes PlantUML (.puml), exportaciones y cambios de Etapa 2
 │   ├── Plan_de_pruebas.md
 │   ├── Revision_pre_entrega.md
 │   └── Documento de diseño.pdf (reincorporar versión actualizada)
@@ -204,7 +204,7 @@ La persistencia utiliza serialización de objetos Java en `datos/agencia.dat`. L
 | `ControladorReservasTest` | OK |
 | `CalculadoraPrecioReservaTest` | OK |
 
-Además, se ejecutó una prueba de humo del menú y una prueba de persistencia: se cargaron los datos de ejemplo, se guardaron y recuperaron desde un archivo temporal (2 tours, 2 salidas y 3 reservas), y se comprobó que `Main` muestra el menú y finaliza con la opción 0. La verificación detallada está en el plan de pruebas.
+Además, se ejecutó una prueba de humo del menú y una prueba de persistencia: se cargaron los datos de ejemplo, se guardaron y recuperaron desde un archivo temporal (2 tours, 2 salidas y 3 reservas), y se comprobó que `Main` muestra el menú y finaliza con la opción 0. La verificación detallada está en el plan de pruebas, que registra 17 escenarios automatizados y separa las guías de pruebas manuales para la defensa.
 
 ### Estado de integración
 

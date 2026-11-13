@@ -1,11 +1,16 @@
 package modelo;
 
+import enumeraciones.CategoriaTour;
 import enumeraciones.EstadoReserva;
 import enumeraciones.EstadoSalida;
 import enumeraciones.MedioPago;
 import enumeraciones.TipoPasajero;
+import enumeraciones.TipoServicio;
+import enumeraciones.TipoVehiculo;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 
 /** Pruebas de Salida: CU04 (validaciones al programar) y CU05 (estados y cupos). */
 public class SalidaTest {
@@ -20,7 +25,11 @@ public class SalidaTest {
         quedaCompletaAlAlcanzarElCupoMaximo();
         sePuedeCancelarPorCupoMinimoAUnaSemana();
         anulaReservasConfirmadasConSaldoVencido();
-        listaSoloPasajerosConfirmados();
+        listaIncluyeReservasVigentesYExcluyeAnuladas();
+        listaPuedeEmitirseConReservasPendientesVigentes();
+        honorariosExcluyenServiciosDeReservasNoConfirmadasOAnuladas();
+        reservaNoPuedeCancelarseDuranteSalidaEnCursoNiFinalizada();
+        listaEmitidaSeInvalidaCuandoCambianLasReservas();
         System.out.println("SalidaTest: OK");
     }
 
@@ -96,18 +105,114 @@ public class SalidaTest {
                 "la anulación automática libera los cupos");
     }
 
-    private static void listaSoloPasajerosConfirmados() throws Exception {
+    private static void listaIncluyeReservasVigentesYExcluyeAnuladas() throws Exception {
         Salida salida = new Salida(31, tour(), HOY.plusDays(30), HOY.plusDays(31), 10);
         Reserva confirmada = crearReservaPendiente(salida, 31, 1);
         confirmada.actualizarImporteTotal(1000);
         confirmada.registrarPago(new Pago(31, HOY, 1000, MedioPago.EFECTIVO, 1));
         confirmada.cambiarEstado(EstadoReserva.CONFIRMADA);
         salida.agregarReserva(confirmada);
-        Reserva pendiente = crearReservaPendiente(salida, 32, 1);
+
+        Reserva pendienteVigente = crearReservaPendiente(salida, 32, 1);
+        salida.agregarReserva(pendienteVigente);
+
+        Reserva anulada = crearReservaPendiente(salida, 33, 1);
+        anulada.cambiarEstado(EstadoReserva.ANULADA);
+        salida.agregarReserva(anulada);
+
+        List<Pasajero> lista = salida.emitirLista(HOY);
+        verificar(lista.size() == 2,
+                "la lista incluye reservas pendientes vigentes y confirmadas, pero excluye anuladas");
+    }
+
+    private static void listaPuedeEmitirseConReservasPendientesVigentes() throws Exception {
+        Salida salida = new Salida(34, tour(), HOY.plusDays(30), HOY.plusDays(31), 10);
+        Reserva pendiente = crearReservaPendiente(salida, 34, 1);
+        salida.agregarReserva(pendiente);
+        verificar(salida.getEstado() == EstadoSalida.PROGRAMADA,
+                "la salida puede seguir programada mientras conserva reservas vigentes bajo el minimo");
+        verificar(salida.emitirLista(HOY).size() == 1,
+                "CU20 permite emitir la lista cuando existen reservas vigentes aunque la salida aun este programada");
+    }
+
+    private static void honorariosExcluyenServiciosDeReservasNoConfirmadasOAnuladas() throws Exception {
+        TourCultural tour = new TourCultural("CUL35", "Tour con traslado", "Recorrido", 2, 2, 10);
+        ServicioAdicional traslado = new ServicioAdicional("Traslado", 100,
+                TipoServicio.TRASLADO, false);
+        tour.agregarServicioAdicional(traslado);
+        Salida salida = new Salida(35, tour, HOY.plusDays(30), HOY.plusDays(31), 10);
+
+        Reserva confirmada = crearReservaPendiente(salida, 35, 1);
+        confirmada.agregarServicioAdicional(confirmada.getPasajeros().get(0), traslado);
+        confirmada.actualizarImporteTotal(1000);
+        confirmada.registrarPago(new Pago(35, HOY, 1000, MedioPago.EFECTIVO, 1));
+        confirmada.cambiarEstado(EstadoReserva.CONFIRMADA);
+        salida.agregarReserva(confirmada);
+
+        Reserva pendiente = crearReservaPendiente(salida, 36, 1);
+        pendiente.agregarServicioAdicional(pendiente.getPasajeros().get(0), traslado);
         salida.agregarReserva(pendiente);
 
-        verificar(salida.emitirLista().size() == 1,
-                "la lista operativa solo incluye pasajeros de reservas confirmadas");
+        Reserva anulada = crearReservaPendiente(salida, 37, 1);
+        anulada.agregarServicioAdicional(anulada.getPasajeros().get(0), traslado);
+        anulada.cambiarEstado(EstadoReserva.ANULADA);
+        salida.agregarReserva(anulada);
+
+        Reserva finalizada = crearReservaPendiente(salida, 38, 1);
+        finalizada.agregarServicioAdicional(finalizada.getPasajeros().get(0), traslado);
+        finalizada.actualizarImporteTotal(1000);
+        finalizada.registrarPago(new Pago(38, HOY, 1000, MedioPago.EFECTIVO, 1));
+        finalizada.cambiarEstado(EstadoReserva.CONFIRMADA);
+        finalizada.finalizar();
+        salida.agregarReserva(finalizada);
+
+        verificar(salida.totalServiciosAdicionales() == 200.0,
+                "los honorarios consideran adicionales de reservas confirmadas y finalizadas, no pendientes ni anuladas");
+    }
+
+    private static void reservaNoPuedeCancelarseDuranteSalidaEnCursoNiFinalizada() throws Exception {
+        TourCultural tour = new TourCultural("CUL02", "Tour corto", "Recorrido", 1, 1, 5);
+        Salida salida = new Salida(39, tour, HOY.plusDays(30), HOY.plusDays(30), 5);
+        Reserva reserva = crearReservaPendiente(salida, 39, 1);
+        reserva.actualizarImporteTotal(1000);
+        reserva.registrarPago(new Pago(39, HOY, 1000, MedioPago.EFECTIVO, 1));
+        reserva.cambiarEstado(EstadoReserva.CONFIRMADA);
+        salida.agregarReserva(reserva);
+        salida.actualizarEstado(HOY);
+
+        Guia guia = new Guia(39, "Guia", "Prueba", "DOC39", "11",
+                Collections.singletonList("Espanol"),
+                Collections.singletonList(CategoriaTour.CULTURAL), 1000);
+        salida.asignarGuia(guia);
+        salida.asignarVehiculo(new Vehiculo("AA039BB", 5, TipoVehiculo.COMBI));
+        salida.emitirLista(HOY);
+        salida.iniciar();
+
+        verificar(!reserva.puedeCancelarse(),
+                "una reserva confirmada no puede cancelarse cuando su salida esta en curso");
+
+        salida.finalizar();
+        verificar(!reserva.puedeCancelarse(),
+                "una reserva finalizada no puede cancelarse cuando la salida finalizo");
+    }
+
+    private static void listaEmitidaSeInvalidaCuandoCambianLasReservas() throws Exception {
+        Salida salida = new Salida(40, tour(), HOY.plusDays(30), HOY.plusDays(31), 10);
+        Reserva primera = crearReservaPendiente(salida, 40, 1);
+        salida.agregarReserva(primera);
+        salida.emitirLista(HOY);
+        verificar(salida.isListaEmitida(), "la emisión deja la lista marcada como vigente");
+
+        Reserva segunda = crearReservaPendiente(salida, 41, 1);
+        salida.agregarReserva(segunda);
+        verificar(!salida.isListaEmitida(),
+                "agregar otra reserva invalida la lista emitida anteriormente");
+
+        salida.emitirLista(HOY);
+        verificar(salida.isListaEmitida(), "la lista puede emitirse nuevamente");
+        segunda.registrarCancelacion(new Cancelacion(HOY, "Cancelación de prueba", false, 0, 0));
+        verificar(!salida.isListaEmitida(),
+                "cancelar una reserva invalida la lista operativa");
     }
 
     private static Reserva crearReservaPendiente(Salida salida, int id, int cantidad) {
