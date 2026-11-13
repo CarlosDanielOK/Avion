@@ -131,7 +131,29 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 
 ## 8. Instalación y ejecución
 
-> **Pendiente – Etapa 2.** Esta sección se completará con los requisitos, los pasos de compilación y ejecución, los datos de prueba y las instrucciones para correr las pruebas unitarias una vez que el código esté disponible.
+Se requiere JDK 17 o superior. Desde la carpeta raíz del proyecto:
+
+**PowerShell (Windows):**
+
+```powershell
+New-Item -ItemType Directory -Force out
+javac -encoding UTF-8 -d out (Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object FullName)
+java -cp out Main
+```
+
+**Pruebas:**
+
+```powershell
+New-Item -ItemType Directory -Force out-test
+javac -encoding UTF-8 -cp out -d out-test (Get-ChildItem -Path test -Recurse -Filter *.java | ForEach-Object FullName)
+java -cp "out;out-test" modelo.AgenciaTest
+java -cp "out;out-test" modelo.SalidaTest
+java -cp "out;out-test" persistencia.RepositorioAgenciaArchivoTest
+java -cp "out;out-test" controladores.GeneradorReportesTest
+java -cp "out;out-test" controladores.ControladorOperacionesTest
+```
+
+Los cambios de catálogo y operación se guardan mediante el repositorio de archivos en `datos/agencia.dat`. Si el archivo existente no puede leerse, `Main` detiene el inicio para evitar sobrescribirlo accidentalmente.
 
 ## 9. Metodología de trabajo
 
@@ -159,66 +181,26 @@ El proyecto se desarrolla de forma colaborativa en GitHub:
 
 ## 12. Implementación y pruebas — Etapa 2
 
-### Implementación del sistema
+### Implementación
 
-Rumbo Sur es un sistema de gestión para una agencia de turismo, desarrollado en Java 17 mediante programación orientada a objetos.
+Rumbo Sur está implementado en Java 17. El código se organiza en `modelo`, `controladores`, `enumeraciones`, `excepciones`, `interfaz` y `persistencia`. La interfaz de consola permite administrar catálogo, tarifas, itinerarios, proveedores, guías, vehículos, salidas, operación y reportes.
 
-El sistema contempla la administración de tours, salidas, clientes, reservas, pasajeros, pagos, cancelaciones y recursos operativos.
+La persistencia utiliza serialización de objetos Java en `datos/agencia.dat`. Los cambios realizados mediante los controladores se guardan automáticamente. Si el archivo no puede leerse, el programa detiene el inicio para evitar sobrescribir datos dañados.
 
-El código fuente está organizado en los paquetes:
+### Pruebas automatizadas ejecutadas
 
-- `modelo`: entidades y reglas de negocio.
-- `controladores`: coordinación de las operaciones.
-- `enumeraciones`: estados y tipos utilizados.
-- `excepciones`: manejo de errores del negocio.
-- `persistencia`: almacenamiento y recuperación de datos.
-- `pruebas`: comprobaciones de funcionalidades.
-
-### Requisitos
-
-- JDK 17.
-- IntelliJ IDEA o una terminal compatible con Java.
-- Git para descargar el repositorio.
-
-### Instalación y compilación
-
-Clonar el repositorio:
-
-```powershell
-git clone https://github.com/CarlosDanielOK/Avion.git
-cd Avion
-```
-
-Compilar desde PowerShell:
-
-```powershell
-New-Item -ItemType Directory -Force out
-javac -encoding UTF-8 -d out (Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object FullName)
-```
-
-La compilación conjunta se verificó en una rama temporal de integración.
-
-La ejecución completa desde la clase principal queda pendiente de verificación.
-
-### Pruebas realizadas
-
-Se efectuaron comprobaciones individuales sobre pagos y cancelaciones.
-
-| Prueba | Resultado esperado |
+| Prueba | Resultado |
 |---|---|
-| Pago en efectivo de $100.000 | $100.000 |
-| Pago con tarjeta en 3 cuotas de $100.000 | $107.000 |
-| Cancelación con 35 días de anticipación | Devolución del 90% |
-| Cancelación con 20 días de anticipación | Devolución del 50% |
-| Cancelación con 10 días de anticipación | Devolución del 20% |
-| Cancelación con 3 días de anticipación | Sin devolución |
-| Cancelación por parte de la agencia | Devolución del 100% |
+| `AgenciaTest` | OK |
+| `SalidaTest` | OK |
+| `RepositorioAgenciaArchivoTest` | OK |
+| `GeneradorReportesTest` | OK |
+| `ControladorOperacionesTest` | OK |
 
-### Integración y estado del proyecto
+Además, se ejecutó una prueba de humo del menú: carga de datos de ejemplo, generación de los cuatro reportes y comprobación de que el archivo de persistencia se crea correctamente.
 
-Durante la integración se corrigieron diferencias entre los métodos de los módulos de reservas y operaciones.
+### Estado de integración
 
-Se consiguió compilar conjuntamente las clases disponibles sin errores.
+La compilación conjunta no presenta errores. Los casos CU04, CU05 y CU24 cuentan con implementación y pruebas específicas. La interfaz también incorpora opciones para completar el catálogo y administrar recursos operativos.
 
-Quedan pendientes las pruebas funcionales integrales, especialmente de los casos CU08 y CU15, así como la verificación de la ejecución completa del sistema.
-
+**Pendiente de integración:** el `ControladorReservas` actual mantiene una colección propia y no utiliza todavía la raíz `Agencia` ni el repositorio compartido. Por ese motivo, el menú permite consultar las reservas que ya están en `Agencia`, pero el alta, cálculo de precio, pagos y cancelaciones todavía necesitan integrarse con el módulo de Bianca. Esto debe completarse y probarse antes de afirmar que el menú cubre todos los casos de uso del sistema.
