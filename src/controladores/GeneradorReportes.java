@@ -67,7 +67,11 @@ public class GeneradorReportes {
         for (Reserva reserva : agencia.getReservas()) {
             if (reserva.getEstado() == EstadoReserva.ANULADA) continue;
             Vendedor vendedor = reserva.getVendedor();
-            double[] datos = acumulado.computeIfAbsent(vendedor.getLegajo(), k -> new double[3]);
+            double[] datos = acumulado.get(vendedor.getLegajo());
+            if (datos == null) {
+                datos = new double[3];
+                acumulado.put(vendedor.getLegajo(), datos);
+            }
             vendedores.put(vendedor.getLegajo(), vendedor);
             datos[0]++;
             datos[1] += reserva.cantidadPasajeros();
@@ -99,7 +103,12 @@ public class GeneradorReportes {
             Cancelacion cancelacion = reserva.getCancelacion();
             double devuelto = cancelacion == null ? 0 : cancelacion.getImporteDevuelto();
             if (cobrado == 0 && devuelto == 0) continue;
-            double[] datos = acumulado.computeIfAbsent(reserva.getSalida().getTour(), k -> new double[2]);
+            Tour tour = reserva.getSalida().getTour();
+            double[] datos = acumulado.get(tour);
+            if (datos == null) {
+                datos = new double[2];
+                acumulado.put(tour, datos);
+            }
             datos[0] += cobrado;
             datos[1] += devuelto;
         }

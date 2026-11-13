@@ -1,7 +1,7 @@
-
 package modelo;
 
 import enumeraciones.EstadoReserva;
+import enumeraciones.MedioPago;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -55,7 +55,16 @@ public class Reserva implements Serializable {
         this.cancelacion = null;
     }
 
-    // AGREGAR PASAJERO
+    // AGREGAR PASAJERO (GRASP Creador: Reserva construye al pasajero que incorpora)
+    public Pasajero agregarPasajero(DatosPasajero datos, String telefono) {
+        if (datos == null) throw new IllegalArgumentException("Los datos del pasajero son obligatorios");
+        Pasajero pasajero = new Pasajero(datos.getNombre(), datos.getApellido(),
+                datos.getDocumento(), telefono, datos.getFechaNacimiento(), datos.getTipoPasajero(),
+                datos.getTelefonoEmergencia(), datos.getRestricciones());
+        agregarPasajero(pasajero);
+        return pasajero;
+    }
+
     public void agregarPasajero(Pasajero pasajero) {
 
         if (pasajero == null) {
@@ -99,6 +108,7 @@ public class Reserva implements Serializable {
             }
         }
         actualizarTotalServiciosAdicionales();
+        importeTotal = 0;
     }
 
     public void agregarServicioAdicional(Pasajero pasajero, ServicioAdicional servicio) {
@@ -111,6 +121,7 @@ public class Reserva implements Serializable {
         }
         pasajero.agregarServicioAdicional(servicio);
         actualizarTotalServiciosAdicionales();
+        importeTotal = 0;
     }
 
     // REGISTRAR PAGO
@@ -261,10 +272,8 @@ public class Reserva implements Serializable {
                     "La reserva ya tiene una cancelacion registrada");
         }
 
-        if (estado == EstadoReserva.ANULADA ||
-                estado == EstadoReserva.FINALIZADA) {
-            throw new IllegalStateException(
-                    "La reserva no se puede cancelar");
+        if (!puedeCancelarse()) {
+            throw new IllegalStateException("La reserva no se puede cancelar en el estado actual de la salida");
         }
 
         cambiarEstado(EstadoReserva.ANULADA);
@@ -283,6 +292,12 @@ public class Reserva implements Serializable {
         }
         if (!salida.puedeParticipar(datos)) {
             throw new IllegalArgumentException("El pasajero no cumple los requisitos del tour");
+        }
+        Pasajero pasajeroValidado = new Pasajero(datos.getNombre(), datos.getApellido(),
+                datos.getDocumento(), "", datos.getFechaNacimiento(), datos.getTipoPasajero(),
+                datos.getTelefonoEmergencia(), datos.getRestricciones());
+        if (!pasajeroValidado.tipoEsCompatible(salida.getFechaInicio())) {
+            throw new IllegalArgumentException("El tipo de pasajero no coincide con su edad");
         }
         int indice = indicePasajero(documento);
         for (Pasajero pasajero : pasajeros) {
@@ -314,57 +329,46 @@ public class Reserva implements Serializable {
 
     // VERIFICAR VENCIMIENTO
     public boolean estaVencida(LocalDate fechaSalida) {
+        return estaVencida(fechaSalida, LocalDate.now());
+    }
 
-        if (fechaSalida == null) {
-            throw new IllegalArgumentException(
-                    "La fecha de salida es obligatoria");
+    /** Evalúa S04/S09 con fecha explícita para no depender del reloj del sistema. */
+    public boolean estaVencida(LocalDate fechaSalida, LocalDate hoy) {
+        if (fechaSalida == null || hoy == null) {
+            throw new IllegalArgumentException("Las fechas son obligatorias");
         }
-
         if (estado != EstadoReserva.PENDIENTE && estado != EstadoReserva.CONFIRMADA) {
             return false;
         }
-
-        LocalDateTime ahora = LocalDateTime.now();
-        LocalDateTime limiteSaldo =
-                fechaSalida.minusDays(10).atStartOfDay();
-
-        if (estado == EstadoReserva.CONFIRMADA) {
-            return calcularSaldoPendiente() > TOLERANCIA
-                    && !ahora.isBefore(limiteSaldo);
-        }
-
-        LocalDateTime vencimiento48Horas =
-                fechaCreacion.plusHours(48);
-
-        LocalDateTime vencimiento;
-
-        if (!limiteSaldo.isAfter(fechaCreacion)) {
-            vencimiento = fechaCreacion;
-        } else {
-            vencimiento = vencimiento48Horas.isBefore(limiteSaldo)
-                    ? vencimiento48Horas
-                    : limiteSaldo;
-        }
-
-        // Una reserva totalmente pagada no vence
-        // por falta de pago.
-        if (importeTotal > 0 &&
-                calcularSaldoPendiente() <= TOLERANCIA) {
+        if (importeTotal > 0 && calcularSaldoPendiente() <= TOLERANCIA) {
             return false;
         }
 
-        return !ahora.isBefore(vencimiento);
+        LocalDate limiteSaldo = fechaSalida.minusDays(10);
+        if (estado == EstadoReserva.CONFIRMADA) {
+            return hoy.isAfter(limiteSaldo);
+        }
+
+        LocalDate fechaCreacionReserva = fechaCreacion.toLocalDate();
+        LocalDate vencimientoRetencion = fechaCreacionReserva.plusDays(2);
+        // Si la reserva se crea dentro de los últimos diez días, debe poder
+        // completarse y pagarse durante ese mismo día (S04).
+        LocalDate vencimiento = limiteSaldo.isBefore(fechaCreacionReserva)
+                ? fechaCreacionReserva
+                : (limiteSaldo.isBefore(vencimientoRetencion)
+                    ? limiteSaldo : vencimientoRetencion);
+        return hoy.isAfter(vencimiento);
     }
 
     // ANULAR SI ESTA VENCIDA
     public boolean anularSiVencida(LocalDate fechaSalida) {
+        return anularSiVencida(fechaSalida, LocalDate.now());
+    }
 
-        if (estaVencida(fechaSalida)) {
-            cambiarEstado(EstadoReserva.ANULADA);
-            return true;
-        }
-
-        return false;
+    public boolean anularSiVencida(LocalDate fechaSalida, LocalDate hoy) {
+        if (!estaVencida(fechaSalida, hoy)) return false;
+        cambiarEstado(EstadoReserva.ANULADA);
+        return true;
     }
 
     // GETTERS
@@ -412,6 +416,12 @@ public class Reserva implements Serializable {
         return cancelacion;
     }
 
+    /** Medio del último pago registrado, según el supuesto S13. */
+    public MedioPago obtenerMedioPagoDevolucion() {
+        if (pagos.isEmpty()) return null;
+        return pagos.get(pagos.size() - 1).getMedioPago();
+    }
+
     public int getNumero() {
         return getId();
     }
@@ -426,24 +436,18 @@ public class Reserva implements Serializable {
                     "La fecha es obligatoria");
         }
 
-        if (estado == EstadoReserva.CONFIRMADA) {
-            return true;
-        }
-
-        return estado == EstadoReserva.PENDIENTE
-                && !estaVencida(salida.getFechaInicio());
+        return (estado == EstadoReserva.PENDIENTE || estado == EstadoReserva.CONFIRMADA)
+                && !estaVencida(salida.getFechaInicio(), hoy);
     }
 
     public void anularPorVencimiento() {
-        if (estado != EstadoReserva.PENDIENTE) {
-            return;
-        }
+        anularPorVencimiento(salida.getFechaInicio(), LocalDate.now());
+    }
 
-        if (!estaVencida(salida.getFechaInicio())) {
-            throw new IllegalStateException(
-                    "La reserva todavia no esta vencida");
+    public void anularPorVencimiento(LocalDate fechaSalida, LocalDate hoy) {
+        if (!estaVencida(fechaSalida, hoy)) {
+            throw new IllegalStateException("La reserva todavia no esta vencida");
         }
-
         cambiarEstado(EstadoReserva.ANULADA);
     }
 
@@ -454,8 +458,9 @@ public class Reserva implements Serializable {
     }
 
     public boolean puedeCancelarse() {
-        return estado == EstadoReserva.PENDIENTE
-                || estado == EstadoReserva.CONFIRMADA;
+        return (estado == EstadoReserva.PENDIENTE || estado == EstadoReserva.CONFIRMADA)
+                && salida.getEstado() != enumeraciones.EstadoSalida.EN_CURSO
+                && salida.getEstado() != enumeraciones.EstadoSalida.FINALIZADA;
     }
 
     public void actualizarServiciosAdicionales(double importe) {
@@ -507,4 +512,3 @@ public class Reserva implements Serializable {
         importeServiciosAdicionales = totalServiciosAdicionales();
     }
 }
-

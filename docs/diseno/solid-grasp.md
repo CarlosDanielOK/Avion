@@ -1,5 +1,3 @@
-
-
 # 5. Aplicación de principios SOLID y patrones GRASP
 
 La aplicación de los principios SOLID y los patrones GRASP tiene como objetivo establecer una distribución adecuada de responsabilidades entre las clases del Sistema de Gestión Rumbo Sur, favoreciendo la cohesión, el bajo acoplamiento, la extensibilidad y el mantenimiento del software.
@@ -127,10 +125,10 @@ El principio Abierto/Cerrado establece que las clases deben estar abiertas a la 
 
 Se propone aplicar polimorfismo mediante una interfaz común:
 
-- **`Promocion`:** interfaz que define la operación `calcularDescuento(reserva, subtotalTour)`.
+- **`Promocion`:** interfaz que define `esAplicable(reserva, fechaSalida)` y `calcularDescuento(subtotalTour)`.
 - **`PromocionAnticipada`:** implementación que evalúa el descuento por anticipación.
 - **`PromocionGrupo`:** implementación que evalúa el descuento por cantidad de pasajeros.
-- **`CalculadoraPrecioReserva`:** clase que consulta las promociones disponibles mediante la interfaz común y selecciona el mayor descuento aplicable.
+- **`CalculadoraPrecioReserva`:** recibe una `List<Promocion>` por constructor, recorre las implementaciones mediante la interfaz y selecciona el mayor descuento aplicable. Su constructor por defecto configura las dos promociones actuales.
 
 Cada promoción encapsula sus propias condiciones.
 
@@ -231,7 +229,7 @@ El patrón Experto en Información establece que una responsabilidad debe asigna
 Se propone distribuir las responsabilidades de la siguiente manera:
 
 - **`Salida`:** conoce su capacidad y la lista de sus reservas (asociación `Salida`–`Reserva` en el diagrama), por lo que puede determinar los cupos disponibles. También conoce su fecha de inicio, por lo que responde cuántos días faltan (`diasHastaInicio`) y si corresponde exigir el pago total (`exigePagoTotal`, faltan 10 días o menos). Además es quien anula las reservas vencidas de su lista (`verificarVencimientos`) y quien finaliza sus reservas cuando termina (`finalizar`).
-- **`Pasajero`:** conoce su fecha de nacimiento y su tipo, por lo que calcula su factor de tarifa (`obtenerFactorTarifa`).
+- **`Pasajero`:** conoce su fecha de nacimiento y su tipo, por lo que calcula su factor de tarifa (`calcularPorcentajeTarifa`).
 - **`Guia`:** conoce sus salidas asignadas y por eso responde si está disponible en un rango de fechas.
 - **`Reserva`:** conoce el importe total y los pagos asociados, por lo que puede calcular el saldo pendiente.
 - **`CalculadoraPrecioReserva`:** reúne las reglas necesarias para determinar el precio a partir de tarifas, promociones y servicios adicionales.
@@ -273,17 +271,11 @@ El patrón Creador establece criterios para asignar la responsabilidad de crear 
 
 #### Decisión de diseño
 
-Se propone que la clase `Reserva` sea responsable de crear e incorporar las instancias de `Pasajero` que componen su registro, mediante la operación:
+La implementación asigna a `Reserva` la creación e incorporación de los pasajeros que la componen mediante la sobrecarga `agregarPasajero(datos: DatosPasajero, telefono: String)`. El método construye el objeto `Pasajero` y delega en `agregarPasajero(Pasajero)` las validaciones y la incorporación a la colección.
 
-`agregarPasajero(datos: DatosPasajero)`
+`MenuConsola` reúne los datos ingresados y entrega el DTO `DatosPasajero`; `Reserva` crea el objeto de dominio. Esta separación permite mantener la colección encapsulada y evita que el menú modifique directamente el estado interno de la reserva. Además, `Reserva.registrarAjuste` crea sus `NotaAjuste`, otra aplicación del mismo criterio. Los objetos `Pago` son construidos por `GestorPagos`, no por `Reserva`.
 
-El `ControladorReservas` coordinará la creación de la reserva y verificará previamente la disponibilidad y las restricciones del tour.
-
-Una vez superadas esas validaciones, `Reserva` administrará la creación y asociación de sus pasajeros.
-
-Esta decisión se fundamenta en que `Reserva` agrupa y administra a los pasajeros vinculados con una operación comercial. Por el mismo criterio, `Reserva` crea sus `Pago` (`registrarPago`, después de que `GestorPagos` calcula el recargo) y sus `NotaAjuste` (`registrarAjuste`).
-
-La propia `Reserva` es creada por `ControladorReservas`, porque es la clase que recibe los datos iniciales (cliente, salida, vendedor y número de reserva): el patrón Creador también admite como creador a quien dispone de los datos de inicialización.
+La instancia inicial de `Reserva` se construye en `MenuConsola.crearReserva`, que dispone de cliente, salida y vendedor. El patrón Creador se justifica específicamente en la creación de pasajeros y notas de ajuste, no en esa instancia inicial.
 
 En el diagrama de clases final, esta relación se representa mediante composición:
 
@@ -332,11 +324,11 @@ Este controlador delegará las operaciones en las clases especializadas:
 
 El controlador coordinará el flujo de trabajo sin concentrar los cálculos específicos de cada regla de negocio.
 
-Por ejemplo, ante una solicitud de creación de reserva, `iniciarReserva` verifica la disponibilidad con `Salida`, valida a los pasajeros y crea la reserva; luego `finalizarReserva` solicita el cálculo del precio a `CalculadoraPrecioReserva`, consulta a `Salida` si corresponde el pago total inmediato y delega en `GestorPagos` o en `Reserva` según el caso. Ninguna de estas reglas está escrita dentro del controlador.
+Por ejemplo, al crear una reserva, `MenuConsola` construye la instancia inicial y recopila los datos de sus pasajeros. Luego `ControladorReservas.registrarReserva(reserva)` valida los requisitos y la disponibilidad, incorpora los servicios obligatorios, solicita a `Salida` que agregue la reserva, la incorpora a `Agencia` y persiste los cambios. El cálculo del precio es una operación posterior: `ControladorReservas.calcularPrecio(idReserva)` obtiene la tarifa vigente de la salida y delega el cálculo en `CalculadoraPrecioReserva`. Los pagos se registran mediante `registrarPago(...)`, y `confirmarReserva(idReserva)` verifica las condiciones con `GestorPagos` antes de cambiar el estado.
 
-Para las reservas pendientes, también coordinará la verificación del vencimiento, según S04 y S09.
+Antes de iniciar una operación sobre una reserva, el controlador coordina la actualización de vencimientos mediante `actualizarVigenciaReserva(idReserva, hoy)`: delega en `Salida.verificarVencimientos(hoy)` y `Salida.actualizarEstado(hoy)`, y procesa las devoluciones si la salida se cancela por no alcanzar el cupo mínimo. Así, calcular precios, registrar pagos, confirmar, cancelar o modificar una reserva no puede eludir S04, S09 ni RN06.
 
-Ante una solicitud de cancelación, recuperará la reserva, verificará si puede cancelarse, solicitará el cálculo de devolución a `GestorCancelaciones` y coordinará la actualización de su estado.
+Ante una solicitud de cancelación, `cancelarReserva(idReserva, motivo, porAgencia)` recupera la reserva, verifica si puede cancelarse, solicita a `GestorCancelaciones` la creación de la liquidación de devolución, registra la cancelación en `Reserva`, actualiza el estado de la salida y persiste los cambios. Si la salida debe cancelarse por cupo mínimo, también coordina la anulación de las demás reservas vigentes y la devolución del 100 %.
 
 #### Clases involucradas
 
@@ -372,9 +364,9 @@ Se crean las siguientes clases especializadas:
 - **`GestorPagos`:** calcula el recargo correspondiente cuando se utiliza financiación con tarjeta y delega en `Reserva` el registro del pago.
 - **`GestorCancelaciones`:** aplica la política de cancelación, calcula el porcentaje de devolución y determina el importe a reintegrar.
 
-La clase `Reserva` conserva sus datos y las operaciones sobre su propio estado, como `totalAbonado()`, `calcularSaldo()`, `confirmar()` y `anular()`.
+La clase `Reserva` conserva sus datos y las operaciones sobre su propio estado, como `calcularTotalPagado()`, `calcularSaldoPendiente()`, `cambiarEstado(...)`, `registrarCancelacion(...)` y `anularPorVencimiento(...)`.
 
-La ejecución efectiva de un reintegro no se considera completada únicamente por calcular el importe de devolución. Ese proceso deberá registrarse según el mecanismo de pagos definido en la implementación.
+La devolución es una simulación: el sistema calcula el importe y conserva el último medio de pago registrado, pero no se conecta a una pasarela ni ejecuta una transferencia o reintegro real.
 
 Esta decisión se diferencia del principio SRP:
 
@@ -425,4 +417,3 @@ El diseño contempla especialmente la gestión de reservas pendientes, la dispon
 Su aplicación definitiva deberá reflejarse de manera consistente en el diagrama de clases final, los diagramas de secuencia y la posterior implementación en Java.
 
 De esta forma, el proyecto establece una base de diseño orientado a objetos que favorece la cohesión, la extensibilidad, la reutilización y el mantenimiento del sistema.
-

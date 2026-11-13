@@ -1,5 +1,5 @@
 @startuml 02-secuencia-crear-reserva
-title CU08 - Crear reserva (flujo principal y alternativas)
+title CU08 / CU09 / CU12 / CU14 - Crear, calcular y confirmar una reserva
 
 skinparam shadowing false
 skinparam backgroundColor White
@@ -9,176 +9,164 @@ autonumber
 actor Vendedor
 participant ":MenuConsola" as UI
 participant ":ControladorReservas" as CTRL
-participant ":Agencia" as AGE
-participant ":Salida" as SAL
-participant ":Tour" as TOUR
 participant ":Reserva" as RES
+participant ":Salida" as SAL
+participant ":Agencia" as AGE
+participant ":Tour" as TOUR
 participant ":Pasajero" as PAS
 participant ":CalculadoraPrecioReserva" as CALC
-participant "p:Promocion" as PROMO
+participant ":Promocion" as PROMO
 participant ":GestorPagos" as GP
-participant ":Pago" as PAG
 participant ":RepositorioAgencia" as REPO
 
-note over UI,CTRL
-En la implementación Java, MenuConsola construye la Reserva y sus Pasajeros
-con los datos ingresados y delega en ControladorReservas.registrarReserva.
-El controlador valida requisitos, cupos, servicios obligatorios y persiste.
-Luego se usan calcularPrecio, registrarPago y confirmarReserva para completar
-el flujo. Los mensajes conceptuales de este diagrama representan esa secuencia.
-end note
-
-== Fase 1: iniciar la reserva (cupos, requisitos y pasajeros) ==
-
-Vendedor -> UI : cargar cliente, salida y pasajeros
-UI -> CTRL : iniciarReserva(documentoCliente, idSalida, legajoVendedor, datos, hoy)
+== Registro de la reserva ==
+Vendedor -> UI : crearReserva()
+UI -> AGE : buscarCliente(documento)
+AGE --> UI : cliente
+UI -> AGE : buscarSalida(idSalida)
+AGE --> UI : salida
+UI -> AGE : buscarEmpleado(legajoVendedor)
+AGE --> UI : vendedor
+create RES
+UI -> RES : <<create>> Reserva(id, cliente, salida, vendedor)
+loop por cada pasajero informado
+  Vendedor -> UI : ingresa datos del pasajero
+  UI -> RES : agregarPasajero(datos, telefono)
+  create PAS
+  RES -> PAS : <<create>> Pasajero(datos, telefono)
+  RES -> RES : validar y agregar pasajero
+end
+UI -> CTRL : registrarReserva(reserva)
 activate CTRL
+CTRL -> SAL : puedeParticipar(datos) / cuposDisponibles(hoy)
+SAL --> CTRL : validación y cupos
+alt salida no admite reservas, faltan cupos o pasajero no cumple requisitos
+  CTRL --> UI : excepción de regla de negocio
+  UI --> Vendedor : informa el motivo y no registra la reserva
+else datos y cupos válidos
+  CTRL -> RES : incluirServiciosObligatorios()
+  RES -> TOUR : obtenerServiciosObligatorios()
+  TOUR --> RES : servicios obligatorios
+  CTRL -> SAL : agregarReserva(reserva)
+  SAL -> SAL : verificarVencimientos(hoy) y actualizarEstado(hoy)
+  CTRL -> AGE : agregarReserva(reserva)
+  CTRL -> REPO : guardar(agencia)
+  REPO --> CTRL : guardado
+  CTRL --> UI : reserva registrada (PENDIENTE)
+  UI --> Vendedor : informa número y estado de la reserva
+end
+deactivate CTRL
 
-CTRL -> AGE : buscarCliente(documentoCliente)
-AGE --> CTRL : cliente
-CTRL -> AGE : buscarSalida(idSalida)
-AGE --> CTRL : salida
-CTRL -> AGE : buscarEmpleado(legajoVendedor)
-AGE --> CTRL : vendedor
-
-CTRL -> SAL : verificarVencimientos(hoy)
-note right of CTRL
-  Se anulan las reservas vencidas y se
-  liberan sus cupos antes de consultar
-  la disponibilidad (S09).
-end note
-CTRL -> SAL : cuposDisponibles(hoy)
-SAL --> CTRL : disponibles
-
-alt disponibles < cantidad de pasajeros
-  CTRL --> UI : CuposInsuficientesException
-  UI --> Vendedor : informa falta de cupos
-else cupos suficientes
-
-  loop por cada DatosPasajero
-    CTRL -> SAL : puedeParticipar(datosPasajero)
-    SAL -> TOUR : puedeParticipar(datosPasajero, fechaInicio)
-    TOUR --> SAL : cumple / no cumple
-    SAL --> CTRL : cumple / no cumple
-  end
-
-  alt algun pasajero no cumple requisitos
-    CTRL --> UI : RequisitosNoCumplidosException
-    UI --> Vendedor : informa restricciones del tour
-  else todos cumplen requisitos
-
-    CTRL -> AGE : siguienteNumeroReserva()
-    AGE --> CTRL : numero
-
-    create RES
-    CTRL -> RES : <<create>> new Reserva(numero, cliente, salida, vendedor, hoy)
-    note right of RES
-      La reserva nace en estado
-      PENDIENTE y todavia no
-      figura en la salida.
-    end note
-
-    loop por cada DatosPasajero
-      RES -> RES : agregarPasajero(datosPasajero)
-      create PAS
-      RES -> PAS : <<create>> new Pasajero(datosPasajero)
-      note right of PAS
-        GRASP Creador: Reserva
-        contiene a los pasajeros
-        y los crea.
-      end note
-    end
-
-    CTRL -> RES : incluirServiciosObligatorios()
-    CTRL --> UI : reserva en preparacion
-
-    opt el vendedor elige servicios opcionales (CU11)
-      loop por cada servicio elegido
-        UI -> CTRL : agregarServicioAdicional(reserva, pasajero, servicio)
-        CTRL -> RES : agregarServicioAdicional(pasajero, servicio)
-      end
-    end
-
-    == Fase 2: calcular el precio y registrar la reserva ==
-
-    UI -> CTRL : finalizarReserva(reserva, medio, cuotas, hoy)
-
-    CTRL -> CALC : calcularTotal(reserva)
-    activate CALC
-    CALC -> SAL : obtenerTarifa()
-    SAL --> CALC : tarifa
-    loop por cada pasajero
-      CALC -> PAS : obtenerFactorTarifa(fechaInicio)
-      PAS --> CALC : factor
-    end
-    loop por cada promocion disponible
-      CALC -> PROMO : calcularDescuento(reserva, subtotalTour)
-      PROMO --> CALC : descuento
-    end
-    note over CALC
-      Se aplica solo la promocion
-      de mayor descuento (RN17).
-    end note
-    CALC -> RES : totalServiciosAdicionales()
-    RES --> CALC : adicionales
-    CALC --> CTRL : total
-    deactivate CALC
-
-    CTRL -> RES : registrarTotal(total)
-
-    CTRL -> SAL : exigePagoTotal(hoy)
-    SAL --> CTRL : exige / no exige
-
-    alt exige pago total y medio == null
-      CTRL --> UI : PagoRequeridoException
-      UI --> Vendedor : informa que debe abonar el total
-      note right of CTRL
-        La reserva no se agrega a la
-        salida ni se guarda: se descarta.
-      end note
-    else se puede registrar la reserva
-
-      alt exige pago total (faltan 10 dias o menos)
-        CTRL -> GP : registrarPago(reserva, total, medio, cuotas, fecha)
-        activate GP
-        GP -> GP : recargo = 7 % del importe si es tarjeta en cuotas
-        GP -> RES : registrarPago(importe, recargo, medio, cuotas, fecha)
-        activate RES
-        create PAG
-        RES -> PAG : <<create>> new Pago(fecha, importe, recargo, medio, cuotas)
-        note right of PAG
-          GRASP Creador: la reserva compone
-          a sus pagos y los crea.
-          importe = capital abonado;
-          recargo no cambia el total.
-        end note
-        RES --> GP : pago
-        deactivate RES
-        GP -> RES : seniaCubierta()
-        RES --> GP : true
-        GP -> RES : confirmar()
-        GP --> CTRL : pago
-        deactivate GP
-      else faltan mas de 10 dias
-        CTRL -> RES : iniciarRetencion(hoy)
-        note right of RES
-          vencimientoPago = el menor entre
-          hoy + 2 dias y 10 dias antes
-          de la salida (S04).
-          Estado PENDIENTE: retiene cupos
-          mientras no venza.
-        end note
-      end
-
-      CTRL -> SAL : agregarReserva(reserva)
-      CTRL -> AGE : agregarReserva(reserva)
-      CTRL -> REPO : guardar(agencia)
-      REPO --> CTRL : guardado
-      CTRL --> UI : reserva CONFIRMADA o PENDIENTE
-      UI --> Vendedor : muestra importe desglosado y estado
-    end
-  end
+== Contratación opcional (si el vendedor elige un servicio) ==
+opt servicio adicional opcional
+  Vendedor -> UI : selecciona servicio y pasajero
+  UI -> CTRL : agregarServicioAdicional(idReserva, documento, servicio)
+  CTRL -> RES : agregarServicioAdicional(pasajero, servicio)
+  RES -> PAS : agregarServicioAdicional(servicio)
+  CTRL -> REPO : guardar(agencia)
+  REPO --> CTRL : guardado
 end
 
+== Cálculo del precio ==
+Vendedor -> UI : solicita calcular precio
+UI -> CTRL : calcularPrecio(idReserva)
+activate CTRL
+CTRL -> AGE : buscarReserva(idReserva)
+AGE --> CTRL : reserva
+CTRL -> SAL : verificarVencimientos(hoy) / actualizarEstado(hoy)
+SAL -> RES : estaVencida(fechaSalida, hoy)
+RES --> SAL : estado vigente / ANULADA
+SAL --> CTRL : estado de la salida actualizado
+alt reserva vencida o salida cancelada
+  CTRL --> UI : excepción; no se calcula el precio
+  UI --> Vendedor : informa que la reserva ya no está vigente
+else reserva vigente
+  CTRL -> SAL : obtenerTarifa()
+  SAL -> TOUR : obtenerTarifa(fechaInicio)
+  TOUR --> SAL : tarifa vigente
+  SAL --> CTRL : tarifa
+  CTRL -> RES : totalServiciosAdicionales()
+  RES --> CTRL : adicionales por pasajero
+  CTRL -> CALC : calcularTotal(reserva, tarifaBase, fechaInicio, adicionales)
+  activate CALC
+  CALC -> RES : getPasajeros()
+  RES --> CALC : pasajeros
+  loop por cada pasajero
+    CALC -> PAS : calcularPorcentajeTarifa(fechaInicio)
+    PAS --> CALC : factor de tarifa
+  end
+  loop promociones configuradas
+    CALC -> PROMO : esAplicable(reserva, fechaInicio)
+    PROMO --> CALC : sí / no
+    opt promoción aplicable
+      CALC -> PROMO : calcularDescuento(subtotalTour)
+      PROMO --> CALC : descuento
+    end
+  end
+  CALC --> CTRL : total calculado
+  deactivate CALC
+  CTRL -> RES : actualizarServiciosAdicionales(adicionales)
+  CTRL -> RES : actualizarImporteTotal(total)
+  CTRL -> REPO : guardar(agencia)
+  REPO --> CTRL : guardado
+  CTRL --> UI : total de reserva
+  UI --> Vendedor : muestra precio calculado
+end
 deactivate CTRL
+
+== Registro de seña o pagos ==
+Vendedor -> UI : ingresa importe, medio y cuotas
+UI -> CTRL : registrarPago(idReserva, idPago, importe, medio, cuotas)
+activate CTRL
+CTRL -> SAL : verificarVencimientos(hoy) / actualizarEstado(hoy)
+SAL --> CTRL : estado actualizado
+alt reserva vencida o salida cancelada
+  CTRL --> UI : excepción; no se registra el pago
+  UI --> Vendedor : informa que la reserva ya no está vigente
+else reserva vigente
+  CTRL -> GP : crearPago(idPago, importe, medio, cuotas)
+  GP -> GP : validar importe, medio y cuotas
+  opt tarjeta en más de una cuota
+    GP -> GP : aplicar recargo del 7 % al capital del pago
+  end
+  GP --> CTRL : pago
+  CTRL -> RES : registrarPago(pago)
+  RES -> RES : validar saldo e ID del pago
+  CTRL -> REPO : guardar(agencia)
+  REPO --> CTRL : guardado
+  CTRL --> UI : pago registrado
+  UI --> Vendedor : informa capital y recargo (si corresponde)
+end
+deactivate CTRL
+
+== Confirmación de la reserva ==
+Vendedor -> UI : confirmar reserva
+UI -> CTRL : confirmarReserva(idReserva)
+activate CTRL
+CTRL -> SAL : verificarVencimientos(hoy) / actualizarEstado(hoy)
+SAL --> CTRL : estado actualizado
+alt reserva vencida o salida cancelada
+  CTRL --> UI : informa que la reserva ya no está vigente
+else reserva vigente
+  CTRL -> GP : puedeConfirmarse(reserva, fechaSalida)
+  GP -> RES : estaVencida(fechaSalida)
+  RES --> GP : sí / no
+  GP -> RES : calcularSaldoPendiente() / calcularTotalPagado()
+  RES --> GP : saldo y capital abonado
+  GP --> CTRL : puede / no puede confirmar
+  alt no alcanza la seña del 30 % o, dentro de los últimos 10 días, no se pagó el total
+    CTRL --> UI : informa que faltan condiciones de pago
+  else condiciones de pago cumplidas
+    CTRL -> RES : cambiarEstado(CONFIRMADA)
+    CTRL -> REPO : guardar(agencia)
+    REPO --> CTRL : guardado
+    CTRL --> UI : reserva confirmada
+  end
+end
+deactivate CTRL
+
+note over UI,REPO
+El precio, los pagos y la confirmación son opciones separadas del menú.
+No se integra una pasarela de pagos: los pagos y devoluciones son simulaciones.
+end note
 @enduml

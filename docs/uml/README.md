@@ -1,13 +1,13 @@
 # Diagramas UML de Rumbo Sur
 
-Esta carpeta contiene los archivos fuente PlantUML (`.puml`) y sus imágenes exportadas en SVG. El diagrama de clases final también se entrega en PDF.
+Esta carpeta contiene los archivos fuente PlantUML (`.puml`) y las exportaciones SVG de casos de uso y del diagrama inicial. En el paquete revisado, las fuentes `.puml` de los diagramas de secuencia y de clases final son la versión vigente; no se incluyen las exportaciones antiguas de esos tres diagramas para evitar confusiones. El PDF del diagrama de clases final y `docs/Documento de diseño.pdf` deben generarse/reincorporarse porque no estaban incluidos en el volcado Repomix recibido.
 
 ## Inventario de diagramas
 
-- `01-clases-inicial.puml` / `.svg`: modelo previo a la aplicación de patrones.
-- `02-secuencia-crear-reserva.puml` / `.svg`: CU08, con flujos alternativos por falta de cupos, requisitos no cumplidos y pago total requerido.
-- `03-secuencia-cancelar-reserva.puml` / `.svg`: CU15, con política de devolución, reserva inexistente y reserva no cancelable.
-- `04-clases-final.puml` / `.svg` / `.pdf`: modelo posterior a la aplicación de SOLID y GRASP, agrupado por capas (modelo del negocio, raíz y persistencia, control e interfaz, servicios y excepciones). Es un diagrama grande: para leerlo en detalle abrir el `.svg` en un navegador o el `.pdf` y ampliar.
+- `01-clases-inicial.puml` / `.svg`: modelo previo a la aplicación de patrones. La fuente se conserva como referencia de la Etapa 1.
+- `02-secuencia-crear-reserva.puml`: CU08, con flujos alternativos por falta de cupos, requisitos no cumplidos, vencimientos y condiciones de pago. Su exportación SVG debe generarse desde esta fuente.
+- `03-secuencia-cancelar-reserva.puml`: CU15, con política de devolución, reserva inexistente, reserva no cancelable y actualización de vencimientos. Su exportación SVG debe generarse desde esta fuente.
+- `04-clases-final.puml`: modelo posterior a la aplicación de SOLID y GRASP, agrupado por capas (modelo del negocio, raíz y persistencia, control e interfaz, servicios y excepciones). El SVG y el PDF deben generarse nuevamente desde esta fuente vigente.
 - `casos-uso-administracion`, `casos-uso-reservas`, `casos-uso-pagos` y `casos-uso-operaciones` (`.puml` y `.svg`): diagramas de casos de uso, con relaciones «include» y «extend».
 
 ## Cambios del diagrama de clases inicial al final
@@ -18,10 +18,10 @@ Esta carpeta contiene los archivos fuente PlantUML (`.puml`) y sus imágenes exp
 - Se incorporan `Promocion`, `PromocionAnticipada` y `PromocionGrupo` para poder agregar promociones sin modificar el cálculo (OCP).
 - Se incorporan `RepositorioAgencia` y `RepositorioAgenciaArchivo`, y la clase raíz `Agencia`, para que la lógica dependa de una abstracción y no del archivo concreto (DIP). `Agencia` guarda las colecciones del sistema y ofrece las búsquedas.
 - Se incorporan `MenuConsola`, `ControladorReservas` y `ControladorOperaciones` para separar la interfaz del flujo de los casos de uso, y `GeneradorReportes` para los reportes (Controlador).
-- `DatosPasajero` desacopla los datos de entrada del proceso de creación, y `Reserva` crea a sus `Pasajero` y `NotaAjuste` (Creador).
+- `DatosPasajero` desacopla los datos de entrada; `Reserva.agregarPasajero(datos, telefono)` construye el `Pasajero` y lo incorpora, y `Reserva.registrarAjuste` crea la `NotaAjuste` (Creador).
 - `Salida`, `Reserva` y `Pasajero` conservan las responsabilidades sobre la información que conocen: cupos, días hasta el inicio, pago total exigido, saldo y factor de tarifa (Experto).
 - Se agregan las excepciones de dominio derivadas de `ReglaNegocioException`.
-- `CalculadoraPrecioReserva` recibe la lista de `Promocion` en su constructor (agregación), de modo que agregar una promoción nueva no obliga a modificarla (OCP).
+- `CalculadoraPrecioReserva` recibe la lista de `Promocion` en su constructor (agregación), y ofrece un constructor por defecto con las dos promociones actuales. La evaluación recorre la interfaz `Promocion`; una nueva promoción puede agregarse sin cambiar el algoritmo (OCP).
 
 **Correcciones de consistencia respecto de la versión anterior**
 
@@ -30,8 +30,12 @@ Esta carpeta contiene los archivos fuente PlantUML (`.puml`) y sus imágenes exp
 - La regla de «faltan 10 días o menos» se mueve del controlador a `Salida` (`exigePagoTotal`), y `diasHastaSalida` pasa de `Reserva` a `Salida` (`diasHastaInicio`).
 - Se quitan los métodos públicos `establecerEstado` y `definirTotal`: la reserva nace en estado pendiente y el vencimiento lo calcula la propia `Reserva` (`iniciarRetencion`).
 - `Coordinador` y `Administrador` quedan solo con sus datos: la lógica de operación pasa a `ControladorOperaciones` y los reportes a `GeneradorReportes`.
-- `Salida.verificarVencimientos` anula las reservas vencidas y libera sus cupos antes de calcular la disponibilidad (S09), y `Salida.finalizar` finaliza las reservas vigentes (`Reserva.finalizar`). `ControladorReservas.registrarReserva` valida los requisitos del tour y agrega los servicios obligatorios.
+- `Salida.verificarVencimientos` anula reservas pendientes y confirmadas cuyo plazo de pago venció (S04/S09), usando la fecha recibida; `Salida.emitirLista` incluye solo pasajeros de reservas confirmadas; y `Salida.finalizar` finaliza las reservas confirmadas. `ControladorReservas` actualiza la vigencia y el estado de la salida antes de iniciar operaciones sobre una reserva, y `registrarReserva` valida estado de la salida, requisitos y tipo de pasajero, y agrega los servicios obligatorios.
 - `MenuConsola` coordina la carga de pasajeros, la selección de servicios y el cierre de la operación mediante llamadas separadas a `ControladorReservas`; la implementación conserva la misma separación de responsabilidades del diseño.
 - `Salida` implementa `Comparable` (orden natural por fecha de inicio) para cumplir con el uso de ordenamiento; los reportes usan además un `Comparator`.
 
 Estos cambios se justifican en [`../diseno/solid-grasp.md`](../diseno/solid-grasp.md).
+
+## Sincronización con la implementación revisada
+
+Los archivos `.puml` de `02-secuencia-crear-reserva`, `03-secuencia-cancelar-reserva` y `04-clases-final` deben considerarse las fuentes vigentes del modelo. Las imágenes `.svg` y el PDF que estaban exportados previamente no se regeneraron en esta revisión y pueden no reflejar los últimos cambios de código. Antes de entregar, volver a exportar los `.puml` actualizados a SVG y actualizar el PDF del diagrama final y el `docs/Documento de diseño.pdf`. No entregar una imagen o PDF anterior junto con una fuente nueva, porque quedarían inconsistentes.

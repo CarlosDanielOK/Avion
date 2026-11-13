@@ -1,4 +1,3 @@
-
 # Reglas de Negocio – Sistema de Gestión Rumbo Sur
 
 ## Introducción

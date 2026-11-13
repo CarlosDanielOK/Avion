@@ -1,4 +1,3 @@
-
 # Supuestos Adoptados – Sistema de Gestión Rumbo Sur
 
 ## 1. Introducción

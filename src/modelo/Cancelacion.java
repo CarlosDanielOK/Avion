@@ -1,8 +1,8 @@
-
 package modelo;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import enumeraciones.MedioPago;
 
 public class Cancelacion implements Serializable {
 
@@ -13,11 +13,20 @@ public class Cancelacion implements Serializable {
     private boolean cancelacionAgencia;
     private double porcentajeDevolucion;
     private double importeDevuelto;
+    private MedioPago medioDevolucion;
 
     public Cancelacion(LocalDate fecha, String motivo,
                        boolean cancelacionAgencia,
                        double porcentajeDevolucion,
                        double importeDevuelto) {
+        this(fecha, motivo, cancelacionAgencia, porcentajeDevolucion, importeDevuelto, null);
+    }
+
+    public Cancelacion(LocalDate fecha, String motivo,
+                       boolean cancelacionAgencia,
+                       double porcentajeDevolucion,
+                       double importeDevuelto,
+                       MedioPago medioDevolucion) {
 
         if (fecha == null || motivo == null ||
                 motivo.isBlank()) {
@@ -37,6 +46,7 @@ public class Cancelacion implements Serializable {
         this.cancelacionAgencia = cancelacionAgencia;
         this.porcentajeDevolucion = porcentajeDevolucion;
         this.importeDevuelto = importeDevuelto;
+        this.medioDevolucion = medioDevolucion;
     }
 
     public LocalDate getFecha() {
@@ -57,6 +67,10 @@ public class Cancelacion implements Serializable {
 
     public double getImporteDevuelto() {
         return importeDevuelto;
+    }
+
+    public MedioPago getMedioDevolucion() {
+        return medioDevolucion;
     }
 
     @Override

@@ -1,0 +1,9 @@
+# Salidas de compilación Java
+/out/
+/out-test/
+/out17/
+/out-test17/
+*.class
+
+# Datos serializados generados al ejecutar el programa
+/datos/

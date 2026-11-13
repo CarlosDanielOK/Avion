@@ -7,10 +7,10 @@
 | **Propuesta elegida** | B – Agencia de Turismo |
 | **Lenguaje** | Java 17 o superior |
 | **Modelado** | UML |
-| **Estado actual** | Etapas 1 y 2 implementadas y verificadas |
+| **Estado actual** | Código y pruebas verificados; exportaciones UML/PDF pendientes de actualizar |
 | **Entrega Etapa 1** | 25/10/2026 (tag `etapa-1`) |
-| **Entrega Etapa 2** | 12/11/2026 (tag `etapa-2`) |
-| **Defensa** | 19/11/2026 (jueves) |
+| **Entrega Etapa 2** | 04/11/2026 según el TPO; 12/11/2026 según el README anterior (confirmar) |
+| **Defensa** | 11/11/2026 según el TPO; 19/11/2026 según el README anterior (confirmar) |
 
 ---
 
@@ -27,6 +27,7 @@
 9. [Metodología de trabajo](#9-metodología-de-trabajo)
 10. [Plan de entregas y estado](#10-plan-de-entregas-y-estado)
 11. [Integrantes](#11-integrantes)
+12. [Implementación y pruebas — Etapa 2](#12-implementación-y-pruebas--etapa-2)
 
 ---
 
@@ -101,8 +102,10 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 | Documento | Contenido |
 |---|---|
 | [`docs/diseno/solid-grasp.md`](docs/diseno/solid-grasp.md) | Aplicación y fundamentación de SOLID y GRASP. |
-| [`docs/uml/`](docs/uml) | Diagramas UML (imagen exportada y fuente PlantUML) y nota de cambios. |
-| [Documento de diseño](docs/Documento%20de%20dise%C3%B1o.pdf) | Documento complementario en formato PDF. |
+| [`docs/uml/`](docs/uml) | Diagramas UML, fuentes PlantUML y nota de cambios. Las fuentes de secuencia y clases finales son vigentes; sus exportaciones gráficas deben regenerarse antes de entregar. |
+| [`docs/Plan_de_pruebas.md`](docs/Plan_de_pruebas.md) | Plan con entradas, resultados esperados y obtenidos, además de pruebas manuales para la defensa. |
+| [`docs/Revision_pre_entrega.md`](docs/Revision_pre_entrega.md) | Resumen de la revisión técnica, correcciones aplicadas y checklist pendiente de entrega. |
+| `docs/Documento de diseño.pdf` | PDF complementario: el binario no estaba incluido en el archivo Repomix proporcionado para esta revisión; debe recuperarse del repositorio original y actualizarse con los diagramas vigentes. |
 
 ## 6. Estructura del repositorio
 
@@ -111,14 +114,16 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 ├── docs/                 Documentación del proyecto
 │   ├── analisis/         Análisis, requerimientos, reglas, supuestos y casos de uso
 │   ├── diseno/           Fundamentación de SOLID y GRASP
-│   ├── uml/                 Diagramas UML (.puml, .svg y .pdf)
-│   └── Documento de diseño.pdf
+│   ├── uml/              Fuentes PlantUML (.puml) y exportaciones gráficas
+│   ├── Plan_de_pruebas.md
+│   ├── Revision_pre_entrega.md
+│   └── Documento de diseño.pdf (reincorporar versión actualizada)
 ├── src/                  Código fuente Java (Etapa 2)
-├── test/                 Pruebas unitarias (Etapa 2)
+├── test/                 Pruebas automatizadas (Etapa 2)
 └── README.md
 ```
 
-> Las carpetas `src/` y `test/` contienen la implementación y las pruebas de la Etapa 2.
+> Las carpetas `src/` y `test/` contienen la implementación y las pruebas de la Etapa 2. Antes de entregar, regenerar las imágenes SVG y los PDF UML desde los `.puml` actualizados y reincorporar el PDF `docs/Documento de diseño.pdf` actualizado. El paquete revisado no incluye las exportaciones antiguas de los diagramas de secuencia/clases para evitar presentarlas como vigentes. El volcado Repomix usado en esta revisión no contenía los binarios PDF.
 
 ## 7. Tecnologías y herramientas
 
@@ -137,7 +142,7 @@ Se requiere JDK 17 o superior. Desde la carpeta raíz del proyecto:
 
 ```powershell
 New-Item -ItemType Directory -Force out
-javac -encoding UTF-8 -d out (Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object FullName)
+javac --release 17 -encoding UTF-8 -d out (Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object FullName)
 java -cp out Main
 ```
 
@@ -145,12 +150,13 @@ java -cp out Main
 
 ```powershell
 New-Item -ItemType Directory -Force out-test
-javac -encoding UTF-8 -cp out -d out-test (Get-ChildItem -Path test -Recurse -Filter *.java | ForEach-Object FullName)
+javac --release 17 -encoding UTF-8 -cp out -d out-test (Get-ChildItem -Path test -Recurse -Filter *.java | ForEach-Object FullName)
 java -cp "out;out-test" modelo.AgenciaTest
 java -cp "out;out-test" modelo.SalidaTest
 java -cp "out;out-test" controladores.GeneradorReportesTest
 java -cp "out;out-test" controladores.ControladorOperacionesTest
 java -cp "out;out-test" controladores.ControladorReservasTest
+java -cp "out;out-test" modelo.CalculadoraPrecioReservaTest
 ```
 
 Los cambios de catálogo y operación se guardan mediante el repositorio de archivos en `datos/agencia.dat`. Si el archivo existente no puede leerse, `Main` detiene el inicio para evitar sobrescribirlo accidentalmente.
@@ -162,15 +168,15 @@ El proyecto se desarrolla de forma colaborativa en GitHub:
 - La rama `main` contiene únicamente versiones revisadas.
 - Los cambios se desarrollan en ramas de trabajo y se integran mediante *pull requests* revisados por al menos otro integrante.
 - Los *commits* tienen mensajes descriptivos.
-- Para identificar cada entrega, se prevé crear un *tag* (`etapa-1`, `etapa-2`).
+- La consigna solicita los *tags* `etapa-1` y `etapa-2`. La exportación Markdown no incluye el historial Git ni los tags; comprobar su existencia en el repositorio con `git tag --list` antes de entregar.
 
 ## 10. Plan de entregas y estado
 
 | Etapa | Contenido | Entrega | Estado |
 |---|---|---|---|
 | **Etapa 1** | Análisis, casos de uso, diagramas de clases y secuencia, SOLID y GRASP. | 25/10/2026 | Finalizada |
-| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 12/11/2026 | Finalizada |
-| **Defensa** | Presentación oral y demostración del sistema. | 19/11/2026 (jueves) | Pendiente |
+| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 04/11/2026 según el TPO original; 12/11/2026 en el README anterior | Finalizada según el grupo; fecha definitiva a confirmar |
+| **Defensa** | Presentación oral y demostración del sistema. | 11/11/2026 según el TPO original; 19/11/2026 en el README anterior | Fecha definitiva a confirmar |
 
 ## 11. Integrantes
 
@@ -196,8 +202,9 @@ La persistencia utiliza serialización de objetos Java en `datos/agencia.dat`. L
 | `GeneradorReportesTest` | OK |
 | `ControladorOperacionesTest` | OK |
 | `ControladorReservasTest` | OK |
+| `CalculadoraPrecioReservaTest` | OK |
 
-Además, se ejecutó una prueba de humo del menú: carga de datos de ejemplo, generación de los cuatro reportes y comprobación de que el archivo de persistencia se crea correctamente.
+Además, se ejecutó una prueba de humo del menú y una prueba de persistencia: se cargaron los datos de ejemplo, se guardaron y recuperaron desde un archivo temporal (2 tours, 2 salidas y 3 reservas), y se comprobó que `Main` muestra el menú y finaliza con la opción 0. La verificación detallada está en el plan de pruebas.
 
 ### Estado de integración
 

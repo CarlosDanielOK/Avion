@@ -1,4 +1,3 @@
-
 package modelo;
 
 import java.time.LocalDate;
@@ -68,6 +67,22 @@ public class GestorCancelaciones {
                 porcentaje,
                 importeDevuelto);
     }
+    /** Crea una devolución simulada y conserva el medio del último pago (S13). */
+    public Cancelacion crearCancelacion(Reserva reserva, String motivo,
+                                        boolean cancelacionAgencia, LocalDate hoy) {
+        if (reserva == null || hoy == null) {
+            throw new IllegalArgumentException("La reserva y la fecha son obligatorias");
+        }
+        if (!reserva.puedeCancelarse()) {
+            throw new IllegalStateException("La reserva no puede cancelarse");
+        }
+        double porcentaje = calcularPorcentajeDevolucion(hoy,
+                reserva.getSalida().getFechaInicio(), cancelacionAgencia);
+        double importe = reserva.calcularTotalPagado() * porcentaje;
+        return new Cancelacion(hoy, motivo, cancelacionAgencia, porcentaje,
+                importe, reserva.obtenerMedioPagoDevolucion());
+    }
+
     public Cancelacion cancelar(
             Reserva reserva,
             String motivo,
@@ -84,20 +99,7 @@ public class GestorCancelaciones {
                     "La reserva no puede cancelarse");
         }
 
-        double porcentaje = calcularPorcentajeDevolucion(
-                hoy,
-                reserva.getSalida().getFechaInicio(),
-                cancelacionAgencia);
-
-        double importeDevuelto =
-                reserva.calcularTotalPagado() * porcentaje;
-
-        Cancelacion cancelacion = new Cancelacion(
-                hoy,
-                motivo,
-                cancelacionAgencia,
-                porcentaje,
-                importeDevuelto);
+        Cancelacion cancelacion = crearCancelacion(reserva, motivo, cancelacionAgencia, hoy);
 
         reserva.registrarCancelacion(cancelacion);
         return cancelacion;

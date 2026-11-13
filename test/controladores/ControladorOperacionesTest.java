@@ -14,7 +14,51 @@ public class ControladorOperacionesTest {
 
     public static void main(String[] args) throws Exception {
         rechazaVehiculoEnSalidasSuperpuestas();
+        cancelaAntesDeEmitirListaSiNoAlcanzaElMinimo();
         System.out.println("ControladorOperacionesTest: OK");
+    }
+
+
+    private static void cancelaAntesDeEmitirListaSiNoAlcanzaElMinimo() throws Exception {
+        Agencia agencia = new Agencia();
+        RepositorioAgencia repositorio = new RepositorioAgencia() {
+            @Override public void guardar(Agencia ignorada) { }
+            @Override public Agencia cargar() { return agencia; }
+        };
+        ControladorOperaciones controlador = new ControladorOperaciones(
+                agencia, repositorio, new GestorCancelaciones());
+        LocalDate hoy = LocalDate.now();
+        LocalDate inicio = hoy.plusDays(10);
+        TourCultural tour = new TourCultural("CUL03", "Tour mínimo", "Descripción", 1, 2, 10);
+        Salida salida = new Salida(3, tour, inicio, inicio, 10);
+        agencia.agregarSalida(salida);
+
+        Cliente cliente = new Cliente("Ana", "Ruiz", "333", "11", "a@mail.com", "Argentina");
+        Vendedor vendedor = new Vendedor(3, "Luis", "Pérez", "444", "22", 5);
+        Reserva reserva = new Reserva(3, cliente, salida, vendedor);
+        reserva.agregarPasajero(new Pasajero("Pablo", "Ruiz", "555", "33",
+                LocalDate.of(1990, 1, 1), enumeraciones.TipoPasajero.ADULTO, "11", ""));
+        reserva.actualizarImporteTotal(1000);
+        reserva.registrarPago(new modelo.Pago(3, hoy, 1000, enumeraciones.MedioPago.EFECTIVO, 1));
+        reserva.cambiarEstado(enumeraciones.EstadoReserva.CONFIRMADA);
+        salida.agregarReserva(reserva);
+        agencia.agregarReserva(reserva);
+
+        // La salida sigue programada a 10 días, pero se verifica como si faltaran 5.
+        try {
+            controlador.emitirListaPasajeros(salida.getId(), hoy.plusDays(5));
+            throw new AssertionError("No debía emitir lista para una salida cancelada por cupo mínimo");
+        } catch (excepciones.OperacionNoPermitidaException esperado) {
+            // comportamiento esperado
+        }
+        if (salida.getEstado() != enumeraciones.EstadoSalida.CANCELADA) {
+            throw new AssertionError("La salida debía cancelarse al quedar a cinco días sin cupo mínimo");
+        }
+        if (reserva.getEstado() != enumeraciones.EstadoReserva.ANULADA
+                || reserva.getCancelacion() == null
+                || reserva.getCancelacion().getPorcentajeDevolucion() != 1.0) {
+            throw new AssertionError("La reserva vigente debía anularse con devolución del 100 %");
+        }
     }
 
     private static void rechazaVehiculoEnSalidasSuperpuestas() throws Exception {

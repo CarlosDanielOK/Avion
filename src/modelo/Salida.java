@@ -61,8 +61,11 @@ public class Salida implements Serializable, Comparable<Salida> {
 
     /** Libera los cupos retenidos por reservas cuyo plazo de pago ya venció. */
     public void verificarVencimientos(LocalDate hoy) {
+        if (hoy == null) throw new IllegalArgumentException("La fecha es obligatoria");
         for (Reserva reserva : reservas) {
-            if (reserva.estaVencida(fechaInicio)) reserva.anularPorVencimiento();
+            if (reserva.estaVencida(fechaInicio, hoy)) {
+                reserva.anularPorVencimiento(fechaInicio, hoy);
+            }
         }
     }
 
@@ -90,7 +93,30 @@ public class Salida implements Serializable, Comparable<Salida> {
 
     public void agregarReserva(Reserva reserva) throws OperacionNoPermitidaException {
         if (reserva == null) throw new IllegalArgumentException("La reserva es obligatoria");
-        if (!reservas.contains(reserva)) reservas.add(reserva);
+        if (reserva.getSalida() != this) {
+            throw new OperacionNoPermitidaException("La reserva pertenece a otra salida");
+        }
+        if (reservas.contains(reserva)) {
+            throw new OperacionNoPermitidaException("La reserva ya está asociada a esta salida");
+        }
+        LocalDate hoy = LocalDate.now();
+        verificarVencimientos(hoy);
+        if (estado == EstadoSalida.CANCELADA || estado == EstadoSalida.FINALIZADA
+                || estado == EstadoSalida.EN_CURSO) {
+            throw new OperacionNoPermitidaException("No se admiten reservas para una salida " + estado);
+        }
+        if (estado == EstadoSalida.COMPLETA) {
+            // Si se liberó un lugar, vuelve a calcular el estado antes de admitir otra reserva.
+            actualizarEstado(hoy);
+            if (estado == EstadoSalida.CANCELADA) {
+                throw new OperacionNoPermitidaException("La salida fue cancelada por no alcanzar el cupo mínimo");
+            }
+        }
+        if (reserva.cantidadPasajeros() > Math.max(0, cupoMaximo - cuposOcupados(hoy))) {
+            throw new OperacionNoPermitidaException("No hay cupos suficientes para la reserva");
+        }
+        reservas.add(reserva);
+        actualizarEstado(hoy);
     }
 
     public void asignarGuia(Guia guia) throws RequisitosNoCumplidosException {
@@ -111,10 +137,18 @@ public class Salida implements Serializable, Comparable<Salida> {
         this.vehiculo = vehiculo;
     }
 
-    /** Genera la lista operativa y habilita el inicio posterior de la salida. */
-    public List<Pasajero> emitirLista() {
+    /** Genera la lista operativa solo cuando la salida alcanzó el cupo mínimo. */
+    public List<Pasajero> emitirLista() throws OperacionNoPermitidaException {
+        if (estado != EstadoSalida.CONFIRMADA && estado != EstadoSalida.COMPLETA) {
+            throw new OperacionNoPermitidaException(
+                    "Solo se puede emitir la lista de una salida confirmada o completa");
+        }
         List<Pasajero> pasajeros = new ArrayList<>();
-        for (Reserva reserva : reservas) pasajeros.addAll(reserva.getPasajeros());
+        for (Reserva reserva : reservas) {
+            if (reserva.getEstado() == enumeraciones.EstadoReserva.CONFIRMADA) {
+                pasajeros.addAll(reserva.getPasajeros());
+            }
+        }
         listaEmitida = true;
         return pasajeros;
     }
@@ -145,8 +179,9 @@ public class Salida implements Serializable, Comparable<Salida> {
     }
 
     public void iniciar() throws RequisitosNoCumplidosException, OperacionNoPermitidaException {
-        if (estado == EstadoSalida.CANCELADA || estado == EstadoSalida.FINALIZADA) {
-            throw new OperacionNoPermitidaException("No se puede iniciar una salida " + estado);
+        if (estado != EstadoSalida.CONFIRMADA && estado != EstadoSalida.COMPLETA) {
+            throw new OperacionNoPermitidaException(
+                    "Solo se puede iniciar una salida confirmada o completa; estado actual: " + estado);
         }
         validarCondicionesInicio();
         estado = EstadoSalida.EN_CURSO;

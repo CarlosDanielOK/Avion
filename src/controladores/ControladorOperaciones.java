@@ -24,6 +24,7 @@ import modelo.GestorCancelaciones;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 /**
@@ -205,18 +206,35 @@ public class ControladorOperaciones {
 
     /** CU20 */
     public List<Pasajero> emitirListaPasajeros(long idSalida) throws ReglaNegocioException {
+        return emitirListaPasajeros(idSalida, LocalDate.now());
+    }
+
+    /**
+     * Antes de emitir la lista se actualizan vencimientos y el mínimo de pasajeros.
+     * Así no se emite una lista para una salida que ya debe cancelarse (RN06/S19).
+     */
+    public List<Pasajero> emitirListaPasajeros(long idSalida, LocalDate hoy) throws ReglaNegocioException {
+        actualizarEstadoSalida(idSalida, hoy);
         Salida salida = agencia.buscarSalida(idSalida);
-        salida.verificarVencimientos(LocalDate.now());
+        if (salida.getEstado() == EstadoSalida.CANCELADA) {
+            throw new OperacionNoPermitidaException("No se puede emitir la lista: la salida está cancelada");
+        }
         List<Pasajero> lista = salida.emitirLista();
         guardar();
         return lista;
     }
 
     /**
-     * CU21: Salida valida lista emitida, guía habilitado y vehículo con capacidad
-     * (RN30).
+     * CU21: actualiza primero el estado de negocio y luego valida la lista,
+     * el guía habilitado y el vehículo con capacidad (RN06, RN30).
      */
     public void iniciarSalida(long idSalida) throws ReglaNegocioException {
+        iniciarSalida(idSalida, LocalDate.now());
+    }
+
+    /** Sobrecarga con fecha explícita para que las reglas temporales sean comprobables. */
+    public void iniciarSalida(long idSalida, LocalDate hoy) throws ReglaNegocioException {
+        actualizarEstadoSalida(idSalida, hoy);
         agencia.buscarSalida(idSalida).iniciar();
         guardar();
     }
@@ -255,7 +273,13 @@ public class ControladorOperaciones {
     /** Tours ordenados por nombre: ordenamiento personalizado con Comparator. */
     public List<Tour> listarTours() {
         List<Tour> tours = new ArrayList<>(agencia.getTours());
-        tours.sort(Comparator.comparing(Tour::getNombre, String.CASE_INSENSITIVE_ORDER));
+        Collections.sort(tours, new Comparator<Tour>() {
+            @Override
+            public int compare(Tour primero, Tour segundo) {
+                return String.CASE_INSENSITIVE_ORDER.compare(
+                        primero.getNombre(), segundo.getNombre());
+            }
+        });
         return tours;
     }
 
