@@ -1,4 +1,3 @@
-
 # INFORME FINAL — ETAPA 2
 ## SISTEMA DE GESTIÓN PARA AGENCIA DE TURISMO — RUMBO SUR
 
@@ -171,17 +170,15 @@ Estos porcentajes forman parte de la lógica implementada y se validan mediante 
 
 ### 5.3. COMPILACIÓN CONJUNTA
 
-Se realizó una prueba de integración del código Java disponible utilizando el compilador de Java.
+Se compiló el proyecto completo con JDK 21 utilizando `javac --release 17`, para comprobar que las clases se mantengan compatibles con la versión mínima indicada en el TPO. La compilación de `src/` y `test/` finalizó sin errores.
 
-Inicialmente se detectaron errores de compatibilidad entre clases y referencias a paquetes.
+### 5.4. PRUEBAS AUTOMATIZADAS Y DE HUMO
 
-Después de incorporar las correcciones correspondientes, la compilación finalizó sin errores.
+Se ejecutaron las seis clases de prueba incluidas en `test/`: `AgenciaTest`, `SalidaTest`, `GeneradorReportesTest`, `ControladorOperacionesTest`, `ControladorReservasTest` y `CalculadoraPrecioReservaTest`. Todas finalizaron con el mensaje `OK`.
 
-Este resultado permitió comprobar la compatibilidad del código a nivel de compilación, aunque no constituye por sí solo una validación funcional completa.
+También se realizó una prueba de persistencia mediante el repositorio de archivos: se cargaron datos de ejemplo, se guardaron y recuperaron desde un archivo temporal, recuperando dos tours, dos salidas y tres reservas. Por último, se inició `Main`, se mostró el menú de consola y se finalizó mediante la opción 0.
 
-### 5.4. PRUEBAS DE INTEGRACIÓN
-
-La prueba `ControladorReservasTest` cubre el flujo de alta de una reserva en `Agencia`, retención de cupos, cálculo de precio, registro de pago, confirmación y cancelación con liberación de cupos. También se verificó la ejecución de la aplicación mediante el menú de consola y la compilación conjunta de fuentes y pruebas.
+El plan de pruebas con datos de entrada, resultado esperado y resultado obtenido se encuentra en [`Plan_de_pruebas.md`](Plan_de_pruebas.md). El mismo documento incluye verificaciones manuales recomendadas para preparar la demostración oral; esas verificaciones no se presentan como automatizadas.
 
 ---
 
@@ -201,14 +198,10 @@ En conjunto, esta etapa permitió adquirir experiencia tanto en la implementaci�
 
 ## 7. CONCLUSIÓN
 
-Durante la segunda etapa del proyecto Rumbo Sur se avanzó en la implementación de las clases correspondientes a los principales módulos del sistema.
+Durante la segunda etapa del proyecto Rumbo Sur se implementaron las funcionalidades vinculadas con tours, salidas, reservas, pasajeros, pagos, cancelaciones y operaciones de la agencia.
 
-Se desarrollaron funcionalidades vinculadas con tours, salidas, reservas, pasajeros, pagos, cancelaciones y operaciones de la agencia.
+La revisión previa a la entrega detectó y corrigió problemas en el vencimiento de reservas confirmadas con saldo pendiente, en la lista de pasajeros, en la admisión de reservas para salidas no habilitadas y en el cálculo del precio a partir de tarifas y servicios realmente registrados. También se alineó la aplicación de promociones con el principio Abierto/Cerrado y se agregó la creación de pasajeros desde `Reserva` para respaldar el patrón GRASP Creador.
 
-Asimismo, se realizaron ajustes respecto del diseño inicial para resolver incompatibilidades detectadas durante la integración.
+La versión revisada compila con compatibilidad Java 17, las seis clases de prueba automatizadas finalizan correctamente y cubren los escenarios documentados, incluidos los vencimientos al iniciar operaciones sobre una reserva (S09). Se verificaron además la persistencia por serialización y el inicio del menú de consola. Para mantener la implementación cercana al temario, la interfaz y los reportes utilizan recorridos tradicionales y `Comparator`, sin streams ni expresiones lambda. Los casos y resultados se documentan en el plan de pruebas.
 
-Como resultado, se consiguió una compilación conjunta satisfactoria del código Java disponible.
-
-Para completar la entrega, resta ejecutar y documentar las pruebas funcionales integrales, verificar la persistencia y confirmar el funcionamiento de la aplicación completa.
-
-El trabajo realizado constituye una base para finalizar la integración y validar los casos de uso definidos para el sistema.
+El documento de diseño PDF fue actualizado con las exportaciones UML vigentes y un anexo de trazabilidad de Etapa 2; las fuentes PlantUML, sus exportaciones SVG y el PDF del diagrama de clases final se encuentran incluidos en el repositorio. Como verificaciones a cargo del grupo antes de cerrar la entrega, quedan confirmar en GitHub los tags `etapa-1` y `etapa-2`, comprobar los commits y Pull Requests de los tres integrantes y ejecutar los casos manuales PM01–PM10 en el equipo del grupo. La entrega de la Etapa 2 fue extendida excepcionalmente al 13/11/2026 debido a inconvenientes con Microsoft Teams y la defensa oral está prevista para el 19/11/2026 (jueves).

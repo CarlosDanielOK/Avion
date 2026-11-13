@@ -1,4 +1,3 @@
-
 # Requerimientos Funcionales – Sistema de Gestión Rumbo Sur
 
 ## Introducción

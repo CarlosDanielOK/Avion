@@ -32,8 +32,12 @@ public class Main {
         ControladorReservas reservas = new ControladorReservas(agencia, repositorio);
         GeneradorReportes reportes = new GeneradorReportes(agencia);
 
-        try (Scanner entrada = new Scanner(System.in)) {
+        Scanner entrada = new Scanner(System.in);
+        try {
             new MenuConsola(agencia, repositorio, operaciones, reservas, reportes, entrada).mostrarMenu();
+        } finally {
+            System.out.println("Sesion finalizada.");
+            entrada.close();
         }
     }
 }

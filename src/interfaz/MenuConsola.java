@@ -81,12 +81,12 @@ public class MenuConsola {
             System.out.println("6. Cargar datos de ejemplo");
             System.out.println("0. Salir");
             switch (leerEntero("Opción: ")) {
-                case 1: submenu(this::menuTours); break;
-                case 2: submenu(this::menuSalidas); break;
-                case 3: submenu(this::menuOperacion); break;
-                case 4: submenu(this::menuReservas); break;
-                case 5: submenu(this::menuReportes); break;
-                case 6: submenu(this::cargarDatosEjemplo); break;
+                case 1: submenu(1); break;
+                case 2: submenu(2); break;
+                case 3: submenu(3); break;
+                case 4: submenu(4); break;
+                case 5: submenu(5); break;
+                case 6: submenu(6); break;
                 case 0: salir = true; break;
                 default: System.out.println("Opción inválida.");
             }
@@ -378,9 +378,7 @@ public class MenuConsola {
             case 2: registrarCliente(); break;
             case 3: crearReserva(); break;
             case 4:
-                double precio = reservas.calcularPrecio(leerEntero("Reserva: "),
-                        leerDecimal("Tarifa base: "), leerFecha("Fecha de salida"),
-                        leerDecimal("Total de adicionales: "));
+                double precio = reservas.calcularPrecio(leerEntero("Reserva: "));
                 System.out.println("Precio calculado: $" + precio);
                 break;
             case 5:
@@ -390,23 +388,31 @@ public class MenuConsola {
                 System.out.println("Pago registrado por $" + pago.getImporte());
                 break;
             case 6:
-                reservas.confirmarReserva(leerEntero("Reserva: "), leerFecha("Fecha de salida"));
+                reservas.confirmarReserva(leerEntero("Reserva: "));
                 System.out.println("Reserva confirmada.");
                 break;
             case 7:
                 Cancelacion cancelacion = reservas.cancelarReserva(leerEntero("Reserva: "),
-                        leerTexto("Motivo: "), leerFecha("Fecha de salida"), false);
-                System.out.println("Reserva cancelada. Devolución: $" + cancelacion.getImporteDevuelto());
+                        leerTexto("Motivo: "), false);
+                System.out.println("Reserva cancelada. Devolución simulada: $" + cancelacion.getImporteDevuelto()
+                        + " | Medio: " + (cancelacion.getMedioDevolucion() == null
+                        ? "sin pagos registrados" : cancelacion.getMedioDevolucion()));
                 break;
             case 8:
                 int reservaAdicional = leerEntero("Reserva: ");
                 Reserva reserva = reservas.buscarReserva(reservaAdicional);
                 if (reserva == null) throw new IllegalArgumentException("No existe la reserva indicada.");
                 String nombreServicio = leerTexto("Nombre del servicio: ");
-                ServicioAdicional servicio = reserva.getSalida().getTour().getServicios().stream()
-                        .filter(s -> s.getNombre().equalsIgnoreCase(nombreServicio))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("No existe ese servicio en el tour."));
+                ServicioAdicional servicio = null;
+                for (ServicioAdicional disponible : reserva.getSalida().getTour().getServicios()) {
+                    if (disponible.getNombre().equalsIgnoreCase(nombreServicio)) {
+                        servicio = disponible;
+                        break;
+                    }
+                }
+                if (servicio == null) {
+                    throw new IllegalArgumentException("No existe ese servicio en el tour.");
+                }
                 reservas.agregarServicioAdicional(reservaAdicional,
                         leerTexto("Documento del pasajero: "), servicio);
                 System.out.println("Servicio adicional contratado.");
@@ -449,8 +455,10 @@ public class MenuConsola {
         Cliente cliente = new Cliente(leerTexto("Nombre: "), leerTexto("Apellido: "),
                 leerTexto("Documento: "), leerTexto("Teléfono: "), leerTexto("Correo: "),
                 leerTexto("País de residencia: "));
-        if (agencia.getClientes().stream().anyMatch(c -> c.getDocumento().equalsIgnoreCase(cliente.getDocumento()))) {
-            throw new IllegalArgumentException("Ya existe un cliente con ese documento.");
+        for (Cliente registrado : agencia.getClientes()) {
+            if (registrado.getDocumento().equalsIgnoreCase(cliente.getDocumento())) {
+                throw new IllegalArgumentException("Ya existe un cliente con ese documento.");
+            }
         }
         agencia.agregarCliente(cliente);
         repositorio.guardar(agencia);
@@ -464,13 +472,15 @@ public class MenuConsola {
         Reserva reserva = new Reserva((int) agencia.siguienteNumeroReserva(), cliente, salida, vendedor);
         int cantidad = leerEntero("Cantidad de pasajeros: ");
         for (int i = 1; i <= cantidad; i++) {
-            reserva.agregarPasajero(new Pasajero(leerTexto("Nombre pasajero " + i + ": "),
-                    leerTexto("Apellido: "), leerTexto("Documento: "), leerTexto("Teléfono: "),
+            reserva.agregarPasajero(new DatosPasajero(
+                    leerTexto("Nombre pasajero " + i + ": "),
+                    leerTexto("Apellido: "), leerTexto("Documento: "),
                     leerFecha("Fecha de nacimiento"), leerEnum("Tipo de pasajero", TipoPasajero.values()),
-                    leerTexto("Contacto de emergencia: "), leerTexto("Restricciones: ")));
+                    leerTexto("Contacto de emergencia: "), leerTexto("Restricciones: ")),
+                    leerTexto("Teléfono: "));
         }
         reservas.registrarReserva(reserva);
-        System.out.println("Reserva #" + reserva.getId() + " creada en estado PENDIENTE.");
+        System.out.println("Reserva #" + reserva.getId() + " creada en estado " + reserva.getEstado() + ".");
     }
 
     private Vendedor obtenerVendedor(int legajo) {
@@ -514,19 +524,23 @@ public class MenuConsola {
 
     // ------------------------------ Entrada por consola ------------------------------
 
-    /** Ejecuta una opción del menú sin que un error de carga o de negocio cierre el programa. */
-    private void submenu(Accion accion) {
+    /** Ejecuta el submenú seleccionado y controla los errores esperables. */
+    private void submenu(int opcion) {
         try {
-            accion.ejecutar();
+            switch (opcion) {
+                case 1: menuTours(); break;
+                case 2: menuSalidas(); break;
+                case 3: menuOperacion(); break;
+                case 4: menuReservas(); break;
+                case 5: menuReportes(); break;
+                case 6: cargarDatosEjemplo(); break;
+                default: System.out.println("Opción inválida.");
+            }
         } catch (ReglaNegocioException e) {
             System.out.println("No se pudo completar la operación: " + e.getMessage());
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("Dato o estado inválido: " + e.getMessage());
         }
-    }
-
-    private interface Accion {
-        void ejecutar() throws ReglaNegocioException;
     }
 
     private String leerTexto(String mensaje) {

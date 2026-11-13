@@ -132,8 +132,8 @@ class Pasajero #FFF3CC {
   - contactoEmergencia: String
   - restricciones: String
   + calcularEdad(fecha: LocalDate): int
-  + tipoEsCompatible(fecha: LocalDate): boolean
-  + obtenerFactorTarifa(fecha: LocalDate): double
+  + tipoEsCompatible(fechaSalida: LocalDate): boolean
+  + calcularPorcentajeTarifa(fechaSalida: LocalDate): double
   + agregarServicioAdicional(s: ServicioAdicional): void
   + getServiciosAdicionales(): List<ServicioAdicional>
   + totalServiciosAdicionales(): double
@@ -239,14 +239,16 @@ class Salida #FFF3CC {
   + verificarVencimientos(hoy: LocalDate): void
   + puedeParticipar(datos: DatosPasajero): boolean
   + obtenerTarifa(): Tarifa
-  + diasHastaInicio(hoy: LocalDate): int
+  + diasHastaInicio(hoy: LocalDate): long
   + exigePagoTotal(hoy: LocalDate): boolean
   + totalServiciosAdicionales(): double
   + agregarReserva(reserva: Reserva): void
   + asignarGuia(guia: Guia): void
   + asignarVehiculo(vehiculo: Vehiculo): void
   + emitirLista(): List<Pasajero>
+  + emitirLista(hoy: LocalDate): List<Pasajero>
   + actualizarEstado(hoy: LocalDate): void
+  ~ invalidarListaPasajeros(): void
   + validarCondicionesInicio(): void
   + iniciar(): void
   + finalizar(): void
@@ -268,34 +270,38 @@ Liquidacion "0..*" --> "1" Guia : paga a >
 ' ===================== VENTAS =====================
 
 class Reserva #FFF3CC {
-  - numero: long
-  - fecha: LocalDate
+  - id: int
+  - cliente: Cliente
+  - salida: Salida
+  - vendedor: Vendedor
+  - pasajeros: List<Pasajero>
+  - pagos: List<Pago>
+  - notasAjuste: List<NotaAjuste>
+  - fechaCreacion: LocalDateTime
   - estado: EstadoReserva
-  - total: double
-  - vencimientoPago: LocalDate
+  - importeTotal: double
+  - importeServiciosAdicionales: double
+  - cancelacion: Cancelacion
+  + agregarPasajero(datos: DatosPasajero, telefono: String): Pasajero
   + agregarPasajero(pasajero: Pasajero): void
   + incluirServiciosObligatorios(): void
-  + agregarServicioAdicional(p: Pasajero, s: ServicioAdicional): void
+  + agregarServicioAdicional(pasajero: Pasajero, servicio: ServicioAdicional): void
   + totalServiciosAdicionales(): double
-  + registrarTotal(total: double): void
-  + iniciarRetencion(hoy: LocalDate): void
-  + estaVencida(hoy: LocalDate): boolean
-  + ocupaCupos(hoy: LocalDate): boolean
-  + cantidadPasajeros(): int
   + registrarPago(pago: Pago): void
-  + totalAbonado(): double
-  + calcularSaldo(): double
-  + seniaCubierta(): boolean
-  + medioDePagoUsado(): MedioPago
-  + obtenerSalida(): Salida
+  + calcularTotalPagado(): double
+  + calcularTotalCobrado(): double
+  + calcularSaldoPendiente(): double
+  + actualizarImporteTotal(importe: double): void
+  + cambiarEstado(nuevoEstado: EstadoReserva): void
+  + registrarCancelacion(cancelacion: Cancelacion): void
+  + estaVencida(fechaSalida: LocalDate, hoy: LocalDate): boolean
+  + anularSiVencida(fechaSalida: LocalDate, hoy: LocalDate): boolean
+  + ocupaCupos(hoy: LocalDate): boolean
   + puedeCancelarse(): boolean
-  + confirmar(): void
-  + finalizar(): void
-  + anular(cancelacion: Cancelacion): void
-  + anularPorVencimiento(): void
+  + anularPorVencimiento(fechaSalida: LocalDate, hoy: LocalDate): void
   + reemplazarPasajero(documento: String, datos: DatosPasajero, hoy: LocalDate): void
   + registrarAjuste(motivo: String, importe: double, fecha: LocalDate): NotaAjuste
-  + getNotasAjuste(): List<NotaAjuste>
+  + obtenerMedioPagoDevolucion(): MedioPago
 }
 
 class Pago #FFF3CC {
@@ -309,7 +315,8 @@ class Pago #FFF3CC {
 class Cancelacion {
   - fecha: LocalDate
   - motivo: String
-  - porcentajeDevolucion: int
+  - cancelacionAgencia: boolean
+  - porcentajeDevolucion: double
   - importeDevuelto: double
   - medioDevolucion: MedioPago
 }
@@ -323,8 +330,8 @@ class NotaAjuste {
 Reserva "0..*" --> "1" Cliente : titular >
 Reserva "0..*" --> "1" Vendedor : atendida por >
 Salida "1" -- "0..*" Reserva : recibe >
-Reserva "1" *-- "1..*" Pasajero : incluye y crea >
-Reserva "1" *-- "0..*" Pago : se abona con y crea >
+Reserva "1" *-- "1..*" Pasajero : incluye y crea mediante agregarPasajero >
+Reserva "1" *-- "0..*" Pago : se abona con >
 Reserva "1" *-- "0..*" NotaAjuste : corrige con y crea >
 Reserva "1" -- "0..1" Cancelacion : puede tener >
 Pasajero "0..*" -- "0..*" ServicioAdicional : contrata >
@@ -401,14 +408,20 @@ class MenuConsola #DDEEFF {
 }
 
 class ControladorReservas #DDEEFF {
+  + ControladorReservas(agencia: Agencia, repo: RepositorioAgencia)
+  + ControladorReservas(agencia: Agencia, repo: RepositorioAgencia, calculadora: CalculadoraPrecioReserva)
   + registrarReserva(reserva: Reserva): void
-  + calcularPrecio(idReserva: int, tarifaBase: double, fechaSalida: LocalDate, adicionales: double): double
-  + registrarPago(idReserva: int, importe: double, medio: MedioPago, cuotas: int): Pago
-  + confirmarReserva(idReserva: int, fechaSalida: LocalDate): void
-  + cancelarReserva(idReserva: int, motivo: String, fechaSalida: LocalDate, porAgencia: boolean): Cancelacion
+  + calcularPrecio(idReserva: int): double
+  + registrarPago(idReserva: int, idPago: int, importe: double, medio: MedioPago, cuotas: int): Pago
+  + consultarSaldo(idReserva: int): double
+  + confirmarReserva(idReserva: int): void
+  + confirmarReserva(idReserva: int, hoy: LocalDate): void
+  + cancelarReserva(idReserva: int, motivo: String, porAgencia: boolean): Cancelacion
+  + calcularCancelacion(idReserva: int, motivo: String, fechaSalida: LocalDate, porAgencia: boolean): Cancelacion
   + agregarServicioAdicional(idReserva: int, documento: String, s: ServicioAdicional): void
   + reemplazarPasajero(idReserva: int, documento: String, datos: DatosPasajero, hoy: LocalDate): void
   + registrarAjuste(idReserva: int, motivo: String, importe: double, fecha: LocalDate): NotaAjuste
+  - actualizarVigenciaReserva(idReserva: int, hoy: LocalDate): Reserva
 }
 
 class ControladorOperaciones #DDEEFF {
@@ -421,13 +434,16 @@ class ControladorOperaciones #DDEEFF {
   + actualizarEstadoSalida(idSalida: long, hoy: LocalDate): void
   + asignarRecursos(idSalida: long, legajoGuia: int, patente: String): void
   + emitirListaPasajeros(idSalida: long): List<Pasajero>
+  + emitirListaPasajeros(idSalida: long, hoy: LocalDate): List<Pasajero>
   + iniciarSalida(idSalida: long): void
+  + iniciarSalida(idSalida: long, hoy: LocalDate): void
   + finalizarSalida(idSalida: long): void
   + liquidarHonorarios(idSalida: long, hoy: LocalDate): Liquidacion
 }
 
 class GeneradorReportes #DDEEFF {
   + reporteOcupacionPorSalida(): String
+  + reporteOcupacionPorSalida(hoy: LocalDate): String
   + reporteVentasPorVendedor(): String
   + reporteIngresosPorTour(): String
   + reporteCancelaciones(): String
@@ -440,29 +456,42 @@ package "Servicios de calculo, pagos y cancelaciones" {
 
 class CalculadoraPrecioReserva #DDEEFF {
   - promociones: List<Promocion>
+  + CalculadoraPrecioReserva()
   + CalculadoraPrecioReserva(promociones: List<Promocion>)
-  + calcularTotal(reserva: Reserva): double
+  + calcularSubtotalTour(reserva: Reserva, tarifaBase: double, fechaSalida: LocalDate): double
+  + calcularMejorDescuento(reserva: Reserva, subtotalTour: double, fechaSalida: LocalDate): double
+  + calcularTotal(reserva: Reserva, tarifaBase: double, fechaSalida: LocalDate, adicionales: double): double
 }
 
 interface Promocion #DDEEFF {
-  + calcularDescuento(reserva: Reserva, subtotalTour: double): double
+  + esAplicable(reserva: Reserva, fechaSalida: LocalDate): boolean
+  + calcularDescuento(subtotalTour: double): double
 }
 
 class PromocionAnticipada #DDEEFF {
-  + calcularDescuento(reserva: Reserva, subtotalTour: double): double
+  + esAplicable(reserva: Reserva, fechaSalida: LocalDate): boolean
+  + calcularDescuento(subtotalTour: double): double
 }
 
 class PromocionGrupo #DDEEFF {
-  + calcularDescuento(reserva: Reserva, subtotalTour: double): double
+  + esAplicable(reserva: Reserva, fechaSalida: LocalDate): boolean
+  + calcularDescuento(subtotalTour: double): double
 }
 
 ' ===================== PAGOS Y CANCELACIONES =====================
 
 class GestorPagos #DDEEFF {
-  + registrarPago(reserva: Reserva, importe: double, medio: MedioPago, cuotas: int, fecha: LocalDate): Pago
+  + crearPago(id: int, importe: double, medio: MedioPago, cuotas: int): Pago
+  + calcularSenaMinima(reserva: Reserva): double
+  + cumpleSena(reserva: Reserva): boolean
+  + consultarSaldo(reserva: Reserva): double
+  + requierePagoTotal(fechaSalida: LocalDate): boolean
+  + puedeConfirmarse(reserva: Reserva, fechaSalida: LocalDate): boolean
 }
 
 class GestorCancelaciones #DDEEFF {
+  + calcularPorcentajeDevolucion(fecha: LocalDate, fechaSalida: LocalDate, porAgencia: boolean): double
+  + crearCancelacion(reserva: Reserva, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
   + cancelar(reserva: Reserva, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
 }
 
@@ -503,7 +532,7 @@ ControladorReservas --> RepositorioAgencia : persiste mediante >
 ControladorReservas --> CalculadoraPrecioReserva : usa >
 ControladorReservas --> GestorPagos : usa >
 ControladorReservas --> GestorCancelaciones : usa >
-ControladorReservas ..> Reserva : crea >
+MenuConsola ..> Reserva : construye >
 
 ControladorOperaciones --> Agencia : consulta >
 ControladorOperaciones --> RepositorioAgencia : persiste mediante >
@@ -513,6 +542,7 @@ GeneradorReportes --> Agencia : consulta >
 
 CalculadoraPrecioReserva "1" o-- "1..*" Promocion : evalua >
 
+GestorPagos ..> Pago : crea >
 GestorCancelaciones ..> Cancelacion : crea >
 ControladorOperaciones ..> Liquidacion : crea >
 
@@ -524,8 +554,20 @@ note right of Salida
   ocupan lugares. Los menores de 3 anios tambien ocupan
   un lugar aunque no abonen tarifa.
   verificarVencimientos anula las reservas vencidas.
+  emitirLista primero actualiza vencimientos y estado.
+  Permite PROGRAMADA, CONFIRMADA o COMPLETA cuando hay
+  reservas vigentes; incluye pendientes no vencidas y
+  confirmadas, y excluye anuladas o vencidas.
+  No emite listas para CANCELADA, EN_CURSO o FINALIZADA.
+  totalServiciosAdicionales solo suma reservas CONFIRMADAS
+  o FINALIZADAS, excluyendo pendientes y anuladas.
+  iniciar solo admite salidas CONFIRMADAS o COMPLETAS.
+  Los cambios de reservas, vencimientos, cancelaciones o
+  pasajeros invalidan una lista previamente emitida.
+  Reserva.cambiarEstado(ANULADA) también invalida la lista.
+  iniciar exige que la lista corresponda al estado actual.
   finalizar() pasa la salida a FINALIZADA y finaliza
-  sus reservas vigentes.
+  sus reservas confirmadas.
 end note
 
 note right of Pago
