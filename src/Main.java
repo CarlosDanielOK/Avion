@@ -1,5 +1,6 @@
 import controladores.ControladorOperaciones;
 import controladores.GeneradorReportes;
+import controladores.ControladorReservas;
 import interfaz.MenuConsola;
 import modelo.Agencia;
 import modelo.GestorCancelaciones;
@@ -28,10 +29,11 @@ public class Main {
         }
 
         ControladorOperaciones operaciones = new ControladorOperaciones(agencia, repositorio, new GestorCancelaciones());
+        ControladorReservas reservas = new ControladorReservas(agencia, repositorio);
         GeneradorReportes reportes = new GeneradorReportes(agencia);
 
         try (Scanner entrada = new Scanner(System.in)) {
-            new MenuConsola(agencia, repositorio, operaciones, reportes, entrada).mostrarMenu();
+            new MenuConsola(agencia, repositorio, operaciones, reservas, reportes, entrada).mostrarMenu();
         }
     }
 }

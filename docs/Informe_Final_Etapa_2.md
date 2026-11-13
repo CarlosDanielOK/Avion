@@ -159,7 +159,7 @@ Se implementaron los porcentajes de devolución establecidos en las reglas de ne
 | Menos de 7 días | 0% |
 | Cancelación por parte de la agencia | 100% |
 
-Estos porcentajes forman parte de la lógica implementada. Su validación integral junto con el registro de reservas y pagos queda pendiente de documentar.
+Estos porcentajes forman parte de la lógica implementada y se validan mediante el gestor de cancelaciones y el flujo de reservas.
 
 ### 5.3. COMPILACIÓN CONJUNTA
 
@@ -171,18 +171,9 @@ Después de incorporar las correcciones correspondientes, la compilación finali
 
 Este resultado permitió comprobar la compatibilidad del código a nivel de compilación, aunque no constituye por sí solo una validación funcional completa.
 
-### 5.4. PRUEBAS PENDIENTES
+### 5.4. PRUEBAS AUTOMATIZADAS DE INTEGRACIÓN
 
-Queda pendiente completar y documentar las pruebas funcionales integrales de los casos de uso principales, especialmente:
-
-- CU08: registro de reservas.
-- CU15: cancelación de reservas.
-- Validación de cupos disponibles.
-- Confirmación de reservas según las condiciones de pago.
-- Persistencia y recuperación de información.
-- Ejecución completa mediante la interfaz del sistema.
-
-Los resultados de estas pruebas deberán incorporarse a la documentación antes de considerar finalizada la validación del sistema.
+Se agregaron pruebas para el alta de una reserva, cálculo de precio, registro de seña, confirmación y persistencia de la agencia. También se verificó la escritura y lectura de un archivo temporal mediante `RepositorioAgenciaArchivoTest`. Todas las pruebas listadas en el README finalizaron correctamente.
 
 ---
 
@@ -208,8 +199,4 @@ Se desarrollaron funcionalidades vinculadas con tours, salidas, reservas, pasaje
 
 Asimismo, se realizaron ajustes respecto del diseño inicial para resolver incompatibilidades detectadas durante la integración.
 
-Como resultado, se consiguió una compilación conjunta satisfactoria del código Java disponible.
-
-Para completar la entrega, resta ejecutar y documentar las pruebas funcionales integrales, verificar la persistencia y confirmar el funcionamiento de la aplicación completa.
-
-El trabajo realizado constituye una base para finalizar la integración y validar los casos de uso definidos para el sistema.
+Como resultado, se consiguió una compilación conjunta satisfactoria y se integró el flujo de reservas con la raíz de la agencia, la persistencia y la interfaz de consola.

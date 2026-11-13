@@ -7,10 +7,10 @@
 | **Propuesta elegida** | B – Agencia de Turismo |
 | **Lenguaje** | Java 17 o superior |
 | **Modelado** | UML |
-| **Estado actual** | Etapa 1 finalizada – Etapa 2 pendiente de implementación |
+| **Estado actual** | Etapas 1 y 2 implementadas y verificadas |
 | **Entrega Etapa 1** | 25/10/2026 (tag `etapa-1`) |
 | **Entrega Etapa 2** | 12/11/2026 (tag `etapa-2`) |
-| **Defensa** | 19/11/2026 (jueves) |
+| **Defensa** | Según cronograma de la cátedra |
 
 ---
 
@@ -102,7 +102,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 |---|---|
 | [`docs/diseno/solid-grasp.md`](docs/diseno/solid-grasp.md) | Aplicación y fundamentación de SOLID y GRASP. |
 | [`docs/uml/`](docs/uml) | Diagramas UML (imagen exportada y fuente PlantUML) y nota de cambios. |
-| [Documento integral del TPO](<docs/TPO_JT_POO (3).pdf>) | Entregable en formato PDF. |
+| [`docs/Documento de diseño.pdf`](docs/Documento%20de%20dise%C3%B1o.pdf) | Entregable de diseño en formato PDF. |
 
 ## 6. Estructura del repositorio
 
@@ -112,13 +112,13 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 │   ├── analisis/         Análisis, requerimientos, reglas, supuestos y casos de uso
 │   ├── diseno/           Fundamentación de SOLID y GRASP
 │   ├── uml/              Diagramas UML (.puml, .png, .svg y .pdf)
-│   └── TPO_JT_POO (3).pdf
+│   └── Documento de diseño.pdf
 ├── src/                  Código fuente Java (Etapa 2)
 ├── test/                 Pruebas unitarias (Etapa 2)
 └── README.md
 ```
 
-> Las carpetas `src/` y `test/` se incorporarán durante la Etapa 2.
+Las carpetas `src/` y `test/` contienen la implementación y las pruebas de la Etapa 2.
 
 ## 7. Tecnologías y herramientas
 
@@ -151,6 +151,7 @@ java -cp "out;out-test" modelo.SalidaTest
 java -cp "out;out-test" persistencia.RepositorioAgenciaArchivoTest
 java -cp "out;out-test" controladores.GeneradorReportesTest
 java -cp "out;out-test" controladores.ControladorOperacionesTest
+java -cp "out;out-test" controladores.ControladorReservasTest
 ```
 
 Los cambios de catálogo y operación se guardan mediante el repositorio de archivos en `datos/agencia.dat`. Si el archivo existente no puede leerse, `Main` detiene el inicio para evitar sobrescribirlo accidentalmente.
@@ -169,8 +170,8 @@ El proyecto se desarrolla de forma colaborativa en GitHub:
 | Etapa | Contenido | Entrega | Estado |
 |---|---|---|---|
 | **Etapa 1** | Análisis, casos de uso, diagramas de clases y secuencia, SOLID y GRASP. | 25/10/2026 | Finalizada |
-| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 12/11/2026 | En preparación |
-| **Defensa** | Presentación oral y demostración del sistema. | 19/11/2026 (jueves) | Pendiente |
+| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 12/11/2026 | Implementada y verificada |
+| **Defensa** | Presentación oral y demostración del sistema. | Según cronograma de la cátedra | Pendiente |
 
 ## 11. Integrantes
 
@@ -196,6 +197,7 @@ La persistencia utiliza serialización de objetos Java en `datos/agencia.dat`. L
 | `RepositorioAgenciaArchivoTest` | OK |
 | `GeneradorReportesTest` | OK |
 | `ControladorOperacionesTest` | OK |
+| `ControladorReservasTest` | OK |
 
 Además, se ejecutó una prueba de humo del menú: carga de datos de ejemplo, generación de los cuatro reportes y comprobación de que el archivo de persistencia se crea correctamente.
 
@@ -203,4 +205,4 @@ Además, se ejecutó una prueba de humo del menú: carga de datos de ejemplo, ge
 
 La compilación conjunta no presenta errores. Los casos CU04, CU05 y CU24 cuentan con implementación y pruebas específicas. La interfaz también incorpora opciones para completar el catálogo y administrar recursos operativos.
 
-**Pendiente de integración:** el `ControladorReservas` actual mantiene una colección propia y no utiliza todavía la raíz `Agencia` ni el repositorio compartido. Por ese motivo, el menú permite consultar las reservas que ya están en `Agencia`, pero el alta, cálculo de precio, pagos y cancelaciones todavía necesitan integrarse con el módulo de Bianca. Esto debe completarse y probarse antes de afirmar que el menú cubre todos los casos de uso del sistema.
+El `ControladorReservas` utiliza la raíz `Agencia` y el mismo `RepositorioAgencia` que el módulo operativo. El menú permite registrar clientes y reservas, calcular precios, registrar pagos, cancelar reservas y consultar sus saldos.

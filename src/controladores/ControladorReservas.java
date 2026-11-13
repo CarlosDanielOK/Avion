@@ -4,24 +4,76 @@ package controladores;
 import modelo.*;
 import enumeraciones.EstadoReserva;
 import enumeraciones.MedioPago;
+import excepciones.EntidadNoEncontradaException;
+import excepciones.ReglaNegocioException;
+import persistencia.RepositorioAgencia;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class ControladorReservas {
 
-    private final List<Reserva> reservas;
+    private final Agencia agencia;
+    private final RepositorioAgencia repositorio;
     private final GestorPagos gestorPagos;
     private final GestorCancelaciones gestorCancelaciones;
     private final CalculadoraPrecioReserva calculadora;
 
+    /** Constructor de compatibilidad para pruebas aisladas del controlador. */
     public ControladorReservas() {
-        this.reservas = new ArrayList<>();
+        this(new Agencia(), null);
+    }
+
+    public ControladorReservas(Agencia agencia, RepositorioAgencia repositorio) {
+        if (agencia == null) throw new IllegalArgumentException("La agencia es obligatoria");
+        this.agencia = agencia;
+        this.repositorio = repositorio;
         this.gestorPagos = new GestorPagos();
         this.gestorCancelaciones = new GestorCancelaciones();
         this.calculadora = new CalculadoraPrecioReserva();
+    }
+
+    public Cliente registrarCliente(String nombre, String apellido, String documento,
+                                    String telefono, String correo, String pais) {
+        try {
+            return agencia.buscarCliente(documento);
+        } catch (EntidadNoEncontradaException ignored) {
+            Cliente cliente = new Cliente(nombre, apellido, documento, telefono, correo, pais);
+            agencia.agregarCliente(cliente);
+            guardar();
+            return cliente;
+        }
+    }
+
+    public Reserva crearReserva(String documentoCliente, long idSalida, int legajoVendedor,
+                                List<Pasajero> pasajeros) throws ReglaNegocioException {
+        if (pasajeros == null || pasajeros.isEmpty()) {
+            throw new IllegalArgumentException("La reserva debe tener pasajeros");
+        }
+        Cliente cliente = agencia.buscarCliente(documentoCliente);
+        Salida salida = agencia.buscarSalida(idSalida);
+        Empleado empleado = agencia.buscarEmpleado(legajoVendedor);
+        if (!(empleado instanceof Vendedor)) {
+            throw new IllegalArgumentException("El legajo no corresponde a un vendedor");
+        }
+        if (salida.cuposDisponibles(LocalDate.now()) < pasajeros.size()) {
+            throw new IllegalStateException("No hay cupos suficientes");
+        }
+        for (Pasajero pasajero : pasajeros) {
+            if (!salida.puedeParticipar(new DatosPasajero(
+                    pasajero.getNombre(), pasajero.getApellido(), pasajero.getDocumento(),
+                    pasajero.getFechaNacimiento(), pasajero.getContactoEmergencia(),
+                    pasajero.getRestricciones()))) {
+                throw new IllegalArgumentException("Un pasajero no cumple los requisitos del tour");
+            }
+        }
+        Reserva reserva = new Reserva((int) agencia.siguienteNumeroReserva(), cliente, salida, (Vendedor) empleado);
+        for (Pasajero pasajero : pasajeros) reserva.agregarPasajero(pasajero);
+        salida.agregarReserva(reserva);
+        agencia.agregarReserva(reserva);
+        guardar();
+        return reserva;
     }
 
     // REGISTRAR RESERVA
@@ -42,17 +94,17 @@ public class ControladorReservas {
                     "Ya existe una reserva con ese ID");
         }
 
-        reservas.add(reserva);
+        agencia.agregarReserva(reserva);
+        guardar();
     }
 
     // BUSCAR RESERVA
     public Reserva buscarReserva(int id) {
-        for (Reserva reserva : reservas) {
-            if (reserva.getId() == id) {
-                return reserva;
-            }
+        try {
+            return agencia.buscarReserva(id);
+        } catch (EntidadNoEncontradaException e) {
+            return null;
         }
-        return null;
     }
 
     // CALCULAR PRECIO
@@ -75,6 +127,7 @@ public class ControladorReservas {
 
         reserva.actualizarServiciosAdicionales(totalAdicionales);
         reserva.actualizarImporteTotal(total);
+        guardar();
         return total;
     }
 
@@ -113,6 +166,7 @@ public class ControladorReservas {
                 importe, medio, cuotas);
 
         reserva.registrarPago(pago);
+        guardar();
         return pago;
     }
 
@@ -162,6 +216,7 @@ public class ControladorReservas {
         }
 
         reserva.cambiarEstado(EstadoReserva.CONFIRMADA);
+        guardar();
     }
 
     // CALCULAR CANCELACION
@@ -201,6 +256,7 @@ public class ControladorReservas {
                         cancelacionAgencia);
 
         reserva.registrarCancelacion(cancelacion);
+        guardar();
 
         return cancelacion;
     }
@@ -232,7 +288,7 @@ public class ControladorReservas {
 
     // LISTAR RESERVAS
     public List<Reserva> listarReservas() {
-        return Collections.unmodifiableList(reservas);
+        return agencia.getReservas();
     }
 
     // OBTENER RESERVA O INFORMAR ERROR
@@ -241,11 +297,13 @@ public class ControladorReservas {
         Reserva reserva = buscarReserva(id);
 
         if (reserva == null) {
-            throw new IllegalArgumentException(
-                    "No existe la reserva #" + id);
+            throw new IllegalArgumentException("No existe la reserva #" + id);
         }
 
         return reserva;
     }
-}
 
+    private void guardar() {
+        if (repositorio != null) repositorio.guardar(agencia);
+    }
+}

@@ -265,33 +265,26 @@ Liquidacion "0..*" --> "1" Guia : paga a >
 ' ===================== VENTAS =====================
 
 class Reserva #FFF3CC {
-  - numero: long
-  - fecha: LocalDate
+  - id: int
+  - fechaCreacion: LocalDateTime
   - estado: EstadoReserva
-  - total: double
-  - vencimientoPago: LocalDate
-  + agregarPasajero(datos: DatosPasajero): Pasajero
-  + incluirServiciosObligatorios(): void
-  + agregarServicioAdicional(p: Pasajero, s: ServicioAdicional): void
-  + totalServiciosAdicionales(): double
-  + registrarTotal(total: double): void
-  + iniciarRetencion(hoy: LocalDate): void
-  + estaVencida(hoy: LocalDate): boolean
+  - importeTotal: double
+  - importeServiciosAdicionales: double
+  + agregarPasajero(pasajero: Pasajero): void
+  + registrarPago(pago: Pago): void
+  + actualizarImporteTotal(importe: double): void
+  + estaVencida(fechaSalida: LocalDate): boolean
   + ocupaCupos(hoy: LocalDate): boolean
-  + cantidadPasajeros(): int
-  + registrarPago(importe: double, recargo: double, medio: MedioPago, cuotas: int, fecha: LocalDate): Pago
-  + totalAbonado(): double
-  + calcularSaldo(): double
-  + seniaCubierta(): boolean
-  + medioDePagoUsado(): MedioPago
-  + obtenerSalida(): Salida
+  + obtenerCantidadPasajeros(): int
+  + calcularTotalPagado(): double
+  + calcularSaldoPendiente(): double
+  + cambiarEstado(estado: EstadoReserva): void
+  + registrarCancelacion(cancelacion: Cancelacion): void
   + puedeCancelarse(): boolean
-  + confirmar(): void
   + finalizar(): void
-  + anular(cancelacion: Cancelacion): void
   + anularPorVencimiento(): void
-  + reemplazarPasajero(documento: String, datos: DatosPasajero, hoy: LocalDate): void
-  + registrarAjuste(motivo: String, importe: double, fecha: LocalDate): NotaAjuste
+  + actualizarServiciosAdicionales(importe: double): void
+  + totalServiciosAdicionales(): double
 }
 
 class Pago #FFF3CC {
@@ -398,14 +391,12 @@ class MenuConsola #DDEEFF {
 
 class ControladorReservas #DDEEFF {
   + registrarCliente(nombre: String, apellido: String, documento: String, telefono: String, correo: String, pais: String): Cliente
-  + iniciarReserva(documentoCliente: String, idSalida: long, legajoVendedor: int, datos: List<DatosPasajero>, hoy: LocalDate): Reserva
-  + agregarServicioAdicional(reserva: Reserva, p: Pasajero, s: ServicioAdicional): void
-  + finalizarReserva(reserva: Reserva, medio: MedioPago, cuotas: int, hoy: LocalDate): Reserva
-  + registrarPago(numero: long, importe: double, medio: MedioPago, cuotas: int, hoy: LocalDate): Pago
-  + verificarVencimientos(idSalida: long, hoy: LocalDate): void
-  + cancelarReserva(numero: long, motivo: String, porAgencia: boolean, hoy: LocalDate): Cancelacion
-  + reemplazarPasajero(numero: long, documento: String, datos: DatosPasajero, hoy: LocalDate): void
-  + registrarAjuste(numero: long, motivo: String, importe: double, hoy: LocalDate): NotaAjuste
+  + crearReserva(documentoCliente: String, idSalida: long, legajoVendedor: int, pasajeros: List<Pasajero>): Reserva
+  + calcularPrecio(idReserva: int, tarifaBase: double, fechaSalida: LocalDate, adicionales: double): double
+  + registrarPago(idReserva: int, idPago: int, importe: double, medio: MedioPago, cuotas: int): Pago
+  + confirmarReserva(idReserva: int, fechaSalida: LocalDate): void
+  + cancelarReserva(idReserva: int, motivo: String, fechaSalida: LocalDate, porAgencia: boolean): Cancelacion
+  + listarReservas(): List<Reserva>
 }
 
 class ControladorOperaciones #DDEEFF {
@@ -436,9 +427,9 @@ package "Servicios de calculo, pagos y cancelaciones" {
 ' ===================== CALCULO DE PRECIOS =====================
 
 class CalculadoraPrecioReserva #DDEEFF {
-  - promociones: List<Promocion>
-  + CalculadoraPrecioReserva(promociones: List<Promocion>)
-  + calcularTotal(reserva: Reserva): double
+  + calcularSubtotalTour(reserva: Reserva, tarifaBase: double, fechaSalida: LocalDate): double
+  + calcularMejorDescuento(reserva: Reserva, subtotal: double, fechaSalida: LocalDate): double
+  + calcularTotal(reserva: Reserva, tarifaBase: double, fechaSalida: LocalDate, adicionales: double): double
 }
 
 interface Promocion #DDEEFF {
@@ -456,7 +447,9 @@ class PromocionGrupo #DDEEFF {
 ' ===================== PAGOS Y CANCELACIONES =====================
 
 class GestorPagos #DDEEFF {
-  + registrarPago(reserva: Reserva, importe: double, medio: MedioPago, cuotas: int, fecha: LocalDate): Pago
+  + crearPago(id: int, importe: double, medio: MedioPago, cuotas: int): Pago
+  + consultarSaldo(reserva: Reserva): double
+  + puedeConfirmarse(reserva: Reserva, fechaSalida: LocalDate): boolean
 }
 
 class GestorCancelaciones #DDEEFF {

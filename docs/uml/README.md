@@ -2,6 +2,10 @@
 
 Esta carpeta contiene los archivos fuente PlantUML (`.puml`), sus imágenes exportadas (`.png`) y los diagramas de casos de uso.
 
+Los archivos `.puml` son la fuente editable del modelo. Luego de modificar una fuente,
+debe regenerarse su `.png`, `.svg` o `.pdf` con PlantUML antes de publicar una nueva
+versión visual del diagrama.
+
 ## Inventario de diagramas
 
 - `01-clases-inicial.puml` / `.png` / `.svg`: modelo previo a la aplicación de patrones.
