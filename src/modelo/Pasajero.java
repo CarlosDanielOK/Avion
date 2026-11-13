@@ -74,6 +74,12 @@ public class Pasajero extends Persona {
         return 1.0;
     }
 
+    public boolean tipoEsCompatible(LocalDate fechaSalida) {
+        int edad = calcularEdad(fechaSalida);
+        if (tipoPasajero == TipoPasajero.MENOR) return edad < 12;
+        return edad >= 12;
+    }
+
     public LocalDate getFechaNacimiento() {
         return fechaNacimiento;
     }

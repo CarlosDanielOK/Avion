@@ -1,14 +1,14 @@
 # Diagramas UML de Rumbo Sur
 
-Esta carpeta contiene los archivos fuente PlantUML (`.puml`), sus imágenes exportadas (`.png`) y los diagramas de casos de uso.
+Esta carpeta contiene los archivos fuente PlantUML (`.puml`) y sus imágenes exportadas en SVG. El diagrama de clases final también se entrega en PDF.
 
 ## Inventario de diagramas
 
-- `01-clases-inicial.puml` / `.png` / `.svg`: modelo previo a la aplicación de patrones.
-- `02-secuencia-crear-reserva.puml` / `.png` / `.svg`: CU08, con flujos alternativos por falta de cupos, requisitos no cumplidos y pago total requerido.
-- `03-secuencia-cancelar-reserva.puml` / `.png` / `.svg`: CU15, con política de devolución, reserva inexistente y reserva no cancelable.
-- `04-clases-final.puml` / `.png` / `.svg` / `.pdf`: modelo posterior a la aplicación de SOLID y GRASP, agrupado por capas (modelo del negocio, raíz y persistencia, control e interfaz, servicios y excepciones). Es un diagrama grande: para leerlo en detalle abrir el `.svg` en un navegador o el `.pdf` y ampliar.
-- `casos-uso-administracion`, `casos-uso-reservas`, `casos-uso-pagos` y `casos-uso-operaciones` (`.puml`, `.png` y `.svg`): diagramas de casos de uso, con relaciones «include» y «extend».
+- `01-clases-inicial.puml` / `.svg`: modelo previo a la aplicación de patrones.
+- `02-secuencia-crear-reserva.puml` / `.svg`: CU08, con flujos alternativos por falta de cupos, requisitos no cumplidos y pago total requerido.
+- `03-secuencia-cancelar-reserva.puml` / `.svg`: CU15, con política de devolución, reserva inexistente y reserva no cancelable.
+- `04-clases-final.puml` / `.svg` / `.pdf`: modelo posterior a la aplicación de SOLID y GRASP, agrupado por capas (modelo del negocio, raíz y persistencia, control e interfaz, servicios y excepciones). Es un diagrama grande: para leerlo en detalle abrir el `.svg` en un navegador o el `.pdf` y ampliar.
+- `casos-uso-administracion`, `casos-uso-reservas`, `casos-uso-pagos` y `casos-uso-operaciones` (`.puml` y `.svg`): diagramas de casos de uso, con relaciones «include» y «extend».
 
 ## Cambios del diagrama de clases inicial al final
 
@@ -30,8 +30,8 @@ Esta carpeta contiene los archivos fuente PlantUML (`.puml`), sus imágenes expo
 - La regla de «faltan 10 días o menos» se mueve del controlador a `Salida` (`exigePagoTotal`), y `diasHastaSalida` pasa de `Reserva` a `Salida` (`diasHastaInicio`).
 - Se quitan los métodos públicos `establecerEstado` y `definirTotal`: la reserva nace en estado pendiente y el vencimiento lo calcula la propia `Reserva` (`iniciarRetencion`).
 - `Coordinador` y `Administrador` quedan solo con sus datos: la lógica de operación pasa a `ControladorOperaciones` y los reportes a `GeneradorReportes`.
-- `Salida.verificarVencimientos` anula las reservas vencidas y libera sus cupos antes de calcular la disponibilidad (S09), y `Salida.finalizar` finaliza las reservas vigentes (`Reserva.finalizar`). `Pasajero.tipoEsCompatible` valida que el tipo de pasajero sea coherente con la edad (S16).
-- `crearReserva` se divide en `iniciarReserva` y `finalizarReserva`, porque la selección de servicios ocurre entre ambos pasos.
+- `Salida.verificarVencimientos` anula las reservas vencidas y libera sus cupos antes de calcular la disponibilidad (S09), y `Salida.finalizar` finaliza las reservas vigentes (`Reserva.finalizar`). `ControladorReservas.registrarReserva` valida los requisitos del tour y agrega los servicios obligatorios.
+- `MenuConsola` coordina la carga de pasajeros, la selección de servicios y el cierre de la operación mediante llamadas separadas a `ControladorReservas`; la implementación conserva la misma separación de responsabilidades del diseño.
 - `Salida` implementa `Comparable` (orden natural por fecha de inicio) para cumplir con el uso de ordenamiento; los reportes usan además un `Comparator`.
 
 Estos cambios se justifican en [`../diseno/solid-grasp.md`](../diseno/solid-grasp.md).

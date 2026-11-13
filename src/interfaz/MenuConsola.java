@@ -101,7 +101,7 @@ public class MenuConsola {
         System.out.println("1. Listar tours\n2. Registrar tour\n3. Registrar tarifa\n"
                 + "4. Modificar tour\n5. Agregar actividad al itinerario\n"
                 + "6. Agregar servicio adicional\n7. Registrar proveedor\n8. Listar proveedores\n"
-                + "9. Consultar itinerario y servicios de un tour\n0. Volver");
+                + "9. Consultar itinerario y servicios de un tour\n10. Consultar tarifas\n0. Volver");
         switch (leerEntero("Opción: ")) {
             case 1:
                 List<Tour> tours = operaciones.listarTours();
@@ -142,6 +142,7 @@ public class MenuConsola {
                 for (Proveedor proveedor : operaciones.listarProveedores()) System.out.println(proveedor);
                 break;
             case 9: consultarItinerario(); break;
+            case 10: consultarTarifas(); break;
             case 0: break;
             default: System.out.println("Opción inválida.");
         }
@@ -184,6 +185,18 @@ public class MenuConsola {
         for (ServicioAdicional servicio : tour.getServicios()) {
             System.out.println(" - " + servicio.getNombre() + " | " + servicio.getTipo()
                     + " | $" + servicio.getPrecio() + (servicio.isObligatorio() ? " | obligatorio" : " | opcional"));
+        }
+    }
+
+    private void consultarTarifas() throws ReglaNegocioException {
+        Tour tour = agencia.buscarTour(leerTexto("Código del tour: "));
+        if (tour.getTarifas().isEmpty()) {
+            System.out.println("No hay tarifas cargadas.");
+            return;
+        }
+        for (Tarifa tarifa : tour.getTarifas()) {
+            System.out.println(tarifa.getTemporada() + " | " + tarifa.getVigenciaDesde()
+                    + " a " + tarifa.getVigenciaHasta() + " | $" + tarifa.getPrecioBase());
         }
     }
 
@@ -314,7 +327,9 @@ public class MenuConsola {
                 List<Pasajero> lista = operaciones.emitirListaPasajeros(leerEntero("Número de salida: "));
                 System.out.println("Lista de pasajeros (" + lista.size() + "):");
                 for (Pasajero pasajero : lista) {
-                    System.out.println(" - " + pasajero.obtenerNombreCompleto() + " (" + pasajero.getDocumento() + ")");
+                    System.out.println(" - " + pasajero.obtenerNombreCompleto() + " (" + pasajero.getDocumento()
+                            + ") | contacto emergencia: " + pasajero.getContactoEmergencia()
+                            + " | restricciones: " + pasajero.getRestricciones());
                 }
                 break;
             }

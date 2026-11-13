@@ -102,7 +102,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 |---|---|
 | [`docs/diseno/solid-grasp.md`](docs/diseno/solid-grasp.md) | Aplicación y fundamentación de SOLID y GRASP. |
 | [`docs/uml/`](docs/uml) | Diagramas UML (imagen exportada y fuente PlantUML) y nota de cambios. |
-| [Documento integral del TPO](<docs/TPO_JT_POO (3).pdf>) | Entregable en formato PDF. |
+| [Documento de diseño](docs/Documento%20de%20dise%C3%B1o.pdf) | Documento complementario en formato PDF. |
 
 ## 6. Estructura del repositorio
 
@@ -111,8 +111,8 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 ├── docs/                 Documentación del proyecto
 │   ├── analisis/         Análisis, requerimientos, reglas, supuestos y casos de uso
 │   ├── diseno/           Fundamentación de SOLID y GRASP
-│   ├── uml/              Diagramas UML (.puml, .png, .svg y .pdf)
-│   └── TPO_JT_POO (3).pdf
+│   ├── uml/                 Diagramas UML (.puml, .svg y .pdf)
+│   └── Documento de diseño.pdf
 ├── src/                  Código fuente Java (Etapa 2)
 ├── test/                 Pruebas unitarias (Etapa 2)
 └── README.md

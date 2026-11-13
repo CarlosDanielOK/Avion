@@ -305,9 +305,6 @@ public class Reserva implements Serializable {
             throw new IllegalArgumentException("Fecha, motivo e importe válido son obligatorios");
         }
         double nuevoTotal = importeTotal + importe;
-        if (nuevoTotal < calcularTotalPagado()) {
-            throw new IllegalArgumentException("El ajuste no puede dejar un saldo cobrado superior al total");
-        }
         int id = notasAjuste.size() + 1;
         NotaAjuste nota = new NotaAjuste(id, fecha, motivo, importe, this);
         notasAjuste.add(nota);
@@ -323,20 +320,21 @@ public class Reserva implements Serializable {
                     "La fecha de salida es obligatoria");
         }
 
-        if (estado != EstadoReserva.PENDIENTE) {
+        if (estado != EstadoReserva.PENDIENTE && estado != EstadoReserva.CONFIRMADA) {
             return false;
         }
 
         LocalDateTime ahora = LocalDateTime.now();
-        LocalDateTime vencimiento48Horas =
-                fechaCreacion.plusHours(48);
-
-        // Si se reserva a 10 dias o menos,
-        // se exige pago total al crear la reserva.
-        // No se aplica un vencimiento anterior
-        // a la propia fecha de creacion.
         LocalDateTime limiteSaldo =
                 fechaSalida.minusDays(10).atStartOfDay();
+
+        if (estado == EstadoReserva.CONFIRMADA) {
+            return calcularSaldoPendiente() > TOLERANCIA
+                    && !ahora.isBefore(limiteSaldo);
+        }
+
+        LocalDateTime vencimiento48Horas =
+                fechaCreacion.plusHours(48);
 
         LocalDateTime vencimiento;
 

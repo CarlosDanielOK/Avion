@@ -64,6 +64,9 @@ public class ControladorReservas {
             if (!salida.puedeParticipar(datos)) {
                 throw new IllegalArgumentException("Un pasajero no cumple los requisitos del tour");
             }
+            if (!pasajero.tipoEsCompatible(salida.getFechaInicio())) {
+                throw new IllegalArgumentException("El tipo de pasajero no coincide con su edad");
+            }
         }
         if (salida.cuposDisponibles(LocalDate.now()) < reserva.obtenerCantidadPasajeros()) {
             throw new IllegalStateException("No hay cupos suficientes para la reserva");
