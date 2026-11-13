@@ -4,6 +4,9 @@ package modelo;
 import enumeraciones.TipoPasajero;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Pasajero extends Persona {
 
@@ -13,6 +16,7 @@ public class Pasajero extends Persona {
     private TipoPasajero tipoPasajero;
     private String contactoEmergencia;
     private String restricciones;
+    private final List<ServicioAdicional> serviciosAdicionales = new ArrayList<>();
 
     public Pasajero(String nombre, String apellido,
                     String documento, String telefono,
@@ -70,6 +74,12 @@ public class Pasajero extends Persona {
         return 1.0;
     }
 
+    public boolean tipoEsCompatible(LocalDate fechaSalida) {
+        int edad = calcularEdad(fechaSalida);
+        if (tipoPasajero == TipoPasajero.MENOR) return edad < 12;
+        return edad >= 12;
+    }
+
     public LocalDate getFechaNacimiento() {
         return fechaNacimiento;
     }
@@ -84,6 +94,30 @@ public class Pasajero extends Persona {
 
     public String getRestricciones() {
         return restricciones;
+    }
+
+    public void agregarServicioAdicional(ServicioAdicional servicio) {
+        if (servicio == null) {
+            throw new IllegalArgumentException("El servicio adicional es obligatorio");
+        }
+        for (ServicioAdicional existente : serviciosAdicionales) {
+            if (existente.getNombre().equalsIgnoreCase(servicio.getNombre())) {
+                throw new IllegalArgumentException("El pasajero ya tiene contratado ese servicio");
+            }
+        }
+        serviciosAdicionales.add(servicio);
+    }
+
+    public List<ServicioAdicional> getServiciosAdicionales() {
+        return Collections.unmodifiableList(serviciosAdicionales);
+    }
+
+    public double totalServiciosAdicionales() {
+        double total = 0;
+        for (ServicioAdicional servicio : serviciosAdicionales) {
+            total += servicio.getPrecio();
+        }
+        return total;
     }
 
     @Override

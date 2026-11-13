@@ -4,28 +4,41 @@ package controladores;
 import modelo.*;
 import enumeraciones.EstadoReserva;
 import enumeraciones.MedioPago;
+import excepciones.ReglaNegocioException;
+import persistencia.RepositorioAgencia;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ControladorReservas {
 
-    private final List<Reserva> reservas;
+    private final Agencia agencia;
+    private final RepositorioAgencia repositorio;
     private final GestorPagos gestorPagos;
     private final GestorCancelaciones gestorCancelaciones;
     private final CalculadoraPrecioReserva calculadora;
 
+    /**
+     * Constructor de compatibilidad para pruebas aisladas. Las reservas se
+     * mantienen en una agencia en memoria y no se persisten.
+     */
     public ControladorReservas() {
-        this.reservas = new ArrayList<>();
+        this(new Agencia(), null);
+    }
+
+    public ControladorReservas(Agencia agencia, RepositorioAgencia repositorio) {
+        if (agencia == null) {
+            throw new IllegalArgumentException("La agencia es obligatoria");
+        }
+        this.agencia = agencia;
+        this.repositorio = repositorio;
         this.gestorPagos = new GestorPagos();
         this.gestorCancelaciones = new GestorCancelaciones();
         this.calculadora = new CalculadoraPrecioReserva();
     }
 
     // REGISTRAR RESERVA
-    public void registrarReserva(Reserva reserva) {
+    public void registrarReserva(Reserva reserva) throws ReglaNegocioException {
 
         if (reserva == null) {
             throw new IllegalArgumentException(
@@ -42,17 +55,36 @@ public class ControladorReservas {
                     "Ya existe una reserva con ese ID");
         }
 
-        reservas.add(reserva);
+        Salida salida = reserva.getSalida();
+        for (Pasajero pasajero : reserva.getPasajeros()) {
+            DatosPasajero datos = new DatosPasajero(pasajero.getNombre(),
+                    pasajero.getApellido(), pasajero.getDocumento(),
+                    pasajero.getFechaNacimiento(), pasajero.getTipoPasajero(),
+                    pasajero.getContactoEmergencia(), pasajero.getRestricciones());
+            if (!salida.puedeParticipar(datos)) {
+                throw new IllegalArgumentException("Un pasajero no cumple los requisitos del tour");
+            }
+            if (!pasajero.tipoEsCompatible(salida.getFechaInicio())) {
+                throw new IllegalArgumentException("El tipo de pasajero no coincide con su edad");
+            }
+        }
+        if (salida.cuposDisponibles(LocalDate.now()) < reserva.obtenerCantidadPasajeros()) {
+            throw new IllegalStateException("No hay cupos suficientes para la reserva");
+        }
+
+        reserva.incluirServiciosObligatorios();
+        salida.agregarReserva(reserva);
+        agencia.agregarReserva(reserva);
+        guardar();
     }
 
     // BUSCAR RESERVA
     public Reserva buscarReserva(int id) {
-        for (Reserva reserva : reservas) {
-            if (reserva.getId() == id) {
-                return reserva;
-            }
+        try {
+            return agencia.buscarReserva(id);
+        } catch (excepciones.EntidadNoEncontradaException e) {
+            return null;
         }
-        return null;
     }
 
     // CALCULAR PRECIO
@@ -75,6 +107,7 @@ public class ControladorReservas {
 
         reserva.actualizarServiciosAdicionales(totalAdicionales);
         reserva.actualizarImporteTotal(total);
+        guardar();
         return total;
     }
 
@@ -113,6 +146,7 @@ public class ControladorReservas {
                 importe, medio, cuotas);
 
         reserva.registrarPago(pago);
+        guardar();
         return pago;
     }
 
@@ -162,6 +196,7 @@ public class ControladorReservas {
         }
 
         reserva.cambiarEstado(EstadoReserva.CONFIRMADA);
+        guardar();
     }
 
     // CALCULAR CANCELACION
@@ -201,6 +236,7 @@ public class ControladorReservas {
                         cancelacionAgencia);
 
         reserva.registrarCancelacion(cancelacion);
+        guardar();
 
         return cancelacion;
     }
@@ -227,12 +263,37 @@ public class ControladorReservas {
 
         Reserva reserva = obtenerReserva(idReserva);
 
-        return reserva.anularSiVencida(fechaSalida);
+        boolean anulada = reserva.anularSiVencida(fechaSalida);
+        if (anulada) guardar();
+        return anulada;
+    }
+
+    public void agregarServicioAdicional(int idReserva, String documentoPasajero,
+                                         ServicioAdicional servicio) {
+        Reserva reserva = obtenerReserva(idReserva);
+        Pasajero pasajero = buscarPasajero(reserva, documentoPasajero);
+        reserva.agregarServicioAdicional(pasajero, servicio);
+        guardar();
+    }
+
+    public void reemplazarPasajero(int idReserva, String documento,
+                                   DatosPasajero datos, LocalDate hoy) {
+        Reserva reserva = obtenerReserva(idReserva);
+        reserva.reemplazarPasajero(documento, datos, hoy);
+        guardar();
+    }
+
+    public NotaAjuste registrarAjuste(int idReserva, String motivo,
+                                      double importe, LocalDate fecha) {
+        Reserva reserva = obtenerReserva(idReserva);
+        NotaAjuste nota = reserva.registrarAjuste(motivo, importe, fecha);
+        guardar();
+        return nota;
     }
 
     // LISTAR RESERVAS
     public List<Reserva> listarReservas() {
-        return Collections.unmodifiableList(reservas);
+        return agencia.getReservas();
     }
 
     // OBTENER RESERVA O INFORMAR ERROR
@@ -246,6 +307,19 @@ public class ControladorReservas {
         }
 
         return reserva;
+    }
+
+    private Pasajero buscarPasajero(Reserva reserva, String documento) {
+        for (Pasajero pasajero : reserva.getPasajeros()) {
+            if (pasajero.getDocumento().equalsIgnoreCase(documento)) return pasajero;
+        }
+        throw new IllegalArgumentException("No existe el pasajero indicado");
+    }
+
+    private void guardar() {
+        if (repositorio != null) {
+            repositorio.guardar(agencia);
+        }
     }
 }
 

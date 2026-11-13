@@ -1,15 +1,22 @@
 package interfaz;
 
 import controladores.ControladorOperaciones;
+import controladores.ControladorReservas;
 import controladores.GeneradorReportes;
 import enumeraciones.CategoriaTour;
 import enumeraciones.Temporada;
 import enumeraciones.TipoVehiculo;
 import enumeraciones.TipoProveedor;
 import enumeraciones.TipoServicio;
+import enumeraciones.TipoPasajero;
+import enumeraciones.MedioPago;
 import excepciones.ReglaNegocioException;
 import modelo.Agencia;
 import modelo.Actividad;
+import modelo.Cancelacion;
+import modelo.Cliente;
+import modelo.DatosPasajero;
+import modelo.Empleado;
 import modelo.Guia;
 import modelo.Liquidacion;
 import modelo.Pasajero;
@@ -23,6 +30,9 @@ import modelo.TourAventura;
 import modelo.TourCultural;
 import modelo.TourNaturaleza;
 import modelo.Vehiculo;
+import modelo.Vendedor;
+import modelo.Pago;
+import modelo.NotaAjuste;
 import persistencia.RepositorioAgencia;
 
 import java.time.LocalDate;
@@ -42,14 +52,17 @@ public class MenuConsola {
     private final Agencia agencia;
     private final RepositorioAgencia repositorio;
     private final ControladorOperaciones operaciones;
+    private final ControladorReservas reservas;
     private final GeneradorReportes reportes;
     private final Scanner entrada;
 
     public MenuConsola(Agencia agencia, RepositorioAgencia repositorio,
-                       ControladorOperaciones operaciones, GeneradorReportes reportes, Scanner entrada) {
+                       ControladorOperaciones operaciones, ControladorReservas reservas,
+                       GeneradorReportes reportes, Scanner entrada) {
         this.agencia = agencia;
         this.repositorio = repositorio;
         this.operaciones = operaciones;
+        this.reservas = reservas;
         this.reportes = reportes;
         this.entrada = entrada;
     }
@@ -63,7 +76,7 @@ public class MenuConsola {
             System.out.println("1. Tours y tarifas");
             System.out.println("2. Salidas (CU04 programar / CU05 estados)");
             System.out.println("3. Recursos y operación de salidas");
-            System.out.println("4. Reservas (consulta)");
+            System.out.println("4. Reservas");
             System.out.println("5. Reportes (CU24)");
             System.out.println("6. Cargar datos de ejemplo");
             System.out.println("0. Salir");
@@ -88,7 +101,7 @@ public class MenuConsola {
         System.out.println("1. Listar tours\n2. Registrar tour\n3. Registrar tarifa\n"
                 + "4. Modificar tour\n5. Agregar actividad al itinerario\n"
                 + "6. Agregar servicio adicional\n7. Registrar proveedor\n8. Listar proveedores\n"
-                + "9. Consultar itinerario y servicios de un tour\n0. Volver");
+                + "9. Consultar itinerario y servicios de un tour\n10. Consultar tarifas\n0. Volver");
         switch (leerEntero("Opción: ")) {
             case 1:
                 List<Tour> tours = operaciones.listarTours();
@@ -129,6 +142,7 @@ public class MenuConsola {
                 for (Proveedor proveedor : operaciones.listarProveedores()) System.out.println(proveedor);
                 break;
             case 9: consultarItinerario(); break;
+            case 10: consultarTarifas(); break;
             case 0: break;
             default: System.out.println("Opción inválida.");
         }
@@ -171,6 +185,18 @@ public class MenuConsola {
         for (ServicioAdicional servicio : tour.getServicios()) {
             System.out.println(" - " + servicio.getNombre() + " | " + servicio.getTipo()
                     + " | $" + servicio.getPrecio() + (servicio.isObligatorio() ? " | obligatorio" : " | opcional"));
+        }
+    }
+
+    private void consultarTarifas() throws ReglaNegocioException {
+        Tour tour = agencia.buscarTour(leerTexto("Código del tour: "));
+        if (tour.getTarifas().isEmpty()) {
+            System.out.println("No hay tarifas cargadas.");
+            return;
+        }
+        for (Tarifa tarifa : tour.getTarifas()) {
+            System.out.println(tarifa.getTemporada() + " | " + tarifa.getVigenciaDesde()
+                    + " a " + tarifa.getVigenciaHasta() + " | $" + tarifa.getPrecioBase());
         }
     }
 
@@ -301,7 +327,9 @@ public class MenuConsola {
                 List<Pasajero> lista = operaciones.emitirListaPasajeros(leerEntero("Número de salida: "));
                 System.out.println("Lista de pasajeros (" + lista.size() + "):");
                 for (Pasajero pasajero : lista) {
-                    System.out.println(" - " + pasajero.obtenerNombreCompleto() + " (" + pasajero.getDocumento() + ")");
+                    System.out.println(" - " + pasajero.obtenerNombreCompleto() + " (" + pasajero.getDocumento()
+                            + ") | contacto emergencia: " + pasajero.getContactoEmergencia()
+                            + " | restricciones: " + pasajero.getRestricciones());
                 }
                 break;
             }
@@ -338,10 +366,72 @@ public class MenuConsola {
         System.out.println("Guía registrado.");
     }
 
-    // ------------------------------ Reservas (consulta) ------------------------------
+    // ------------------------------ Reservas ------------------------------
 
-    private void menuReservas() {
+    private void menuReservas() throws ReglaNegocioException {
         System.out.println("\n-- Reservas --");
+        System.out.println("1. Listar\n2. Registrar cliente\n3. Crear reserva\n4. Calcular precio");
+        System.out.println("5. Registrar pago\n6. Confirmar\n7. Cancelar\n8. Contratar adicional");
+        System.out.println("9. Reemplazar pasajero\n10. Registrar nota de ajuste\n0. Volver");
+        switch (leerEntero("Opción: ")) {
+            case 1: listarReservas(); break;
+            case 2: registrarCliente(); break;
+            case 3: crearReserva(); break;
+            case 4:
+                double precio = reservas.calcularPrecio(leerEntero("Reserva: "),
+                        leerDecimal("Tarifa base: "), leerFecha("Fecha de salida"),
+                        leerDecimal("Total de adicionales: "));
+                System.out.println("Precio calculado: $" + precio);
+                break;
+            case 5:
+                Pago pago = reservas.registrarPago(leerEntero("Reserva: "), leerEntero("ID del pago: "),
+                        leerDecimal("Importe: "), leerEnum("Medio de pago", MedioPago.values()),
+                        leerEntero("Cuotas: "));
+                System.out.println("Pago registrado por $" + pago.getImporte());
+                break;
+            case 6:
+                reservas.confirmarReserva(leerEntero("Reserva: "), leerFecha("Fecha de salida"));
+                System.out.println("Reserva confirmada.");
+                break;
+            case 7:
+                Cancelacion cancelacion = reservas.cancelarReserva(leerEntero("Reserva: "),
+                        leerTexto("Motivo: "), leerFecha("Fecha de salida"), false);
+                System.out.println("Reserva cancelada. Devolución: $" + cancelacion.getImporteDevuelto());
+                break;
+            case 8:
+                int reservaAdicional = leerEntero("Reserva: ");
+                Reserva reserva = reservas.buscarReserva(reservaAdicional);
+                if (reserva == null) throw new IllegalArgumentException("No existe la reserva indicada.");
+                String nombreServicio = leerTexto("Nombre del servicio: ");
+                ServicioAdicional servicio = reserva.getSalida().getTour().getServicios().stream()
+                        .filter(s -> s.getNombre().equalsIgnoreCase(nombreServicio))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("No existe ese servicio en el tour."));
+                reservas.agregarServicioAdicional(reservaAdicional,
+                        leerTexto("Documento del pasajero: "), servicio);
+                System.out.println("Servicio adicional contratado.");
+                break;
+            case 9:
+                reservas.reemplazarPasajero(leerEntero("Reserva: "),
+                        leerTexto("Documento del pasajero actual: "),
+                        new DatosPasajero(leerTexto("Nombre: "), leerTexto("Apellido: "),
+                                leerTexto("Documento nuevo: "), leerFecha("Fecha de nacimiento"),
+                                leerEnum("Tipo de pasajero", TipoPasajero.values()),
+                                leerTexto("Contacto de emergencia: "), leerTexto("Restricciones: ")),
+                        leerFecha("Fecha de hoy"));
+                System.out.println("Pasajero reemplazado.");
+                break;
+            case 10:
+                NotaAjuste nota = reservas.registrarAjuste(leerEntero("Reserva: "),
+                        leerTexto("Motivo: "), leerDecimal("Importe (+/-): "), leerFecha("Fecha"));
+                System.out.println("Nota registrada: " + nota);
+                break;
+            case 0: break;
+            default: System.out.println("Opción inválida.");
+        }
+    }
+
+    private void listarReservas() {
         if (agencia.getReservas().isEmpty()) {
             System.out.println("No hay reservas registradas.");
             return;
@@ -352,6 +442,46 @@ public class MenuConsola {
                     + " | pasajeros: " + r.cantidadPasajeros()
                     + String.format(java.util.Locale.US, " | total $%,.2f | pagado $%,.2f | saldo $%,.2f",
                     r.getImporteTotal(), r.calcularTotalPagado(), r.calcularSaldoPendiente()));
+        }
+    }
+
+    private void registrarCliente() {
+        Cliente cliente = new Cliente(leerTexto("Nombre: "), leerTexto("Apellido: "),
+                leerTexto("Documento: "), leerTexto("Teléfono: "), leerTexto("Correo: "),
+                leerTexto("País de residencia: "));
+        if (agencia.getClientes().stream().anyMatch(c -> c.getDocumento().equalsIgnoreCase(cliente.getDocumento()))) {
+            throw new IllegalArgumentException("Ya existe un cliente con ese documento.");
+        }
+        agencia.agregarCliente(cliente);
+        repositorio.guardar(agencia);
+        System.out.println("Cliente registrado.");
+    }
+
+    private void crearReserva() throws ReglaNegocioException {
+        Cliente cliente = agencia.buscarCliente(leerTexto("Documento del cliente: "));
+        Salida salida = agencia.buscarSalida(leerEntero("Número de salida: "));
+        Vendedor vendedor = obtenerVendedor(leerEntero("Legajo del vendedor: "));
+        Reserva reserva = new Reserva((int) agencia.siguienteNumeroReserva(), cliente, salida, vendedor);
+        int cantidad = leerEntero("Cantidad de pasajeros: ");
+        for (int i = 1; i <= cantidad; i++) {
+            reserva.agregarPasajero(new Pasajero(leerTexto("Nombre pasajero " + i + ": "),
+                    leerTexto("Apellido: "), leerTexto("Documento: "), leerTexto("Teléfono: "),
+                    leerFecha("Fecha de nacimiento"), leerEnum("Tipo de pasajero", TipoPasajero.values()),
+                    leerTexto("Contacto de emergencia: "), leerTexto("Restricciones: ")));
+        }
+        reservas.registrarReserva(reserva);
+        System.out.println("Reserva #" + reserva.getId() + " creada en estado PENDIENTE.");
+    }
+
+    private Vendedor obtenerVendedor(int legajo) {
+        try {
+            Empleado empleado = agencia.buscarEmpleado(legajo);
+            if (!(empleado instanceof Vendedor)) {
+                throw new IllegalArgumentException("El legajo no corresponde a un vendedor.");
+            }
+            return (Vendedor) empleado;
+        } catch (excepciones.EntidadNoEncontradaException e) {
+            throw new IllegalArgumentException("No existe el vendedor indicado.");
         }
     }
 

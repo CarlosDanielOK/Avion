@@ -20,6 +20,14 @@ participant ":GestorPagos" as GP
 participant ":Pago" as PAG
 participant ":RepositorioAgencia" as REPO
 
+note over UI,CTRL
+En la implementación Java, MenuConsola construye la Reserva y sus Pasajeros
+con los datos ingresados y delega en ControladorReservas.registrarReserva.
+El controlador valida requisitos, cupos, servicios obligatorios y persiste.
+Luego se usan calcularPrecio, registrarPago y confirmarReserva para completar
+el flujo. Los mensajes conceptuales de este diagrama representan esa secuencia.
+end note
+
 == Fase 1: iniciar la reserva (cupos, requisitos y pasajeros) ==
 
 Vendedor -> UI : cargar cliente, salida y pasajeros
