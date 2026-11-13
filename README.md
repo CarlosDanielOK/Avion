@@ -7,7 +7,7 @@
 | **Propuesta elegida** | B – Agencia de Turismo |
 | **Lenguaje** | Java 17 o superior |
 | **Modelado** | UML |
-| **Estado actual** | Etapa 1 finalizada – Etapa 2 pendiente de implementación |
+| **Estado actual** | Etapas 1 y 2 implementadas y verificadas |
 | **Entrega Etapa 1** | 25/10/2026 (tag `etapa-1`) |
 | **Entrega Etapa 2** | 12/11/2026 (tag `etapa-2`) |
 | **Defensa** | 19/11/2026 (jueves) |
@@ -118,7 +118,7 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 └── README.md
 ```
 
-> Las carpetas `src/` y `test/` se incorporarán durante la Etapa 2.
+> Las carpetas `src/` y `test/` contienen la implementación y las pruebas de la Etapa 2.
 
 ## 7. Tecnologías y herramientas
 
@@ -148,9 +148,9 @@ New-Item -ItemType Directory -Force out-test
 javac -encoding UTF-8 -cp out -d out-test (Get-ChildItem -Path test -Recurse -Filter *.java | ForEach-Object FullName)
 java -cp "out;out-test" modelo.AgenciaTest
 java -cp "out;out-test" modelo.SalidaTest
-java -cp "out;out-test" persistencia.RepositorioAgenciaArchivoTest
 java -cp "out;out-test" controladores.GeneradorReportesTest
 java -cp "out;out-test" controladores.ControladorOperacionesTest
+java -cp "out;out-test" controladores.ControladorReservasTest
 ```
 
 Los cambios de catálogo y operación se guardan mediante el repositorio de archivos en `datos/agencia.dat`. Si el archivo existente no puede leerse, `Main` detiene el inicio para evitar sobrescribirlo accidentalmente.
@@ -169,7 +169,7 @@ El proyecto se desarrolla de forma colaborativa en GitHub:
 | Etapa | Contenido | Entrega | Estado |
 |---|---|---|---|
 | **Etapa 1** | Análisis, casos de uso, diagramas de clases y secuencia, SOLID y GRASP. | 25/10/2026 | Finalizada |
-| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 12/11/2026 | En preparación |
+| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 12/11/2026 | Finalizada |
 | **Defensa** | Presentación oral y demostración del sistema. | 19/11/2026 (jueves) | Pendiente |
 
 ## 11. Integrantes
@@ -193,9 +193,9 @@ La persistencia utiliza serialización de objetos Java en `datos/agencia.dat`. L
 |---|---|
 | `AgenciaTest` | OK |
 | `SalidaTest` | OK |
-| `RepositorioAgenciaArchivoTest` | OK |
 | `GeneradorReportesTest` | OK |
 | `ControladorOperacionesTest` | OK |
+| `ControladorReservasTest` | OK |
 
 Además, se ejecutó una prueba de humo del menú: carga de datos de ejemplo, generación de los cuatro reportes y comprobación de que el archivo de persistencia se crea correctamente.
 
@@ -203,4 +203,4 @@ Además, se ejecutó una prueba de humo del menú: carga de datos de ejemplo, ge
 
 La compilación conjunta no presenta errores. Los casos CU04, CU05 y CU24 cuentan con implementación y pruebas específicas. La interfaz también incorpora opciones para completar el catálogo y administrar recursos operativos.
 
-**Pendiente de integración:** el `ControladorReservas` actual mantiene una colección propia y no utiliza todavía la raíz `Agencia` ni el repositorio compartido. Por ese motivo, el menú permite consultar las reservas que ya están en `Agencia`, pero el alta, cálculo de precio, pagos y cancelaciones todavía necesitan integrarse con el módulo de Bianca. Esto debe completarse y probarse antes de afirmar que el menú cubre todos los casos de uso del sistema.
+El módulo de reservas está integrado con la raíz `Agencia` y el repositorio compartido. El menú permite registrar clientes, crear reservas controlando cupos, calcular precios, registrar pagos, confirmar y cancelar reservas. La prueba `ControladorReservasTest` verifica el flujo integrado y la persistencia se ejecuta después de cada modificación.

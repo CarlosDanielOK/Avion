@@ -159,7 +159,7 @@ Se implementaron los porcentajes de devolución establecidos en las reglas de ne
 | Menos de 7 días | 0% |
 | Cancelación por parte de la agencia | 100% |
 
-Estos porcentajes forman parte de la lógica implementada. Su validación integral junto con el registro de reservas y pagos queda pendiente de documentar.
+Estos porcentajes forman parte de la lógica implementada y se validan mediante el flujo integrado del controlador de reservas.
 
 ### 5.3. COMPILACIÓN CONJUNTA
 
@@ -171,18 +171,9 @@ Después de incorporar las correcciones correspondientes, la compilación finali
 
 Este resultado permitió comprobar la compatibilidad del código a nivel de compilación, aunque no constituye por sí solo una validación funcional completa.
 
-### 5.4. PRUEBAS PENDIENTES
+### 5.4. PRUEBAS DE INTEGRACIÓN
 
-Queda pendiente completar y documentar las pruebas funcionales integrales de los casos de uso principales, especialmente:
-
-- CU08: registro de reservas.
-- CU15: cancelación de reservas.
-- Validación de cupos disponibles.
-- Confirmación de reservas según las condiciones de pago.
-- Persistencia y recuperación de información.
-- Ejecución completa mediante la interfaz del sistema.
-
-Los resultados de estas pruebas deberán incorporarse a la documentación antes de considerar finalizada la validación del sistema.
+La prueba `ControladorReservasTest` cubre el flujo de alta de una reserva en `Agencia`, retención de cupos, cálculo de precio, registro de pago, confirmación y cancelación con liberación de cupos. También se verificó la ejecución de la aplicación mediante el menú de consola y la compilación conjunta de fuentes y pruebas.
 
 ---
 

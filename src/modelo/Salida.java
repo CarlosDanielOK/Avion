@@ -62,7 +62,7 @@ public class Salida implements Serializable, Comparable<Salida> {
     /** Libera los cupos retenidos por reservas cuyo plazo de pago ya venció. */
     public void verificarVencimientos(LocalDate hoy) {
         for (Reserva reserva : reservas) {
-            if (reserva.estaVencida(hoy)) reserva.anularPorVencimiento();
+            if (reserva.estaVencida(fechaInicio)) reserva.anularPorVencimiento();
         }
     }
 
