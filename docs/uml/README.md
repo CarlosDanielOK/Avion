@@ -1,13 +1,13 @@
 # Diagramas UML de Rumbo Sur
 
-Esta carpeta contiene los archivos fuente PlantUML (`.puml`) y las exportaciones SVG de casos de uso y del diagrama inicial. En el paquete revisado, las fuentes `.puml` de los diagramas de secuencia y de clases final son la versión vigente; no se incluyen las exportaciones antiguas de esos tres diagramas para evitar confusiones. El PDF del diagrama de clases final y `docs/Documento de diseño.pdf` deben generarse/reincorporarse porque no estaban incluidos en el volcado Repomix recibido.
+Esta carpeta contiene las fuentes PlantUML (`.puml`) y sus exportaciones vigentes (`.svg` y, para el diagrama de clases final, `.pdf`). Las imágenes de secuencia y de clases final fueron regeneradas desde sus fuentes actualizadas. El documento consolidado `docs/Documento de diseño.pdf` incorpora los diagramas vigentes y un anexo de trazabilidad de Etapa 2.
 
 ## Inventario de diagramas
 
 - `01-clases-inicial.puml` / `.svg`: modelo previo a la aplicación de patrones. La fuente se conserva como referencia de la Etapa 1.
-- `02-secuencia-crear-reserva.puml`: CU08, con flujos alternativos por falta de cupos, requisitos no cumplidos, vencimientos y condiciones de pago. Su exportación SVG debe generarse desde esta fuente.
-- `03-secuencia-cancelar-reserva.puml`: CU15, con política de devolución, reserva inexistente, reserva no cancelable y actualización de vencimientos. Su exportación SVG debe generarse desde esta fuente.
-- `04-clases-final.puml`: modelo posterior a la aplicación de SOLID y GRASP, agrupado por capas (modelo del negocio, raíz y persistencia, control e interfaz, servicios y excepciones). El SVG y el PDF deben generarse nuevamente desde esta fuente vigente.
+- `02-secuencia-crear-reserva.puml`: CU08, con flujos alternativos por falta de cupos, requisitos no cumplidos, vencimientos y condiciones de pago. Su exportación `02-secuencia-crear-reserva.svg` está regenerada desde esta fuente.
+- `03-secuencia-cancelar-reserva.puml`: CU15, con política de devolución, reserva inexistente, reserva no cancelable y actualización de vencimientos. Su exportación `03-secuencia-cancelar-reserva.svg` está regenerada desde esta fuente.
+- `04-clases-final.puml`: modelo posterior a la aplicación de SOLID y GRASP, agrupado por capas (modelo del negocio, raíz y persistencia, control e interfaz, servicios y excepciones). Las exportaciones `04-clases-final.svg` y `04-clases-final.pdf` están generadas desde esta fuente vigente.
 - `casos-uso-administracion`, `casos-uso-reservas`, `casos-uso-pagos` y `casos-uso-operaciones` (`.puml` y `.svg`): diagramas de casos de uso, con relaciones «include» y «extend».
 
 ## Cambios del diagrama de clases inicial al final
@@ -38,4 +38,4 @@ Estos cambios se justifican en [`../diseno/solid-grasp.md`](../diseno/solid-gras
 
 ## Sincronización con la implementación revisada
 
-Los archivos `.puml` de `02-secuencia-crear-reserva`, `03-secuencia-cancelar-reserva` y `04-clases-final` deben considerarse las fuentes vigentes del modelo. Las imágenes `.svg` y el PDF que estaban exportados previamente no se regeneraron en esta revisión y pueden no reflejar los últimos cambios de código. Antes de entregar, volver a exportar los `.puml` actualizados a SVG y actualizar el PDF del diagrama final y el `docs/Documento de diseño.pdf`. No entregar una imagen o PDF anterior junto con una fuente nueva, porque quedarían inconsistentes.
+Los archivos `.puml` de `02-secuencia-crear-reserva`, `03-secuencia-cancelar-reserva` y `04-clases-final` son las fuentes vigentes del modelo. Sus exportaciones SVG y el PDF del diagrama de clases final están regenerados. El archivo `docs/Documento de diseño.pdf` también fue actualizado: incluye los diagramas vigentes y un anexo que explica las decisiones de Etapa 2 y su correspondencia con el código. Para mantener la consistencia, cualquier modificación posterior a una fuente `.puml` debe acompañarse de una nueva exportación de su SVG/PDF y de la actualización del documento consolidado.

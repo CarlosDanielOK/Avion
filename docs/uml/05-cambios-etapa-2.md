@@ -16,8 +16,9 @@ Este documento registra las decisiones incorporadas durante la codificación. Su
 
 ## Artefactos vigentes
 
-- `04-clases-final.puml`: diagrama de clases final, actualizado con firmas y reglas descritas arriba.
-- `02-secuencia-crear-reserva.puml` y `03-secuencia-cancelar-reserva.puml`: diagramas de secuencia correspondientes a los métodos que ejecuta la implementación.
+- `04-clases-final.puml`, `04-clases-final.svg` y `04-clases-final.pdf`: diagrama de clases final, actualizado con las firmas y reglas descritas arriba.
+- `02-secuencia-crear-reserva.puml` / `.svg` y `03-secuencia-cancelar-reserva.puml` / `.svg`: diagramas de secuencia correspondientes a los flujos de la implementación.
+- `docs/Documento de diseño.pdf`: documento consolidado que incluye los diagramas vigentes y un anexo de trazabilidad de Etapa 2.
 - `docs/Plan_de_pruebas.md`: plan de pruebas de Etapa 2.
 
-Las imágenes SVG y los PDF deben exportarse nuevamente desde las fuentes PlantUML vigentes antes de entregar. No deben reutilizarse exportaciones de una versión anterior si no fueron regeneradas.
+Las exportaciones y el PDF de diseño incluidos en el repositorio corresponden a las fuentes PlantUML vigentes a la fecha de esta revisión. Si se modifica una fuente UML posteriormente, también deberá regenerarse su exportación y actualizarse el documento consolidado.

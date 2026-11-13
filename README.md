@@ -7,10 +7,10 @@
 | **Propuesta elegida** | B – Agencia de Turismo |
 | **Lenguaje** | Java 17 o superior |
 | **Modelado** | UML |
-| **Estado actual** | Código y pruebas verificados; exportaciones UML/PDF pendientes de actualizar |
+| **Estado actual** | Código, pruebas, exportaciones UML y documento de diseño actualizados; pendientes verificaciones finales del grupo en GitHub y pruebas manuales. |
 | **Entrega Etapa 1** | 25/10/2026 (tag `etapa-1`) |
-| **Entrega Etapa 2** | 04/11/2026 según el TPO; 12/11/2026 según el README anterior (confirmar) |
-| **Defensa** | 11/11/2026 según el TPO; 19/11/2026 según el README anterior (confirmar) |
+| **Entrega Etapa 2** | 13/11/2026 (extensión excepcional comunicada por la profesora debido a inconvenientes con Microsoft Teams). |
+| **Defensa** | 19/11/2026 (jueves). |
 
 ---
 
@@ -102,10 +102,10 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 | Documento | Contenido |
 |---|---|
 | [`docs/diseno/solid-grasp.md`](docs/diseno/solid-grasp.md) | Aplicación y fundamentación de SOLID y GRASP. |
-| [`docs/uml/`](docs/uml) | Diagramas UML y fuentes PlantUML. La nota [`05-cambios-etapa-2.md`](docs/uml/05-cambios-etapa-2.md) justifica las diferencias entre el diseño inicial y la implementación. Las exportaciones gráficas deben regenerarse antes de entregar. |
+| [`docs/uml/`](docs/uml) | Fuentes PlantUML y exportaciones SVG/PDF vigentes. La nota [`05-cambios-etapa-2.md`](docs/uml/05-cambios-etapa-2.md) justifica las diferencias entre el diseño inicial y la implementación. |
 | [`docs/Plan_de_pruebas.md`](docs/Plan_de_pruebas.md) | Plan con entradas, resultados esperados y obtenidos, además de pruebas manuales para la defensa. |
 | [`docs/Revision_pre_entrega.md`](docs/Revision_pre_entrega.md) | Resumen de la revisión técnica, correcciones aplicadas y checklist pendiente de entrega. |
-| `docs/Documento de diseño.pdf` | PDF complementario: el binario no estaba incluido en el archivo Repomix proporcionado para esta revisión; debe recuperarse del repositorio original y actualizarse con los diagramas vigentes. |
+| `docs/Documento de diseño.pdf` | Documento consolidado de diseño (47 páginas), con diagramas UML vigentes y anexo de trazabilidad de Etapa 2. |
 
 ## 6. Estructura del repositorio
 
@@ -117,13 +117,13 @@ La justificación completa de cada decisión (problema detectado, decisión adop
 │   ├── uml/              Fuentes PlantUML (.puml), exportaciones y cambios de Etapa 2
 │   ├── Plan_de_pruebas.md
 │   ├── Revision_pre_entrega.md
-│   └── Documento de diseño.pdf (reincorporar versión actualizada)
+│   └── Documento de diseño.pdf (versión consolidada vigente)
 ├── src/                  Código fuente Java (Etapa 2)
 ├── test/                 Pruebas automatizadas (Etapa 2)
 └── README.md
 ```
 
-> Las carpetas `src/` y `test/` contienen la implementación y las pruebas de la Etapa 2. Antes de entregar, regenerar las imágenes SVG y los PDF UML desde los `.puml` actualizados y reincorporar el PDF `docs/Documento de diseño.pdf` actualizado. El paquete revisado no incluye las exportaciones antiguas de los diagramas de secuencia/clases para evitar presentarlas como vigentes. El volcado Repomix usado en esta revisión no contenía los binarios PDF.
+> Las carpetas `src/` y `test/` contienen la implementación y las pruebas de la Etapa 2. Las exportaciones SVG, el PDF del diagrama de clases final y `docs/Documento de diseño.pdf` están actualizados a partir de las fuentes PlantUML vigentes. El documento de diseño conserva el modelado de Etapa 1 e incorpora un anexo con cambios de implementación, correspondencia UML-código y síntesis de pruebas. Antes de entregar, el grupo debe verificar los tags y aportes en GitHub y ejecutar las pruebas manuales PM01–PM10 del plan en su propio equipo.
 
 ## 7. Tecnologías y herramientas
 
@@ -175,8 +175,8 @@ El proyecto se desarrolla de forma colaborativa en GitHub:
 | Etapa | Contenido | Entrega | Estado |
 |---|---|---|---|
 | **Etapa 1** | Análisis, casos de uso, diagramas de clases y secuencia, SOLID y GRASP. | 25/10/2026 | Finalizada |
-| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 04/11/2026 según el TPO original; 12/11/2026 en el README anterior | Finalizada según el grupo; fecha definitiva a confirmar |
-| **Defensa** | Presentación oral y demostración del sistema. | 11/11/2026 según el TPO original; 19/11/2026 en el README anterior | Fecha definitiva a confirmar |
+| **Etapa 2** | Codificación, pruebas unitarias y funcionales, documentación final. | 13/11/2026 (extensión excepcional por inconvenientes con Microsoft Teams) | Finalizada y preparada para entregar. |
+| **Defensa** | Presentación oral y demostración del sistema. | 19/11/2026 (jueves) | Pendiente de realizar. |
 
 ## 11. Integrantes
 

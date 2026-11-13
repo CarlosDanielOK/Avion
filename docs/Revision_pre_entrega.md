@@ -18,18 +18,22 @@ La implementación Java revisada compila con `--release 17`, sus seis clases de 
 10. `Salida.totalServiciosAdicionales()` excluye reservas pendientes y anuladas de la base de cálculo de honorarios, y considera solo reservas confirmadas o finalizadas.
 11. La emisión de una lista actualiza vencimientos y el estado de la salida; los cambios posteriores en reservas o pasajeros invalidan la lista anterior para que no se inicie la salida con datos desactualizados.
 
-## Pendientes que no pueden cerrarse con el volcado proporcionado
+## Estado de la documentación y verificaciones finales
 
-- El archivo Repomix describe `docs/Documento de diseño.pdf` y varios PDF UML, pero no incluye sus bytes (Repomix excluye los binarios). Por eso no se pudo revisar visualmente ese PDF ni actualizarlo.
-- Las fuentes PlantUML (`.puml`) de los diagramas de secuencia y del diagrama de clases final se actualizaron. Las exportaciones `.svg` y PDF disponibles en el volcado son exportaciones previas y deben regenerarse antes de entregar.
-- El volcado `.md` no contiene el directorio `.git`, por lo que no se pudo comprobar el historial, los pull requests ni los tags `etapa-1` y `etapa-2` requeridos por la consigna.
-- La consigna original indica entrega de Etapa 2 el 04/11/2026 y defensa el 11/11/2026; el README de la versión recibida indica 12/11/2026 y 19/11/2026. Confirmar con la profesora cuál cronograma quedó vigente y corregir ambos documentos para que coincidan.
+El documento `docs/Documento de diseño.pdf` fue actualizado a partir de las exportaciones UML vigentes. Conserva las secciones de Etapa 1 e incorpora el diagrama de clases final actualizado y un anexo de Etapa 2 con trazabilidad de cambios, correspondencia UML-código y síntesis de pruebas. Las exportaciones SVG y el PDF de `04-clases-final` también están incluidos en `docs/uml/`.
+
+No se pudo verificar el historial de GitHub desde el ZIP porque no contiene el directorio `.git`. Tampoco se pueden dar por ejecutadas las pruebas manuales PM01–PM10: el plan las presenta como recorridos para que el grupo las ejecute en su entorno.
 
 ## Checklist final del grupo
 
-- [ ] Regenerar `02-secuencia-crear-reserva.svg` y `03-secuencia-cancelar-reserva.svg` desde sus `.puml`.
-- [ ] Regenerar `04-clases-final.svg` y `04-clases-final.pdf` desde `04-clases-final.puml`.
-- [ ] Actualizar `docs/Documento de diseño.pdf` con los diagramas finales y verificar que sus textos describan la implementación actual.
+- [x] Regenerar las exportaciones SVG de los diagramas UML actualizados.
+- [x] Regenerar `04-clases-final.pdf` desde `04-clases-final.puml`.
+- [x] Actualizar `docs/Documento de diseño.pdf` e inspeccionar visualmente sus páginas modificadas.
 - [ ] Verificar que `git tag --list` incluya `etapa-1` y `etapa-2` y que ambos apunten a los commits correctos.
-- [ ] Confirmar las fechas definitivas con la cátedra.
-- [ ] Ejecutar en el equipo del grupo los casos manuales PM01–PM10 del plan de pruebas y practicar el recorrido antes de la defensa.
+- [ ] Confirmar que los commits de los tres integrantes y las revisiones por Pull Request sean visibles en GitHub.
+- [ ] Ejecutar en el equipo del grupo los casos manuales PM01–PM10 del plan de pruebas y practicar la demostración.
+- [x] Fecha de defensa confirmada: 19/11/2026 (jueves).
+
+## Fechas de entrega
+
+La entrega de la Etapa 2 fue extendida excepcionalmente al 13/11/2026 debido a inconvenientes con Microsoft Teams. La defensa oral está prevista para el 19/11/2026 (jueves).
