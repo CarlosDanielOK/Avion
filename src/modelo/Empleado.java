@@ -1,6 +1,7 @@
 package modelo;
 
 /** Personal de la agencia. Cada subclase define su rol. */
+/** Especializacion de Persona para el personal de la agencia. */
 public abstract class Empleado extends Persona {
     private static final long serialVersionUID = 1L;
 

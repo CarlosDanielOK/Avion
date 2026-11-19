@@ -9,6 +9,11 @@ import persistencia.RepositorioAgencia;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Controlador GRASP del modulo comercial.
+ * Recibe operaciones de clientes, reservas, pagos, confirmaciones y
+ * cancelaciones, coordina el modelo y delega reglas especializadas.
+ */
 public class ControladorReservas {
 
     private final Agencia agencia;

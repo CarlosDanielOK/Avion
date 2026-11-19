@@ -1,5 +1,6 @@
 package modelo;
 
+/** Empleado que registra ventas y conserva la comision acordada para reportes. */
 public class Vendedor extends Empleado {
     private static final long serialVersionUID = 1L;
 

@@ -2,6 +2,7 @@ package modelo;
 
 import enumeraciones.CategoriaTour;
 
+/** Especializacion cultural: usa las reglas comunes de Tour sin restricciones adicionales. */
 public class TourCultural extends Tour {
     private static final long serialVersionUID = 1L;
 

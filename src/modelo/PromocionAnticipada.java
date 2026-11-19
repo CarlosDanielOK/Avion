@@ -3,6 +3,7 @@ package modelo;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
+/** Descuento del 15 % cuando la reserva se realiza mas de 60 dias antes. */
 public class PromocionAnticipada implements Promocion {
 
     private static final long serialVersionUID = 1L;

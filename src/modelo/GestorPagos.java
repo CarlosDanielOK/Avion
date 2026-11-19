@@ -6,6 +6,11 @@ import enumeraciones.MedioPago;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Clase de fabricacion pura que centraliza la creacion de pagos, el calculo
+ * de saldos y las reglas de confirmacion.
+ * Separa esta responsabilidad de Reserva para aplicar SRP.
+ */
 public class GestorPagos {
 
     private static final double PORCENTAJE_SENA = 0.30;

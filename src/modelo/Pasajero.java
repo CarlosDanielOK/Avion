@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Participante de una reserva. Calcula su edad al inicio de la salida y el
+ * factor de tarifa correspondiente. Tambien conserva sus servicios adicionales.
+ */
 public class Pasajero extends Persona {
 
     private static final long serialVersionUID = 1L;

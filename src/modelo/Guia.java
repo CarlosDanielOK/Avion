@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/** Empleado habilitado para dirigir tours segun idioma y categoria. */
 public class Guia extends Empleado {
     private static final long serialVersionUID = 1L;
 

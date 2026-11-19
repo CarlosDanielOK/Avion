@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 
 /** Datos de prueba para la demostración: permiten ver los reportes y la operación sin cargar todo a mano. */
+/** Carga datos iniciales de demostracion para mostrar el funcionamiento del menu. */
 final class DatosEjemplo {
 
     private DatosEjemplo() {

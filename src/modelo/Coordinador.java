@@ -1,5 +1,6 @@
 package modelo;
 
+/** Empleado responsable de operaciones, listas y coordinacion de salidas. */
 public class Coordinador extends Empleado {
     private static final long serialVersionUID = 1L;
 

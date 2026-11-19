@@ -10,6 +10,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Entidad central de una venta. Encapsula estado, pasajeros, pagos, ajustes,
+ * cancelacion y vencimientos de una reserva.
+ *
+ * GRASP Experto: conoce los datos necesarios para calcular saldo y vigencia.
+ * El calculo del precio, los pagos y las devoluciones se delegan en otras
+ * clases para evitar concentrar demasiadas responsabilidades.
+ */
 public class Reserva implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -55,7 +63,10 @@ public class Reserva implements Serializable {
         this.cancelacion = null;
     }
 
-    // AGREGAR PASAJERO (GRASP Creador: Reserva construye al pasajero que incorpora)
+    /**
+     * Crea un pasajero a partir de los datos de entrada.
+     * Aplica GRASP Creador porque Reserva agrega y contiene a esos pasajeros.
+     */
     public Pasajero agregarPasajero(DatosPasajero datos, String telefono) {
         if (datos == null) throw new IllegalArgumentException("Los datos del pasajero son obligatorios");
         Pasajero pasajero = new Pasajero(datos.getNombre(), datos.getApellido(),
@@ -127,7 +138,10 @@ public class Reserva implements Serializable {
         importeTotal = 0;
     }
 
-    // REGISTRAR PAGO
+    /**
+     * Valida que el pago sea posible y lo incorpora al historial.
+     * No permite pagos en reservas terminales ni importes superiores al saldo.
+     */
     public void registrarPago(Pago pago) {
 
         if (pago == null) {
@@ -212,7 +226,10 @@ public class Reserva implements Serializable {
         this.importeTotal = importe;
     }
 
-    // CAMBIAR ESTADO
+    /**
+     * Controla las transiciones permitidas entre PENDIENTE, CONFIRMADA,
+     * ANULADA y FINALIZADA. Impide volver a operar reservas terminales.
+     */
     public void cambiarEstado(EstadoReserva nuevoEstado) {
 
         if (nuevoEstado == null) {
@@ -334,7 +351,9 @@ public class Reserva implements Serializable {
         return nota;
     }
 
-    // VERIFICAR VENCIMIENTO
+    /**
+     * Calcula el vencimiento usando la fecha real del reloj.
+     */
     public boolean estaVencida(LocalDate fechaSalida) {
         return estaVencida(fechaSalida, LocalDate.now());
     }

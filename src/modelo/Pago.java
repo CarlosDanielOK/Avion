@@ -4,6 +4,10 @@ import enumeraciones.MedioPago;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+/**
+ * Movimiento de cobro. Guarda el capital abonado y un recargo independiente,
+ * sin modificar el importe total de la reserva.
+ */
 public class Pago implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -6,7 +6,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-/** Calcula el precio y delega las reglas variables en las promociones recibidas. */
+/**
+ * Calcula el importe total de una reserva.
+ *
+ * Aplica SRP al separar el precio del estado de Reserva.
+ * Aplica OCP y polimorfismo al evaluar una lista de implementaciones
+ * Promocion sin modificar el algoritmo central.
+ */
 public class CalculadoraPrecioReserva {
 
     private final List<Promocion> promociones;

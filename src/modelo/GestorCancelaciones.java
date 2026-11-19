@@ -3,6 +3,10 @@ package modelo;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Clase de fabricacion pura para aplicar la politica de devolucion.
+ * Separa porcentajes y montos de las entidades Reserva y Controlador.
+ */
 public class GestorCancelaciones {
 
     public double calcularPorcentajeDevolucion(

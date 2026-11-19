@@ -3,6 +3,7 @@ package modelo;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+/** Correccion economica auditada que modifica el total sin borrar pagos existentes. */
 public class NotaAjuste implements Serializable {
 
     private static final long serialVersionUID = 1L;
