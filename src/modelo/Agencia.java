@@ -8,7 +8,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Raíz del modelo: concentra las colecciones que forman el estado de la agencia.
+ * Raiz del modelo y objeto persistido. Concentra todas las colecciones del
+ * sistema y realiza busquedas centralizadas.
+ *
+ * Este es el objeto que RepositorioAgenciaArchivo escribe y lee.
  */
 public class Agencia implements Serializable {
     private static final long serialVersionUID = 1L;

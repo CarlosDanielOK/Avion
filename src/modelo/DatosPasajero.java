@@ -4,6 +4,7 @@ import enumeraciones.TipoPasajero;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+/** DTO de entrada: separa los datos informados por el usuario de la entidad Pasajero. */
 public class DatosPasajero implements Serializable {
 
     private static final long serialVersionUID = 1L;

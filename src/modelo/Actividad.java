@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalTime;
 
 /** Paso del itinerario de un tour. Orden natural: por día y luego por orden. */
+/** Actividad de un dia del itinerario. Se compara por dia y numero de orden. */
 public class Actividad implements Serializable, Comparable<Actividad> {
     private static final long serialVersionUID = 1L;
 

@@ -47,6 +47,11 @@ import java.util.Scanner;
  * Interfaz de consola. Solo muestra opciones, pide datos y delega en los
  * controladores y en el generador de reportes (no contiene reglas de negocio).
  */
+/**
+ * Interfaz de consola y GRASP Controlador de presentacion.
+ * Lee opciones del usuario, construye datos y delega todas las reglas de
+ * negocio a las clases de modelo y controladores.
+ */
 public class MenuConsola {
 
     private final Agencia agencia;

@@ -2,7 +2,11 @@ package persistencia;
 
 import modelo.Agencia;
 
-/** Abstracción de persistencia para que el modelo no dependa de un archivo. */
+/**
+ * Contrato de persistencia.
+ * GRASP DIP: el programa depende de esta abstraccion y no de una implementacion
+ * concreta de archivo.
+ */
 public interface RepositorioAgencia {
     void guardar(Agencia agencia);
     Agencia cargar();

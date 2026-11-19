@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import enumeraciones.MedioPago;
 
+/** Resultado documentado de una cancelacion: fecha, motivo, porcentaje y devolucion. */
 public class Cancelacion implements Serializable {
 
     private static final long serialVersionUID = 1L;

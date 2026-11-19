@@ -1,5 +1,6 @@
 package modelo;
 
+/** Empleado con responsabilidad administrativa sobre el catalogo de la agencia. */
 public class Administrador extends Empleado {
     private static final long serialVersionUID = 1L;
 

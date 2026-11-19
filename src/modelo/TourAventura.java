@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.Period;
 
 /** Tour de aventura: exige edad mínima, indica dificultad y requiere seguro. */
+/** Tour sujeto a nivel de dificultad, edad minima y seguro obligatorio. */
 public class TourAventura extends Tour {
     private static final long serialVersionUID = 1L;
 

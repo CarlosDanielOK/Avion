@@ -2,6 +2,7 @@ package modelo;
 
 import java.time.LocalDate;
 
+/** Descuento del 10 % cuando la reserva contiene seis o mas pasajeros. */
 public class PromocionGrupo implements Promocion {
 
     private static final long serialVersionUID = 1L;

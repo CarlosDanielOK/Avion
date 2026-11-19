@@ -3,6 +3,7 @@ package modelo;
 import enumeraciones.TipoVehiculo;
 import java.io.Serializable;
 
+/** Transporte disponible para una salida. Valida capacidad y superposicion de fechas. */
 public class Vehiculo implements Serializable {
     private static final long serialVersionUID = 1L;
 

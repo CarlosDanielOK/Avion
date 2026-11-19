@@ -11,7 +11,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Salida programada de un tour; conoce sus cupos, recursos y reservas. */
+/**
+ * Representa una fecha concreta de un tour.
+ * GRASP Experto: esta clase conoce cupos, reservas, recursos y fechas, por lo
+ * que calcula disponibilidad, vencimientos y condiciones de inicio.
+ *
+ * Implementa Comparable<Salida> para ordenar naturalmente por fecha e
+ * identificador.
+ */
 public class Salida implements Serializable, Comparable<Salida> {
     private static final long serialVersionUID = 1L;
 

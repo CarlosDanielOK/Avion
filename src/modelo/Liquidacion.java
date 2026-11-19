@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 /** Registro de los honorarios pagados a un guía por una salida finalizada. */
+/** Registro del honorario calculado para la salida de un guia finalizada. */
 public class Liquidacion implements Serializable {
     private static final long serialVersionUID = 1L;
 

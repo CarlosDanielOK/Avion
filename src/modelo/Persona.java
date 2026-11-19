@@ -3,6 +3,7 @@ package modelo;
 import java.io.Serializable;
 
 /** Clase abstracta base de todas las personas del sistema. */
+/** Clase base de todos los actores almacenados: comparte nombre, documento y telefono. */
 public abstract class Persona implements Serializable {
     private static final long serialVersionUID = 1L;
 

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 /** Precio base por pasajero de un tour durante un período de vigencia. */
+/** Precio base vigente durante un periodo y una temporada determinados. */
 public class Tarifa implements Serializable {
     private static final long serialVersionUID = 1L;
 

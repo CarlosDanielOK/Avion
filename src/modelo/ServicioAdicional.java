@@ -4,6 +4,7 @@ import enumeraciones.TipoServicio;
 import java.io.Serializable;
 
 /** Servicio extra que se contrata por pasajero (excursión, traslado, seguro). */
+/** Servicio opcional o obligatorio vendido dentro de un tour. */
 public class ServicioAdicional implements Serializable {
     private static final long serialVersionUID = 1L;
 

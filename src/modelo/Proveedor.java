@@ -3,6 +3,7 @@ package modelo;
 import enumeraciones.TipoProveedor;
 import java.io.Serializable;
 
+/** Empresa externa contratada para prestar servicios asociados a actividades. */
 public class Proveedor implements Serializable {
     private static final long serialVersionUID = 1L;
 
