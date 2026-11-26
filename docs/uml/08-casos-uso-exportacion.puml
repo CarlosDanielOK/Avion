@@ -1,0 +1,41 @@
+@startuml 08-casos-uso-exportacion
+title Mejora final - Exportación a TXT
+
+skinparam shadowing false
+skinparam backgroundColor White
+skinparam usecase {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam actor {
+  BackgroundColor White
+  BorderColor #333333
+}
+
+left to right direction
+
+actor "Coordinador de operaciones" as COO
+actor "Vendedor" as VEN
+
+rectangle "Sistema de Gestión Rumbo Sur" {
+  usecase "CU20 - Emitir listas de pasajeros" as CU20
+  usecase "CU25 - Exportar lista de pasajeros a TXT" as CU25
+  usecase "CU26 - Consultar y exportar historial de un cliente" as CU26
+}
+
+COO --> CU25
+VEN --> CU26
+CU25 ..> CU20 : <<include>>
+
+note right of CU25
+  Reutiliza CU20: se emite la lista
+  con sus reglas y luego se guarda
+  en un archivo de texto.
+end note
+
+note right of CU26
+  Busca al cliente por documento
+  (sin usuario ni contraseña).
+end note
+@enduml

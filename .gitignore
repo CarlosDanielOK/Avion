@@ -7,3 +7,6 @@
 
 # Datos serializados generados al ejecutar el programa
 /datos/
+
+# Archivos TXT generados durante las exportaciones
+/exportaciones/

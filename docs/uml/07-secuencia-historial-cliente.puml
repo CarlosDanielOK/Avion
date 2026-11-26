@@ -1,0 +1,41 @@
+@startuml 07-secuencia-historial-cliente
+title CU26 - Consultar y exportar el historial de un cliente
+actor Vendedor
+participant "MenuConsola" as M
+participant "ControladorExportaciones" as C
+participant "Agencia" as A
+participant "ExportadorTxt" as E
+participant "Files" as F
+
+Vendedor -> M : elige "7. Exportar a TXT" y "2. Historial"
+M -> Vendedor : pide el documento del cliente
+Vendedor -> M : documento
+M -> C : exportarHistorialCliente(documento)
+C -> A : buscarCliente(documento)
+alt el cliente no existe
+  A --> C : EntidadNoEncontradaException
+  C --> M : EntidadNoEncontradaException
+  M --> Vendedor : "No se pudo completar la operación: no existe el cliente"
+else el cliente existe
+  A --> C : cliente
+  C -> A : buscarReservasDeCliente(documento)
+  A --> C : reservas
+  C -> E : exportarHistorialCliente(cliente, reservas)
+  loop por cada reserva
+    E -> E : cuenta su estado y arma la línea de detalle
+  end
+  E -> F : write(ruta, lineas)
+  alt falla la escritura
+    F --> E : IOException
+    E --> M : IllegalStateException("No se pudo escribir el archivo")
+    M --> Vendedor : muestra el error
+  else escritura correcta
+    F --> E : ruta
+    E --> C : ruta
+    C --> M : ruta
+    M -> F : readAllLines(ruta)
+    F --> M : lineas
+    M --> Vendedor : "Archivo generado" y su contenido
+  end
+end
+@enduml
