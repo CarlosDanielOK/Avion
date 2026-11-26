@@ -12,12 +12,14 @@ class ControladorExportaciones <<Controlador>> {
   - agencia : Agencia
   - operaciones : ControladorOperaciones
   - exportador : ExportadorTxt
+  + ControladorExportaciones(agencia : Agencia, operaciones : ControladorOperaciones, exportador : ExportadorTxt)
   + exportarListaPasajeros(idSalida : long) : Path
   + exportarHistorialCliente(documento : String) : Path
 }
 
 class ExportadorTxt <<Fabricación pura>> {
   - carpeta : Path
+  + ExportadorTxt(carpeta : String)
   + exportarListaPasajeros(salida : Salida, pasajeros : List<Pasajero>) : Path
   + exportarHistorialCliente(cliente : Cliente, reservas : List<Reserva>) : Path
   - escribir(nombreArchivo : String, lineas : List<String>) : Path
@@ -42,6 +44,10 @@ MenuConsola --> ControladorExportaciones
 ControladorExportaciones --> Agencia
 ControladorExportaciones --> ControladorOperaciones
 ControladorExportaciones --> ExportadorTxt
+ControladorExportaciones ..> Salida : obtiene de Agencia
+ControladorExportaciones ..> Cliente : obtiene de Agencia
+ControladorExportaciones ..> Pasajero : recibe de ControladorOperaciones
+ControladorExportaciones ..> Reserva : obtiene de Agencia
 ExportadorTxt ..> Salida : lee datos
 ExportadorTxt ..> Cliente : lee datos
 ExportadorTxt ..> Reserva : lee datos
@@ -53,8 +59,19 @@ Reserva --> "1" Cliente
 Reserva --> "1" Salida
 Reserva *-- "1..*" Pasajero
 
+note right of Agencia
+  GRASP Experto en información: Agencia conoce
+  la colección de reservas y filtra las del cliente.
+end note
+
+note right of ControladorExportaciones
+  GRASP Controlador: coordina la solicitud del menú,
+  consulta los datos y delega la escritura del archivo.
+end note
+
 note right of ExportadorTxt
-  Única clase que escribe
-  archivos de texto (SRP).
+  GRASP Fabricación pura: servicio técnico que no es
+  una entidad del negocio. Aplica SRP porque concentra
+  el armado y la escritura de los archivos TXT.
 end note
 @enduml

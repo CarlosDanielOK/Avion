@@ -1,5 +1,5 @@
 @startuml 04-clases-final
-title Rumbo Sur - Diagrama de clases final (SOLID y GRASP)
+title Rumbo Sur - Diagrama de clases final (SOLID, GRASP y exportación TXT)
 
 skinparam shadowing false
 skinparam packageStyle rectangle
@@ -353,6 +353,7 @@ class Agencia #DDEEFF {
   + buscarSalida(id: long): Salida
   + buscarCliente(documento: String): Cliente
   + buscarReserva(numero: long): Reserva
+  + buscarReservasDeCliente(documento: String): List<Reserva>
   + buscarEmpleado(legajo: int): Empleado
   + buscarVehiculo(patente: String): Vehiculo
   + siguienteNumeroReserva(): long
@@ -370,11 +371,20 @@ class RepositorioAgenciaArchivo #DDEEFF {
   + cargar(): Agencia
 }
 
+class ExportadorTxt <<Fabricación pura>> #DDEEFF {
+  - carpeta: Path
+  + ExportadorTxt(carpeta: String)
+  + exportarListaPasajeros(salida: Salida, pasajeros: List<Pasajero>): Path
+  + exportarHistorialCliente(cliente: Cliente, reservas: List<Reserva>): Path
+  - escribir(nombreArchivo: String, lineas: List<String>): Path
+}
 
 note right of Agencia
   Agencia es la raiz del sistema: agrupa
   las colecciones de Tour, Salida, Reserva,
   Cliente, Empleado, Vehiculo y Proveedor.
+  Además, es Experto en información para buscar
+  las reservas cuyo titular tiene un documento dado.
 end note
 
 Agencia o-- "0..*" Tour
@@ -404,7 +414,10 @@ class DatosPasajero #DDEEFF {
 }
 
 class MenuConsola #DDEEFF {
+  - exportaciones: ControladorExportaciones
   + mostrarMenu(): void
+  - menuExportaciones(): void
+  - mostrarArchivo(ruta: Path): void
 }
 
 class ControladorReservas #DDEEFF {
@@ -439,6 +452,15 @@ class ControladorOperaciones #DDEEFF {
   + iniciarSalida(idSalida: long, hoy: LocalDate): void
   + finalizarSalida(idSalida: long): void
   + liquidarHonorarios(idSalida: long, hoy: LocalDate): Liquidacion
+}
+
+class ControladorExportaciones <<Controlador>> #DDEEFF {
+  - agencia: Agencia
+  - operaciones: ControladorOperaciones
+  - exportador: ExportadorTxt
+  + ControladorExportaciones(agencia: Agencia, operaciones: ControladorOperaciones, exportador: ExportadorTxt)
+  + exportarListaPasajeros(idSalida: long): Path
+  + exportarHistorialCliente(documento: String): Path
 }
 
 class GeneradorReportes #DDEEFF {
@@ -526,6 +548,20 @@ ReglaNegocioException <|-- EntidadNoEncontradaException
 MenuConsola --> ControladorReservas : delega >
 MenuConsola --> ControladorOperaciones : delega >
 MenuConsola --> GeneradorReportes : delega >
+MenuConsola --> ControladorExportaciones : delega >
+
+ControladorExportaciones --> Agencia : consulta >
+ControladorExportaciones --> ControladorOperaciones : reutiliza emisión de lista >
+ControladorExportaciones --> ExportadorTxt : delega escritura >
+ControladorExportaciones ..> Salida : obtiene de Agencia >
+ControladorExportaciones ..> Cliente : obtiene de Agencia >
+ControladorExportaciones ..> Pasajero : recibe de ControladorOperaciones >
+ControladorExportaciones ..> Reserva : obtiene de Agencia >
+
+ExportadorTxt ..> Salida : lee y formatea datos >
+ExportadorTxt ..> Pasajero : lee y formatea datos >
+ExportadorTxt ..> Cliente : lee y formatea datos >
+ExportadorTxt ..> Reserva : lee y formatea datos >
 
 ControladorReservas --> Agencia : consulta >
 ControladorReservas --> RepositorioAgencia : persiste mediante >
@@ -568,6 +604,19 @@ note right of Salida
   iniciar exige que la lista corresponda al estado actual.
   finalizar() pasa la salida a FINALIZADA y finaliza
   sus reservas confirmadas.
+end note
+
+note right of ControladorExportaciones
+  GRASP Controller: recibe la solicitud desde MenuConsola,
+  coordina las consultas a Agencia y la emisión operativa
+  mediante ControladorOperaciones, y delega la escritura
+  del TXT en ExportadorTxt.
+end note
+
+note right of ExportadorTxt
+  GRASP Fabricación pura: servicio técnico que no representa
+  una entidad del negocio. Aplica SRP porque concentra
+  el armado y la escritura de los archivos TXT.
 end note
 
 note right of Pago
