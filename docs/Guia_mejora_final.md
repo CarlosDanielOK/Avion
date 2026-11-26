@@ -21,7 +21,6 @@ Ambos aparecen en el **menú principal, opción 7**. Después de generar el arch
 | `interfaz/DatosEjemplo.java` | +2 reservas de Carla para que el historial tenga datos. |
 | `test/persistencia/ExportadorTxtTest.java` | NUEVO. Pruebas. |
 
-Para aplicarlo, copia las carpetas `src`, `test` y `docs` sobre tu repo. No agregué atributos nuevos a `Agencia`, así que **no cambia el formato de `agencia.dat`**.
 
 ## 2. Guion de demostración (2 minutos)
 
