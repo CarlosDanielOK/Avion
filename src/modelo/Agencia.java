@@ -66,6 +66,17 @@ public class Agencia implements Serializable {
         throw new EntidadNoEncontradaException("No existe el vehículo con patente " + patente);
     }
 
+    /** Experto en información: la agencia conoce todas las reservas, así que filtra las de un cliente. */
+    public List<Reserva> buscarReservasDeCliente(String documento) {
+        List<Reserva> resultado = new ArrayList<>();
+        for (Reserva reserva : reservas) {
+            if (reserva.getCliente().getDocumento().equalsIgnoreCase(documento)) {
+                resultado.add(reserva);
+            }
+        }
+        return resultado;
+    }
+
     public long siguienteNumeroReserva() {
         long mayor = 0;
         for (Reserva reserva : reservas) mayor = Math.max(mayor, reserva.getNumero());

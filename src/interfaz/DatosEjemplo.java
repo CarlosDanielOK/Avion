@@ -81,6 +81,13 @@ final class DatosEjemplo {
         r3.cambiarEstado(EstadoReserva.CONFIRMADA);
         r3.registrarCancelacion(new Cancelacion(hoy, "El cliente no puede viajar", false, 0.5, 40000));
 
+        // Historial de Carla (CU26): un viaje ya realizado y otro pendiente, además de la reserva 1.
+        Reserva r4 = nuevaReserva(agencia, 4, c1, salidaCultural, luis, 80000, 1, "36000031");
+        pagar(r4, 4, 80000, hoy);
+        r4.cambiarEstado(EstadoReserva.CONFIRMADA);
+        r4.finalizar(); // simula un viaje ya realizado: queda FINALIZADA
+        nuevaReserva(agencia, 5, c1, salidaAventura, ana, 150000, 1, "36000041"); // queda PENDIENTE, sin pagos
+
         operaciones.actualizarEstadoSalida(salidaAventura.getId(), hoy);
         operaciones.actualizarEstadoSalida(salidaCultural.getId(), hoy);
     }

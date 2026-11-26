@@ -1,0 +1,60 @@
+@startuml 06-clases-mejora-final
+title Mejora final - Exportación a TXT (CU25 y CU26) - Diagrama de clases
+skinparam classAttributeIconSize 0
+
+class MenuConsola {
+  - exportaciones : ControladorExportaciones
+  - menuExportaciones() : void
+  - mostrarArchivo(ruta : Path) : void
+}
+
+class ControladorExportaciones <<Controlador>> {
+  - agencia : Agencia
+  - operaciones : ControladorOperaciones
+  - exportador : ExportadorTxt
+  + exportarListaPasajeros(idSalida : long) : Path
+  + exportarHistorialCliente(documento : String) : Path
+}
+
+class ExportadorTxt <<Fabricación pura>> {
+  - carpeta : Path
+  + exportarListaPasajeros(salida : Salida, pasajeros : List<Pasajero>) : Path
+  + exportarHistorialCliente(cliente : Cliente, reservas : List<Reserva>) : Path
+  - escribir(nombreArchivo : String, lineas : List<String>) : Path
+}
+
+class ControladorOperaciones {
+  + emitirListaPasajeros(idSalida : long) : List<Pasajero>
+}
+
+class Agencia {
+  + buscarCliente(documento : String) : Cliente
+  + buscarSalida(id : long) : Salida
+  + buscarReservasDeCliente(documento : String) : List<Reserva>
+}
+
+class Salida
+class Cliente
+class Reserva
+class Pasajero
+
+MenuConsola --> ControladorExportaciones
+ControladorExportaciones --> Agencia
+ControladorExportaciones --> ControladorOperaciones
+ControladorExportaciones --> ExportadorTxt
+ExportadorTxt ..> Salida : lee datos
+ExportadorTxt ..> Cliente : lee datos
+ExportadorTxt ..> Reserva : lee datos
+ExportadorTxt ..> Pasajero : lee datos
+Agencia o-- "0..*" Cliente
+Agencia o-- "0..*" Salida
+Agencia o-- "0..*" Reserva
+Reserva --> "1" Cliente
+Reserva --> "1" Salida
+Reserva *-- "1..*" Pasajero
+
+note right of ExportadorTxt
+  Única clase que escribe
+  archivos de texto (SRP).
+end note
+@enduml

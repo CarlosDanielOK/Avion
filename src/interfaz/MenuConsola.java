@@ -1,5 +1,6 @@
 package interfaz;
 
+import controladores.ControladorExportaciones;
 import controladores.ControladorOperaciones;
 import controladores.ControladorReservas;
 import controladores.GeneradorReportes;
@@ -35,6 +36,9 @@ import modelo.Pago;
 import modelo.NotaAjuste;
 import persistencia.RepositorioAgencia;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
@@ -59,16 +63,19 @@ public class MenuConsola {
     private final ControladorOperaciones operaciones;
     private final ControladorReservas reservas;
     private final GeneradorReportes reportes;
+    private final ControladorExportaciones exportaciones;
     private final Scanner entrada;
 
     public MenuConsola(Agencia agencia, RepositorioAgencia repositorio,
                        ControladorOperaciones operaciones, ControladorReservas reservas,
-                       GeneradorReportes reportes, Scanner entrada) {
+                       GeneradorReportes reportes,
+                       ControladorExportaciones exportaciones, Scanner entrada) {
         this.agencia = agencia;
         this.repositorio = repositorio;
         this.operaciones = operaciones;
         this.reservas = reservas;
         this.reportes = reportes;
+        this.exportaciones = exportaciones;
         this.entrada = entrada;
     }
 
@@ -84,6 +91,7 @@ public class MenuConsola {
             System.out.println("4. Reservas");
             System.out.println("5. Reportes (CU24)");
             System.out.println("6. Cargar datos de ejemplo");
+            System.out.println("7. Exportar a TXT (lista de pasajeros / historial de cliente)");
             System.out.println("0. Salir");
             switch (leerEntero("Opción: ")) {
                 case 1: submenu(1); break;
@@ -92,6 +100,7 @@ public class MenuConsola {
                 case 4: submenu(4); break;
                 case 5: submenu(5); break;
                 case 6: submenu(6); break;
+                case 7: submenu(7); break;
                 case 0: salir = true; break;
                 default: System.out.println("Opción inválida.");
             }
@@ -515,6 +524,31 @@ public class MenuConsola {
         }
     }
 
+    // ------------------------------ Exportaciones a TXT (CU25 y CU26) ------------------------------
+
+    private void menuExportaciones() throws ReglaNegocioException {
+        System.out.println("\n-- Exportar a TXT --");
+        System.out.println("1. Exportar lista de pasajeros de una salida\n2. Historial de viajes de un cliente\n0. Volver");
+        switch (leerEntero("Opción: ")) {
+            case 1: mostrarArchivo(exportaciones.exportarListaPasajeros(leerEntero("Número de salida: "))); break;
+            case 2: mostrarArchivo(exportaciones.exportarHistorialCliente(leerTexto("Documento del cliente: "))); break;
+            case 0: break;
+            default: System.out.println("Opción inválida.");
+        }
+    }
+
+    /** Avisa dónde quedó el archivo y muestra su contenido leyéndolo (Files.readAllLines). */
+    private void mostrarArchivo(Path ruta) {
+        System.out.println("Archivo generado: " + ruta.toAbsolutePath());
+        try {
+            for (String linea : Files.readAllLines(ruta)) {
+                System.out.println(linea);
+            }
+        } catch (IOException e) {
+            System.out.println("El archivo se generó, pero no se pudo mostrar: " + e.getMessage());
+        }
+    }
+
     // ------------------------------ Datos de ejemplo ------------------------------
 
     private void cargarDatosEjemplo() throws ReglaNegocioException {
@@ -539,6 +573,7 @@ public class MenuConsola {
                 case 4: menuReservas(); break;
                 case 5: menuReportes(); break;
                 case 6: cargarDatosEjemplo(); break;
+                case 7: menuExportaciones(); break;
                 default: System.out.println("Opción inválida.");
             }
         } catch (ReglaNegocioException e) {

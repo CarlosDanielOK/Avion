@@ -4,6 +4,8 @@ import controladores.GeneradorReportes;
 import interfaz.MenuConsola;
 import modelo.Agencia;
 import modelo.GestorCancelaciones;
+import controladores.ControladorExportaciones;
+import persistencia.ExportadorTxt;
 import persistencia.RepositorioAgencia;
 import persistencia.RepositorioAgenciaArchivo;
 
@@ -38,10 +40,11 @@ public class Main {
         ControladorOperaciones operaciones = new ControladorOperaciones(agencia, repositorio, new GestorCancelaciones());
         ControladorReservas reservas = new ControladorReservas(agencia, repositorio);
         GeneradorReportes reportes = new GeneradorReportes(agencia);
+        ControladorExportaciones exportaciones = new ControladorExportaciones(agencia, operaciones, new ExportadorTxt("exportaciones"));
 
         Scanner entrada = new Scanner(System.in);
         try {
-            new MenuConsola(agencia, repositorio, operaciones, reservas, reportes, entrada).mostrarMenu();
+            new MenuConsola(agencia, repositorio, operaciones, reservas, reportes, exportaciones, entrada).mostrarMenu();
         } finally {
             // finally garantiza el mensaje de cierre y libera el Scanner.
             System.out.println("Sesion finalizada.");
